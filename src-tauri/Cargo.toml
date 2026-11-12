@@ -1,0 +1,26 @@
+[package]
+name = "meyaforge"
+version = "0.1.0"
+description = "MEYAFORGE — firmware kitchen"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ureq = { version = "2", features = ["json"] }
+tauri-plugin-dialog = "2"
+flate2 = "1.1.11"
+tar = "0.4.46"
+ext4-view = { version = "1.0.0", features = ["std"] }
+zip = { version = "9.5.1", default-features = false, features = ["deflate"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

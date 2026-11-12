@@ -1,0 +1,1270 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MEYAFORGE</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="bg"></canvas>
+
+  <!-- Заголовок окна -->
+  <header class="titlebar" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region>
+      <img src="assets/icon.png" alt="" />
+      <span class="logo-text">MEYA<b>FORGE</b></span>
+      <span class="ver" id="appVer">v0.1.0</span>
+    </div>
+    <div class="task-bar-indicator hidden" id="topTaskBar">
+      <span class="spinner-mini"></span>
+      <span id="topTaskLabel">Выполняется операция...</span>
+      <span id="topTaskPct" class="pct"></span>
+    </div>
+    <div class="win-btns">
+      <button id="wMin" title="Свернуть"><svg viewBox="0 0 12 12"><path d="M2 6h8"/></svg></button>
+      <button id="wMax" title="Развернуть"><svg viewBox="0 0 12 12"><rect x="2" y="2" width="8" height="8" rx="1"/></svg></button>
+      <button id="wClose" class="close" title="Закрыть"><svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>
+    </div>
+  </header>
+
+  <!-- Сплэш: проверка обновлений -->
+  <section id="splash" class="splash">
+    <div class="splash-inner">
+      <div class="mascot-wrap">
+        <div class="halo"></div>
+        <img id="splashImg" src="assets/title.jpg" alt="MEYAFORGE" />
+      </div>
+      <div class="progress"><i></i></div>
+      <p id="splashText" class="splash-text">Проверяем обновления на GitHub…</p>
+      <div id="updateBox" class="update-box hidden">
+        <h3>Доступно обновление <span id="updVer"></span></h3>
+        <pre id="updNotes"></pre>
+        <div class="row">
+          <button class="btn ghost" id="updSkip">Позже</button>
+          <button class="btn primary" id="updGo">Скачать</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Основное приложение -->
+  <main id="app" class="app hidden">
+    <nav class="sidebar">
+      <div class="nav-indicator"></div>
+      <button class="nav active" data-page="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Главная</span></button>
+      <button class="nav" data-page="projects"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Проекты</span></button>
+      <button class="nav" data-page="partitions"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg><span>Разделы</span></button>
+      <button class="nav" data-page="device"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg><span>Чтение устройства</span></button>
+      <button class="nav" data-page="files"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Файлы</span></button>
+      <button class="nav" data-page="bootapk"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V6a4 4 0 0 0-4-4zm-2 6V6a2 2 0 1 1 4 0v2h-4z"/></svg><span>Boot / APK</span></button>
+      <button class="nav" data-page="tools"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg><span>Инструменты</span></button>
+      <button class="nav" data-page="unpack"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg><span>Распаковка / Сборка</span></button>
+      <button class="nav" data-page="port"><svg viewBox="0 0 24 24"><path d="M4 12h12M12 6l6 6-6 6M20 4v16"/></svg><span>Портирование</span></button>
+      <div class="spacer"></div>
+      <button class="nav" data-page="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15.1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6V4.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Настройки</span></button>
+      <div class="user-chip" id="userChip">
+        <div class="avatar" id="avatar">?</div>
+        <div class="uinfo"><b id="uNick">Гость</b><small id="uTg">—</small></div>
+      </div>
+    </nav>
+
+    <section class="content">
+      <div class="pages">
+        <!-- Главная -->
+        <div class="page active" data-page="home">
+          <div class="hero">
+            <div>
+              <h1>Привет, <span class="grad" id="heroNick">кузнец</span> ✦</h1>
+              <p>Кухня для модификации, портирования и сборки Android-прошивок.</p>
+            </div>
+            <div class="status-pills">
+              <span class="pill" id="pillUpd"><i></i>Обновления</span>
+              <span class="pill" id="pillWsl"><i></i>WSL</span>
+            </div>
+          </div>
+          <div class="grid">
+            <article class="card" data-go="projects" style="--c:var(--pink)"><div class="ic">📁</div><h3>Проекты</h3><p>Управление рабочими пространствами прошивок.</p></article>
+            <article class="card" data-go="device" style="--c:var(--sky)"><div class="ic">📱</div><h3>Чтение устройства</h3><p>Режимы ADB/Fastboot, разделы, build.prop, fstab.</p></article>
+            <article class="card" data-go="partitions" style="--c:var(--violet)"><div class="ic">🧩</div><h3>Разделы и образы</h3><p>Определение super, sparse, ext4, erofs и их разборка.</p></article>
+            <article class="card" data-go="files" style="--c:var(--sky)"><div class="ic">🗂️</div><h3>Файлы & Редактор</h3><p>Дерево разделов, просмотр, редактирование и синтаксис.</p></article>
+            <article class="card" data-go="bootapk" style="--c:var(--pink)"><div class="ic">⚡</div><h3>Boot & APK</h3><p>Патчинг kernel, ramdisk, boot.img и Smali модификации APK.</p></article>
+            <article class="card" data-go="tools" style="--c:var(--violet)"><div class="ic">🛠️</div><h3>Менеджер утилит</h3><p>MagiskBoot, Apktool, Uber-Signer, JADX, erofs-utils и др.</p></article>
+            <article class="card" data-go="unpack" style="--c:var(--pink)"><div class="ic">📦</div><h3>Распаковка / Сборка</h3><p>Упаковка и формирование flashable zip образов.</p></article>
+            <article class="card" data-go="port" style="--c:var(--violet)"><div class="ic">🧬</div><h3>Портирование</h3><p>Сравнение прошивок, перенос ядра, fstab и HAL модулей.</p></article>
+          </div>
+        </div>
+
+        <!-- Проекты -->
+        <div class="page" data-page="projects">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Проекты</h2>
+              <p class="muted">Рабочие пространства с изолированными разделами, конфигами и исходниками</p>
+            </div>
+            <div class="actions">
+              <button class="btn primary" id="btnNewProject">+ Новый проект</button>
+            </div>
+          </div>
+          <div id="projectsList" class="projects-grid">
+            <div class="empty-state">Загрузка проектов...</div>
+          </div>
+        </div>
+
+        <!-- Разделы (детальный вид текущего проекта) -->
+        <div class="page" data-page="partitions">
+          <div class="page-header">
+            <div>
+              <div class="crumbs"><span id="activeProjectCrumbs">Проект не выбран</span></div>
+              <h2 class="page-title" id="partitionsTitle">Управление разделами</h2>
+            </div>
+            <div class="actions" id="projectActionsWrap">
+              <button class="btn ghost" id="btnImportFirmware" disabled>📥 Импорт прошивки / образа</button>
+              <button class="btn ghost" id="btnExtractAllParts" disabled>⚡ Разобрать все разделы</button>
+              <button class="btn ghost" id="btnOpenProjFolder" disabled>📂 Папка проекта</button>
+            </div>
+          </div>
+
+          <div id="noProjectSelected" class="empty-placeholder">
+            <div class="ic">📁</div>
+            <h3>Проект не выбран</h3>
+            <p class="muted">Выберите существующий проект во вкладке «Проекты» или создайте новый, чтобы приступить к работе с образами.</p>
+            <button class="btn primary" id="btnGoToProjects">Перейти к проектам</button>
+          </div>
+
+          <div id="partitionsContent" class="hidden">
+            <div class="info-banner" id="projectBanner">
+              <span class="info-tag">Источник: <b id="projSourceText">не импортирован</b></span>
+              <span class="info-tag">Разделов: <b id="projPartsCount">0</b></span>
+            </div>
+            <div class="table-card">
+              <table class="parts-table">
+                <thead>
+                  <tr>
+                    <th>Раздел</th>
+                    <th>Тип (ФС)</th>
+                    <th>Размер</th>
+                    <th>Статус разборки</th>
+                    <th style="text-align:right">Действия</th>
+                  </tr>
+                </thead>
+                <tbody id="partitionsTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Чтение устройства -->
+        <div class="page" data-page="device">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Чтение и диагностика устройства</h2>
+              <p class="muted">Глубокий анализ устройства в режимах Android OS, Recovery, Sideload, Fastboot и FastbootD</p>
+            </div>
+            <div class="actions">
+              <button class="btn ghost" id="btnOpenDevLib">🗄️ Хранилище (<span id="savedDevicesCount">0</span>)</button>
+              <button class="btn ghost" id="btnOpenLogsModal">📋 Снять логи</button>
+              <label><input type="checkbox" id="scanBootImages" /> Сохранить lk и boot</label>
+              <button class="btn primary" id="btnScanDevice">🔍 Просканировать устройство</button>
+            </div>
+          </div>
+
+          <div id="deviceScanningBox" class="empty-placeholder hidden">
+            <div class="spinner-mini" style="width:24px;height:24px;margin:0 auto 12px"></div>
+            <h3>Опрос устройства через ADB & Fastboot...</h3>
+            <p class="muted">Пожалуйста, подождите, считываются свойства getprop, точки монтирования, таблицы fstab и fastboot variables.</p>
+          </div>
+
+          <div id="deviceEmptyPlaceholder" class="empty-placeholder">
+            <div class="ic">🔌</div>
+            <h3>Устройство не просканировано</h3>
+            <p class="muted">Подключите телефон по USB с включенной отладкой по USB (ADB) или переведите в режим Fastboot / Recovery, затем нажмите «Просканировать устройство».</p>
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:10px">
+              <button class="btn ghost" id="btnOpenDevLibFromEmpty">🗄️ Открыть из хранилища</button>
+              <button class="btn primary" onclick="document.getElementById('btnScanDevice').click()">Начать сканирование</button>
+            </div>
+          </div>
+
+          <div id="deviceDetailsContent" class="hidden">
+            <!-- Предупреждающий баннер при ошибке сканирования -->
+            <div id="devScanErrorBanner" class="info-banner hidden" style="border-left:4px solid #ff8fab;background:rgba(255,143,171,.1);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:14px">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <span style="font-size:24px">⚠️</span>
+                <div>
+                  <h4 style="margin:0 0 4px;color:#ff8fab">Сканирование завершилось с ошибкой</h4>
+                  <div style="font-size:12.5px;color:var(--text)" id="devScanErrorDesc">Сбой на этапе...</div>
+                  <small class="muted">Ниже отображены все параметры, которые удалось считать до прерывания.</small>
+                </div>
+              </div>
+              <button class="btn primary" id="btnSavePartialScan" style="white-space:nowrap">💾 Сохранить устройство</button>
+            </div>
+
+            <!-- Режим и статус -->
+            <div class="device-status-banner">
+              <div class="dev-mode-badge" id="devModeBadge">ADB: SYSTEM</div>
+              <div>
+                <h3 id="devMainTitle">Xiaomi Redmi Note 12 (sweet)</h3>
+                <small class="muted" id="devSubDesc">Серийный номер: <b id="devSerial">—</b> | Режим: <b id="devModeDesc">—</b></small>
+              </div>
+            </div>
+
+            <!-- Сетка основных параметров -->
+            <div class="spec-grid">
+              <div class="spec-card">
+                <span class="label">Бренд & Производитель</span>
+                <b id="specBrand">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">Модель / Устройство</span>
+                <b id="specModel">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">SoC / Процессор</span>
+                <b id="specSoc">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">Архитектура (ABI)</span>
+                <b id="specAbi">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">Версия Android & SDK</span>
+                <b id="specAndroid">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">Патч безопасности</span>
+                <b id="specSecurity">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">Схема слотов (A/B)</span>
+                <b id="specSlots">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">Динамические разделы (Super)</span>
+                <b id="specDynamic">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">Загрузчик (Bootloader)</span>
+                <b id="specBootloader">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">Установленное Recovery</span>
+                <b id="specRecovery">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">SELinux Статус</span>
+                <b id="specSelinux">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">Root доступ (ADB)</span>
+                <b id="specRoot">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">Дисплей & DPI</span>
+                <b id="specDisplay">—</b>
+              </div>
+              <div class="spec-card">
+                <span class="label">Модем (Baseband)</span>
+                <b id="specBaseband">—</b>
+              </div>
+            </div>
+
+            <!-- Дополнительная информация -->
+            <div class="panel-box" style="margin-top:16px">
+              <div class="panel-head">
+                <span class="ic">🔋</span>
+                <div>
+                  <h3>Батарея, Память и Ядро</h3>
+                  <small class="muted">Системные показатели из dumpsys и procfs</small>
+                </div>
+              </div>
+              <div class="kv-list">
+                <div class="kv-row"><span>Ядро Linux:</span> <b id="specKernel">—</b></div>
+                <div class="kv-row"><span>ОЗУ:</span> <b id="specRam">—</b></div>
+                <div class="kv-row"><span>Батарея:</span> <b id="specBattery">—</b></div>
+                <div class="kv-row"><span>Fingerprint:</span> <small id="specFingerprint" class="code-sm">—</small></div>
+                <div class="kv-row"><span>Параметры запуска ядра (cmdline):</span> <small id="specCmdline" class="code-sm">—</small></div>
+                <div class="kv-row" id="rowOemInfo" style="display:none"><span>OEM Bootloader Info:</span> <small id="specOemInfo" class="code-sm">—</small></div>
+              </div>
+            </div>
+
+            <!-- Вкладки деталей: Разделы / build.prop / Fastboot / fstab -->
+            <div class="device-tabs-wrap">
+              <div class="filter-pills" id="deviceSubTabs">
+                <button class="f-pill active" data-tab="parts">Разделы устройства (<span id="devPartsCount">0</span>)</button>
+                <button class="f-pill" data-tab="props">Свойства getprop (<span id="devPropsCount">0</span>)</button>
+                <button class="f-pill" data-tab="settings">Настройки Android</button>
+                <button class="f-pill" data-tab="diagnostics">Диагностика и образы</button>
+                <button class="f-pill" data-tab="fastboot">Переменные Fastboot (<span id="devFbVarsCount">0</span>)</button>
+                <button class="f-pill" data-tab="fstab">Конфигурация Fstab</button>
+                <button class="f-pill" data-tab="logs">Логи устройства</button>
+              </div>
+
+              <!-- Таблица разделов устройства -->
+              <div id="devTabParts" class="dev-tab-pane">
+                <div class="table-card">
+                  <table class="parts-table">
+                    <thead>
+                      <tr>
+                        <th>Раздел / Точка монтирования</th>
+                        <th>Файловая система</th>
+                        <th>Размер</th>
+                        <th>Блочное устройство</th>
+                      </tr>
+                    </thead>
+                    <tbody id="devPartsTbody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Поиск и таблица build.prop / getprop -->
+              <div id="devTabProps" class="dev-tab-pane hidden">
+                <div class="table-tools-row">
+                  <input id="inputPropFilter" class="search-input" placeholder="Фильтр по свойствам getprop (например ro.build, miui, audio)..." />
+                </div>
+                <div class="table-card" style="max-height:450px;overflow:auto">
+                  <table class="parts-table">
+                    <thead>
+                      <tr>
+                        <th style="width:40%">Ключ</th>
+                        <th style="width:60%">Значение</th>
+                      </tr>
+                    </thead>
+                    <tbody id="devPropsTbody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div id="devTabSettings" class="dev-tab-pane hidden">
+                <div class="table-tools-row">
+                  <select id="devSettingsNamespace" class="search-input" aria-label="Категория настроек">
+                    <option value="global">global</option>
+                    <option value="secure">secure</option>
+                    <option value="system">system</option>
+                  </select>
+                  <input id="devSettingsFilter" class="search-input" aria-label="Фильтр настроек" placeholder="Поиск по ключу или значению" />
+                </div>
+                <p class="muted" id="devSettingsStatus"></p>
+                <div class="table-card" style="max-height:450px;overflow:auto">
+                  <table class="parts-table">
+                    <thead><tr><th>Ключ</th><th>Значение</th></tr></thead>
+                    <tbody id="devSettingsTbody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div id="devTabDiagnostics" class="dev-tab-pane hidden">
+                <div class="table-tools-row">
+                  <select id="devDiagnosticType" class="search-input" aria-label="Тип диагностики">
+                    <option value="features">Возможности Android</option>
+                    <option value="libraries">Системные библиотеки</option>
+                    <option value="overlays">Оверлеи ресурсов</option>
+                    <option value="bootconfig">Конфигурация загрузки ядра</option>
+                  </select>
+                </div>
+                <pre class="fstab-viewer" id="devDiagnosticView"></pre>
+                <h3>Образы разделов</h3>
+                <p class="muted" id="devBootImageStatus"></p>
+                <ul id="devBootImages"></ul>
+              </div>
+
+              <!-- Поиск и таблица Fastboot getvar -->
+              <div id="devTabFastboot" class="dev-tab-pane hidden">
+                <div class="table-tools-row">
+                  <input id="inputFbVarFilter" class="search-input" placeholder="Фильтр по переменным Fastboot (например partition, slot, unlocked)..." />
+                </div>
+                <div class="table-card" style="max-height:450px;overflow:auto">
+                  <table class="parts-table">
+                    <thead>
+                      <tr>
+                        <th style="width:40%">Переменная (getvar)</th>
+                        <th style="width:60%">Значение Bootloader</th>
+                      </tr>
+                    </thead>
+                    <tbody id="devFbVarsTbody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Fstab -->
+              <div id="devTabFstab" class="dev-tab-pane hidden">
+                <pre class="fstab-viewer" id="devFstabView">Конфигурация fstab не найдена.</pre>
+              </div>
+
+              <!-- Встроенный просмотрщик логов -->
+              <div id="devTabLogs" class="dev-tab-pane hidden">
+                <div class="table-tools-row" style="display:flex;gap:10px;justify-content:space-between">
+                  <div style="display:flex;gap:8px">
+                    <button class="btn sm primary" data-log="logcat" id="btnLogcatTab">Logcat (ОС)</button>
+                    <button class="btn sm ghost" data-log="dmesg" id="btnDmesgTab">Dmesg (Ядро)</button>
+                    <button class="btn sm ghost" data-log="recovery" id="btnRecLogTab">Recovery Log</button>
+                  </div>
+                  <button class="btn sm ghost" id="btnCopyLogText">Копировать лог</button>
+                </div>
+                <pre class="fstab-viewer" id="devLogView" style="max-height:480px">Выберите тип лога выше для отображения.</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Boot, Recovery & APK Modding -->
+        <div class="page" data-page="bootapk">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Boot, Recovery & APK Модификации</h2>
+              <p class="muted">Быстрый доступ к разборке загрузочных ядер (MagiskBoot) и Smali декомпиляции/сборке APK (Apktool)</p>
+            </div>
+          </div>
+
+          <div class="grid-2col">
+            <!-- Секция Boot / Kernel / Recovery -->
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">⚡</span>
+                <div>
+                  <h3>Boot / Kernel / Recovery (MagiskBoot)</h3>
+                  <small class="muted">Распаковка на kernel, ramdisk.cpio, dtb и обратная перепаковка</small>
+                </div>
+              </div>
+              <div class="form-row">
+                <button class="btn primary" id="btnSelectBootFile">Выбрать boot.img / recovery.img</button>
+                <button class="btn ghost" id="btnRepackBoot">Собрать из extracted/</button>
+              </div>
+              <div class="tool-hint">
+                <span>Требуется утилита: <b>MagiskBoot</b> (проверьте наличие в разделе «Инструменты»).</span>
+              </div>
+            </div>
+
+            <!-- Секция APK Modding -->
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">📱</span>
+                <div>
+                  <h3>APK Декомпиляция и Сборка</h3>
+                  <small class="muted">Разборка ресурсов и Smali с помощью Apktool, сборка и подпись</small>
+                </div>
+              </div>
+              <div class="form-row">
+                <button class="btn primary" id="btnSelectApkFile">Декомпилировать APK</button>
+                <button class="btn ghost" id="btnBuildApk">Собрать & Подписать APK</button>
+              </div>
+              <div class="tool-hint">
+                <span>Требуются: <b>Java (JRE)</b>, <b>Apktool</b>, <b>Uber-APK-Signer</b>.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Инструменты -->
+        <div class="page" data-page="tools">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Инструменты и утилиты</h2>
+              <p class="muted">Внешние бинарники для работы с прошивками. Скачиваются и обновляются напрямую с GitHub Releases в один клик</p>
+            </div>
+            <div class="actions">
+              <button class="btn ghost" id="btnCheckToolsUpdates">🔄 Проверить обновления инструментов</button>
+            </div>
+          </div>
+          <div class="filter-pills" id="toolCategoryFilters">
+            <button class="f-pill active" data-cat="all">Все</button>
+            <button class="f-pill" data-cat="Boot / Recovery">Boot / Kernel</button>
+            <button class="f-pill" data-cat="APK Modding">APK Моддинг</button>
+            <button class="f-pill" data-cat="Partitions">Разделы</button>
+            <button class="f-pill" data-cat="Compression">Сжатие</button>
+            <button class="f-pill" data-cat="Flasher & Bridge">Прошивка / ADB</button>
+          </div>
+          <div id="toolsList" class="tools-grid">
+            <div class="empty-state">Загрузка списка инструментов...</div>
+          </div>
+        </div>
+
+        <!-- Файловый менеджер -->
+        <div class="page" data-page="files">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Файловый менеджер</h2>
+              <p class="muted">Навигация по структуре проекта, просмотр и редактирование файлов с подсветкой синтаксиса</p>
+            </div>
+            <div class="actions">
+              <select id="fmProjectSelect" class="search-input" style="width:220px;padding:8px 12px">
+                <option value="">Выберите проект...</option>
+              </select>
+              <button class="btn ghost sm" id="btnFmNewFile">📄 Новый файл</button>
+              <button class="btn ghost sm" id="btnFmNewFolder">📁 Новая папка</button>
+              <button class="btn ghost sm" id="btnFmRefresh">🔄 Обновить</button>
+              <button class="btn ghost sm" id="btnFmOpenExplorer">📂 В проводнике</button>
+            </div>
+          </div>
+
+          <div class="fm-layout">
+            <!-- Левая колонка: Дерево файлов -->
+            <div class="fm-sidebar">
+              <div class="fm-sidebar-head">
+                <input id="fmTreeFilter" class="search-input" placeholder="Фильтр файлов (build.prop, .rc)..." style="font-size:12px;padding:6px 10px" />
+              </div>
+              <div class="fm-tree-body" id="fmTreeBody">
+                <div class="empty-state" style="padding:20px;font-size:12px">Выберите проект для отображения файлов</div>
+              </div>
+            </div>
+
+            <!-- Правая колонка: Встроенный редактор / просмотрщик -->
+            <div class="fm-main">
+              <!-- Заголовок редактора -->
+              <div class="fm-main-head">
+                <div class="fm-crumbs" id="fmCrumbs">
+                  <span>Файл не выбран</span>
+                </div>
+                <div class="fm-meta-group">
+                  <span id="fmStatsBadge" style="font-size:12px;color:var(--muted)"></span>
+                  <span class="badge raw" id="fmLangBadge" style="display:none">TXT</span>
+                  <button class="btn sm ghost" id="btnFmCopyPath" style="display:none" title="Копировать относительный путь">📋 Путь</button>
+                  <button class="btn sm ghost danger" id="btnFmDeleteCurrent" style="display:none" title="Удалить файл">🗑️</button>
+                  <button class="btn sm primary" id="btnFmSaveFile" style="display:none">💾 Сохранить (Ctrl+S)</button>
+                </div>
+              </div>
+
+              <!-- Тело редактора -->
+              <div class="fm-body" id="fmBody">
+                <!-- Пустое состояние -->
+                <div id="fmEmptyEditor" class="fm-binary-box" style="width:100%">
+                  <div class="ic">📄</div>
+                  <h3>Выберите файл в дереве слева</h3>
+                  <p style="max-width:360px">
+                    Поддерживается редактирование текстовых файлов (<code>build.prop</code>, <code>fstab</code>, <code>.rc</code>, <code>.xml</code>, <code>.sh</code>, <code>.json</code>), предпросмотр изображений и анализ бинарных файлов.
+                  </p>
+                </div>
+
+                <!-- Редактор текста с номерами строк -->
+                <div id="fmTextEditorWrap" class="fm-editor-wrap hidden">
+                  <div class="fm-line-numbers" id="fmLineNumbers">1</div>
+                  <textarea id="fmCodeTextarea" class="fm-textarea" spellcheck="false" autocomplete="off" placeholder="Содержимое файла..."></textarea>
+                </div>
+
+                <!-- Просмотр изображений -->
+                <div id="fmImageViewWrap" class="fm-binary-box hidden" style="width:100%">
+                  <img id="fmImagePreview" class="fm-image-preview" alt="Preview" />
+                  <div id="fmImageInfo" style="font-size:12px;color:var(--muted)"></div>
+                </div>
+
+                <!-- Бинарные файлы -->
+                <div id="fmBinaryViewWrap" class="fm-binary-box hidden" style="width:100%">
+                  <div class="ic">💿</div>
+                  <h3 id="fmBinaryName">Образ раздела / Бинарный файл</h3>
+                  <p id="fmBinaryDesc" style="max-width:440px">
+                    Этот файл является бинарным (скомпилированным) и не может быть отредактирован как текст.
+                  </p>
+                  <div style="display:flex;gap:10px">
+                    <button class="btn ghost sm" id="btnFmOpenBinaryExt">Открыть файл в Windows</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Распаковка / Сборка -->
+        <div class="page" data-page="unpack">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Сборщик прошивок & Repacker</h2>
+              <p class="muted">Сборка разделов из extracted/ (EROFS/EXT4/Boot), упаковка super.img через lpmake и генерация Fastboot ROM пакетов</p>
+            </div>
+            <div class="actions">
+              <select id="repackProjectSelect" class="search-input" style="width:220px;padding:8px 12px">
+                <option value="">Выберите проект...</option>
+              </select>
+              <button class="btn ghost" id="btnRefreshRepack">🔄 Обновить</button>
+              <button class="btn ghost" id="btnOpenOutDir">📂 Папка out/</button>
+            </div>
+          </div>
+
+          <!-- Верхняя сетка: Шаг 1 (Сборка разделов) и Шаг 2 (Сборка super.img) -->
+          <div class="grid-2col" style="margin-bottom:20px">
+            <!-- Блок сборки разделов -->
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">🔨</span>
+                <div style="flex:1">
+                  <h3>1. Сборка разделов из extracted/</h3>
+                  <small class="muted">Упаковка модифицированных файлов обратно в .img образы</small>
+                </div>
+                <button class="btn sm ghost" id="btnRepackAllExtracted">⚡ Собрать все</button>
+              </div>
+
+              <div id="repackExtractedList" style="display:flex;flex-direction:column;gap:10px;max-height:360px;overflow-y:auto">
+                <div class="empty-state" style="padding:24px">Выберите проект с извлечёнными разделами</div>
+              </div>
+            </div>
+
+            <!-- Блок сборки super.img -->
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">📦</span>
+                <div style="flex:1">
+                  <h3>2. Сборка динамического super.img</h3>
+                  <small class="muted">Генерация LP метаданных и объединение образов через lpmake</small>
+                </div>
+                <div class="pill ok" id="superBadgeReady"><i></i>Готов к сборке</div>
+              </div>
+
+              <p class="muted" style="font-size:12.5px;margin:0">
+                Выберите разделы из <code>images/</code> для включения в таблицу динамических разделов:
+              </p>
+
+              <div id="superPartitionsCheckList" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;background:rgba(10,20,55,.4);padding:10px 14px;border-radius:8px;border:1px solid var(--line)">
+                <span class="muted" style="font-size:12px">Нет образов в images/</span>
+              </div>
+
+              <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:12px">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px">
+                  <input type="checkbox" id="chkSuperSparse" checked style="accent-color:var(--pink);transform:scale(1.2)" />
+                  <span><b>Sparse формат</b> (для Fastboot прошивки)</span>
+                </label>
+                <div style="font-size:12px;color:var(--muted)">
+                  Общий размер: <b id="superTotalCalcSize" style="color:var(--sky)">0 МБ</b>
+                </div>
+              </div>
+
+              <button class="btn primary" id="btnRunRepackSuper" style="width:100%">
+                📦 Собрать super.img (lpmake)
+              </button>
+            </div>
+          </div>
+
+          <!-- Нижняя сетка: Шаг 3 (Формирование Fastboot ROM Flasher пакета) и Список готовых файлов в out/ -->
+          <div class="grid-2col">
+            <!-- Блок генерации релиза -->
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">🚀</span>
+                <div>
+                  <h3>3. Формирование готовой прошивки (Fastboot ROM)</h3>
+                  <small class="muted">Создание пакета для быстрой прошивки с автоматическими скриптами</small>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <label class="field" style="margin:0">
+                  <input id="fastbootRomTitle" placeholder=" " value="Custom ROM" />
+                  <span>Название прошивки (например, HyperOS Port v1.0)</span>
+                </label>
+
+                <label class="field" style="margin:0">
+                  <input id="fastbootRomAuthor" placeholder=" " value="MeyaForge" />
+                  <span>Автор / Билдер сборки</span>
+                </label>
+
+                <div class="tool-hint">
+                  Пакет будет включать <code>super.img</code>, <code>boot.img</code>, <code>vbmeta.img</code>, а также кроссплатформенные скрипты <b>flash_all.bat</b> (Windows) и <b>flash_all.sh</b> (Linux/macOS) с автоотключением AVB/dm-verity.
+                </div>
+
+                <button class="btn primary" id="btnBuildFastbootPkg">
+                  🚀 Сформировать Fastboot ROM пакет
+                </button>
+              </div>
+            </div>
+
+            <!-- Блок готовых файлов сборки -->
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">📁</span>
+                <div>
+                  <h3>Файлы в папке out/ (<span id="repackOutCount">0</span>)</h3>
+                  <small class="muted">Результаты сборки ядер, разделов и супер-образов</small>
+                </div>
+              </div>
+
+              <div id="repackOutList" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto">
+                <div class="empty-state" style="padding:20px">Папка out/ пуста. Запустите сборку выше.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Портирование -->
+        <div class="page" data-page="port">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Мастер портирования прошивок</h2>
+              <p class="muted">Сравнение стоковой базы и донора, анализ совместимости Android / VNDK, автоматический перенос ядра, fstab и HAL драйверов</p>
+            </div>
+            <div class="actions">
+              <div style="display:flex;gap:10px;align-items:center">
+                <select id="portBaseSelect" class="search-input" style="width:190px;padding:8px 12px">
+                  <option value="">База (Сток)...</option>
+                </select>
+                <span style="color:var(--pink);font-weight:bold;font-size:16px">➔</span>
+                <select id="portPortSelect" class="search-input" style="width:190px;padding:8px 12px">
+                  <option value="">Порт (Донор)...</option>
+                </select>
+                <button class="btn primary" id="btnCompareProjects">🔍 Сравнить</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Начальное пустое состояние -->
+          <div id="portEmptyState" class="empty-placeholder">
+            <div class="ic">🧬</div>
+            <h3>Выберите проекты Базы и Порта</h3>
+            <p class="muted">
+              <b>База (Сток)</b> — родная прошивка вашего устройства, откуда будут взяты ядро, fstab и аппаратные библиотеки.<br>
+              <b>Порт (Донор)</b> — прошивка с другого устройства (HyperOS, Pixel, OneUI), чей интерфейс и системные разделы переносятся.
+            </p>
+          </div>
+
+          <!-- Результаты сравнения (скрыто до нажатия Сравнить) -->
+          <div id="portResultView" class="hidden">
+            <!-- Баннер совместимости -->
+            <div class="device-status-banner" style="justify-content:space-between;margin-bottom:18px">
+              <div style="display:flex;align-items:center;gap:16px">
+                <div style="font-size:36px" id="portScoreIcon">⚖️</div>
+                <div>
+                  <h3 style="margin:0;font-size:18px">
+                    Совместимость: <span id="portScoreVal" style="color:var(--pink)">100%</span>
+                  </h3>
+                  <div id="portScoreNotes" style="display:flex;flex-direction:column;gap:3px;margin-top:4px;font-size:12.5px;color:var(--muted)"></div>
+                </div>
+              </div>
+              <button class="btn ghost sm" id="btnRecompareProjects">🔄 Перепроверить</button>
+            </div>
+
+            <!-- Сетка: Сравнение характеристик (База vs Порт) -->
+            <div class="grid-2col" style="margin-bottom:18px">
+              <!-- Спецификации Базы -->
+              <div class="panel-box">
+                <div class="panel-head">
+                  <span class="ic">📱</span>
+                  <div>
+                    <h3 id="portBaseTitle">Базовое устройство (Сток)</h3>
+                    <small class="muted">Источник драйверов и конфигураций железа</small>
+                  </div>
+                </div>
+                <div class="kv-list" id="portBasePropsList"></div>
+              </div>
+
+              <!-- Спецификации Порта -->
+              <div class="panel-box">
+                <div class="panel-head">
+                  <span class="ic">✨</span>
+                  <div>
+                    <h3 id="portPortTitle">Портируемая прошивка (Донор)</h3>
+                    <small class="muted">Источник системных разделов (system, product)</small>
+                  </div>
+                </div>
+                <div class="kv-list" id="portPortPropsList"></div>
+              </div>
+            </div>
+
+            <!-- Сравнение разделов и HAL модулей -->
+            <div class="grid-2col" style="margin-bottom:18px">
+              <!-- Разделы -->
+              <div class="panel-box">
+                <div class="panel-head">
+                  <span class="ic">🧩</span>
+                  <div>
+                    <h3>Сравнение структуры разделов</h3>
+                    <small class="muted">Общие и уникальные разделы в обоих проектах</small>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;font-size:12.5px">
+                  <div>
+                    <span class="muted">Общие разделы (<span id="portCommonPartsCount">0</span>):</span>
+                    <div id="portCommonPartsBadges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+                  </div>
+                  <div style="border-top:1px solid var(--line);padding-top:8px">
+                    <span class="muted">Только в базе:</span>
+                    <div id="portBaseOnlyBadges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+                  </div>
+                  <div style="border-top:1px solid var(--line);padding-top:8px">
+                    <span class="muted">Только в порте:</span>
+                    <div id="portPortOnlyBadges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- HAL Модули -->
+              <div class="panel-box">
+                <div class="panel-head">
+                  <span class="ic">⚙️</span>
+                  <div>
+                    <h3>Аппаратные библиотеки (Vendor HAL)</h3>
+                    <small class="muted">Камера, аудио, сенсоры, дисплей и биометрия</small>
+                  </div>
+                </div>
+                <div style="max-height:220px;overflow-y:auto">
+                  <table class="parts-table" style="font-size:12px">
+                    <thead>
+                      <tr>
+                        <th>Категория</th>
+                        <th>Библиотека</th>
+                        <th>База</th>
+                        <th>Порт</th>
+                      </tr>
+                    </thead>
+                    <tbody id="portHalTbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Мастер портирования: Выбор действий и Применение -->
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">🪄</span>
+                <div>
+                  <h3>Мастер портирования: Перенос и синхронизация</h3>
+                  <small class="muted">Выберите компоненты, которые автоматика перенесёт из Базы в проект Порта</small>
+                </div>
+              </div>
+
+              <div class="grid-2col" style="gap:14px;margin:12px 0">
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="chkPortKernel" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Перенести ядро и загрузчик (boot.img, dtbo.img, vendor_boot.img)</b><br>
+                    <small class="muted">Гарантирует запуск ядра родного устройства на новой прошивке.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="chkPortFstab" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Синхронизировать fstab и точки монтирования</b><br>
+                    <small class="muted">Переносит vendor/etc/fstab.* с родной разметкой дисков целевого аппарата.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="chkPortAvb" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Отключить AVB 2.0 и dm-verity в fstab</b><br>
+                    <small class="muted">Вырезает флаги verity/avb из fstab для исключения бутлупа при изменении system.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="chkPortHal" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Синхронизировать HAL драйверы (vendor/lib/hw)</b><br>
+                    <small class="muted">Переносит библиотеки звука, сенсоров, подсветки и камеры с базы.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="chkPortFirmware" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Синхронизировать радиомодули (vendor/firmware)</b><br>
+                    <small class="muted">Переносит бинарники модема, Wi-Fi и Bluetooth для работы связи.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="chkPortProps" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Адаптировать идентификаторы в build.prop под базу</b><br>
+                    <small class="muted">Заменяет ro.product.device, model и brand на значения целевого устройства.</small>
+                  </span>
+                </label>
+              </div>
+
+              <div class="row" style="margin-top:10px;justify-content:flex-end">
+                <button class="btn primary" id="btnApplyPortingTransfer" style="padding:12px 28px;font-size:14px">
+                  🚀 Применить портирование к проекту
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Настройки -->
+        <div class="page" data-page="settings">
+          <h2 class="page-title">Настройки</h2>
+          <div class="panel" style="margin-bottom:18px">
+            <h3>Профиль автора</h3>
+            <p class="muted">Эти данные подставляются в релизы прошивок.</p>
+            <button class="btn primary" id="editProfile">Редактировать профиль</button>
+          </div>
+
+          <!-- Telegram Бот & Уведомления в Настройках -->
+          <div class="panel-box" style="margin-bottom:18px">
+            <div class="page-header" style="margin-bottom:14px">
+              <div>
+                <h3 style="margin:0;font-size:18px">🤖 Telegram Бот & Уведомления</h3>
+                <small class="muted">Живые статусы сборки, автопостинг релизов в каналы и управление через команды бота</small>
+              </div>
+              <div class="actions">
+                <button class="btn ghost sm" id="btnTgPollNow">🔄 Проверить команды</button>
+                <button class="btn ghost sm" id="btnTgSendTest">📢 Тестовое сообщение</button>
+                <button class="btn primary sm" id="btnTgSaveConfig">💾 Сохранить настройки</button>
+              </div>
+            </div>
+
+            <!-- Верхняя сетка: Токен и Подключение / Подсказка по командам -->
+            <div class="grid-2col">
+              <!-- Блок подключения бота -->
+              <div class="panel-box" style="background:rgba(10,20,55,.4)">
+                <div class="panel-head">
+                  <span class="ic">🤖</span>
+                  <div>
+                    <h3>Настройки бота (Bot Father)</h3>
+                    <small class="muted">Токен доступа, полученный у @BotFather</small>
+                  </div>
+                </div>
+
+                <div class="field" style="margin-top:10px">
+                  <input id="tgBotToken" type="password" placeholder=" " style="padding-right:75px" />
+                  <span>HTTP Bot Token *</span>
+                  <button class="icon-btn" id="btnToggleTgTokenEye" style="position:absolute;right:8px;top:12px;font-size:14px" title="Показать токен">👁️</button>
+                </div>
+
+                <div style="display:flex;gap:10px;align-items:center;margin:12px 0 16px">
+                  <button class="btn sm ghost" id="btnTgCheckToken">🔍 Проверить подключение</button>
+                  <div id="tgBotStatusBadge" class="pill bad"><i></i>Не настроен</div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:14px">
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                    <input type="checkbox" id="tgEnabled" style="accent-color:var(--pink);transform:scale(1.2)" />
+                    <span><b>Включить интеграцию Telegram</b></span>
+                  </label>
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                    <input type="checkbox" id="tgPollActive" style="accent-color:var(--sky);transform:scale(1.2)" />
+                    <span>
+                      <b>Фоновый слушатель команд в каналах</b><br>
+                      <small class="muted">Позволяет привязывать каналы командой /meyakitchen прямо в Telegram</small>
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Инструкция по привязке через Telegram -->
+              <div class="panel-box" style="background:rgba(10,20,55,.4)">
+                <div class="panel-head">
+                  <span class="ic">💡</span>
+                  <div>
+                    <h3>Привязка каналов и групп</h3>
+                    <small class="muted">Как подключить бота к каналу или чату</small>
+                  </div>
+                </div>
+
+                <div class="fstab-viewer" style="margin-top:10px;background:rgba(10,20,55,.6);line-height:1.6">
+<b>1.</b> Добавьте вашего бота в Telegram канал или группу с правом отправки сообщений.<br>
+<b>2.</b> Напишите в чате или канале команду:<br>
+<code style="color:var(--sky);font-weight:bold">/meyakitchen apply &lt;триггер&gt;</code><br><br>
+<b>Доступные триггеры:</b><br>
+• <code style="color:var(--pink)">all</code> — все уведомления программы<br>
+• <code style="color:var(--pink)">build</code> — живой прогресс и завершение сборки<br>
+• <code style="color:var(--pink)">release</code> — релизы и готовые прошивки<br>
+• <code style="color:var(--pink)">import</code> — разборка и распаковка образов<br>
+• <code style="color:var(--pink)">device</code> — слепки диагностированных устройств<br><br>
+<b>Другие команды:</b><br>
+• <code>/meyakitchen status</code> — статус привязки чата<br>
+• <code>/meyakitchen remove</code> — отвязать чат от кухни
+                </div>
+              </div>
+            </div>
+
+            <!-- Привязанные каналы -->
+            <div class="panel-box" style="margin-top:18px;background:rgba(10,20,55,.4)">
+              <div class="panel-head">
+                <span class="ic">📢</span>
+                <div>
+                  <h3>Привязанные каналы и чаты (<span id="tgChannelsCount">0</span>)</h3>
+                  <small class="muted">Список чатов, куда бот отправляет уведомления по триггерам</small>
+                </div>
+              </div>
+
+              <div class="table-card" style="margin-top:12px">
+                <table class="parts-table">
+                  <thead>
+                    <tr>
+                      <th>Чат / Канал</th>
+                      <th>Chat ID</th>
+                      <th>Тип</th>
+                      <th>Назначенные триггеры</th>
+                      <th style="text-align:right">Действия</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tgChannelsTbody">
+                    <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">Нет привязанных каналов. Напишите <code>/meyakitchen apply all</code> в вашем канале или группе.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Настройка триггеров и событий -->
+            <div class="panel-box" style="margin-top:18px;background:rgba(10,20,55,.4)">
+              <div class="panel-head">
+                <span class="ic">⚡</span>
+                <div>
+                  <h3>События и триггеры (что отправлять в Telegram)</h3>
+                  <small class="muted">Настройте, о каких операциях бот будет сообщать в привязанные чаты</small>
+                </div>
+              </div>
+
+              <div class="grid-2col" style="margin-top:14px;gap:16px">
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvBuildStart" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Начало сборки (создание отслеживаемого сообщения)</b><br>
+                    <small class="muted">Создает сообщение со статусом старта и запоминает его для дальнейшего обновления.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvBuildProgress" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Живое обновление прогресса сборки</b><br>
+                    <small class="muted">Редактирует то же самое сообщение в канале по мере прохождения этапов и выводит шкалу прогресса.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvBuildDone" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Успешное завершение сборки</b><br>
+                    <small class="muted">Финальное редактирование сообщения с именем выходного файла, размером, MD5 и автором.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvImport" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Импорт и разборка прошивок</b><br>
+                    <small class="muted">Уведомляет о распакованном архиве (zip, rar, 7z, payload) и числе извлеченных разделов.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvDevice" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Диагностика и слепки устройств</b><br>
+                    <small class="muted">Отправляет краткую карточку подключенного и просканированного Android-телефона.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvRelease" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Публикация релизов прошивок</b><br>
+                    <small class="muted">Отправка релизных заметок и файлов прошивок при финальной публикации.</small>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-bottom:18px">
+            <h3>WSL (Подсистема Windows для Linux)</h3>
+            <p class="muted" id="wslText">Проверка…</p>
+            <button class="btn ghost" id="wslInstall">Установить WSL</button>
+          </div>
+          <div class="panel">
+            <h3>Обновления программы</h3>
+            <p class="muted" id="updText">—</p>
+            <button class="btn ghost" id="updRecheck">Проверить снова</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Терминал -->
+      <div class="terminal" id="terminal">
+        <div class="term-head" id="termHead">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span>Терминал</span>
+          <span class="term-state" id="termState">готов</span>
+          <button class="icon-btn" id="termClear" title="Очистить">⌫</button>
+          <button class="icon-btn" id="termToggle" title="Свернуть">▾</button>
+        </div>
+        <div class="term-body" id="termBody"></div>
+        <form class="term-input" id="termForm">
+          <span class="prompt">meya@forge&nbsp;❯</span>
+          <input id="termIn" autocomplete="off" spellcheck="false" placeholder="введите команду…" />
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Модалка: Создание проекта -->
+  <div id="newProjectModal" class="modal hidden">
+    <form class="modal-card" id="newProjectForm">
+      <h2>Новый проект</h2>
+      <p class="muted">Введите кодовое название прошивки или устройства (латиница, цифры, дефис).</p>
+      <label class="field">
+        <input name="projName" id="inputProjName" required placeholder=" " maxlength="32" pattern="[A-Za-z0-9_\-\.]+" />
+        <span>Название проекта * (например, redmi_note12)</span>
+      </label>
+      <p class="form-err" id="newProjectErr"></p>
+      <div class="row">
+        <button class="btn ghost" type="button" id="btnCancelNewProj">Отмена</button>
+        <button class="btn primary" type="submit">Создать</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Модалка: Анкета пользователя -->
+  <div id="profileModal" class="modal hidden">
+    <form class="modal-card" id="profileForm">
+      <img class="modal-mascot" src="assets/icon.png" alt="" />
+      <h2>Давай знакомиться!</h2>
+      <p class="muted">Эта информация хранится локально и показывается в ваших релизах.</p>
+      <label class="field"><input name="nickname" required placeholder=" " maxlength="32" /><span>Ник *</span></label>
+      <label class="field"><input name="telegram" placeholder=" " /><span>Telegram (ссылка или @username)</span></label>
+      <label class="field"><input name="github" placeholder=" " /><span>GitHub</span></label>
+      <label class="field"><input name="device" placeholder=" " /><span>Основное устройство</span></label>
+      <label class="field"><textarea name="about" rows="2" placeholder=" "></textarea><span>О себе / подпись к релизам</span></label>
+      <p class="form-err" id="profileErr"></p>
+      <button class="btn primary wide" type="submit">Сохранить и продолжить</button>
+    </form>
+  </div>
+
+  <!-- Модалка: Подтверждение опасного действия (сканирование / логирование) -->
+  <div id="deviceWarningModal" class="modal hidden">
+    <div class="modal-card">
+      <div style="text-align:center;font-size:36px;margin-bottom:6px">⚠️</div>
+      <h2 id="warnModalTitle">Внимание! Подтверждение операции</h2>
+      <p class="muted" id="warnModalDesc" style="line-height:1.6">
+        Во время сбора комплексной информации и снятия системных логов устройство может кратковременно зависнуть, войти в режим опроса шин или <b style="color:var(--pink)">автоматически перезагрузиться</b>.<br><br>
+        <span style="color:#ff8fab">Не отключайте кабель USB и не нажимайте кнопки на телефоне до окончания операции!</span>
+      </p>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" id="btnCancelDeviceWarn">Отмена</button>
+        <button class="btn primary" id="btnConfirmDeviceWarn">Я согласен, продолжить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка: Выбор логов -->
+  <div id="deviceLogsModal" class="modal hidden">
+    <div class="modal-card">
+      <div style="text-align:center;font-size:32px;margin-bottom:6px">📋</div>
+      <h2>Снятие логов с устройства</h2>
+      <p class="muted">Выберите тип системного журнала для извлечения через ADB:</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin:10px 0">
+        <button class="btn ghost" id="btnTakeLogcat" style="justify-content:flex-start;padding:12px 16px">
+          <b>Logcat (Android OS)</b> — общий журнал приложений, крашей и сервисов
+        </button>
+        <button class="btn ghost" id="btnTakeDmesg" style="justify-content:flex-start;padding:12px 16px">
+          <b>Dmesg (Ядро Linux)</b> — логи инициализации драйверов и ядра
+        </button>
+        <button class="btn ghost" id="btnTakeRecovery" style="justify-content:flex-start;padding:12px 16px">
+          <b>Recovery Log</b> — журнал установки прошивок из TWRP / кастомного рекавери
+        </button>
+      </div>
+      <div class="row">
+        <button class="btn ghost" id="btnCloseLogsModal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка: Параметры импорта и разборки прошивки -->
+  <div id="importOptionsModal" class="modal hidden">
+    <div class="modal-card">
+      <div style="text-align:center;font-size:36px;margin-bottom:6px">📦</div>
+      <h2>Параметры импорта и разборки</h2>
+      <p class="muted" style="margin-bottom:14px">
+        Файл: <b id="importOptFileName" style="color:var(--pink)">—</b><br>
+        Выберите, как обработать найденные разделы и что делать с промежуточными файлами:
+      </p>
+
+      <div style="display:flex;flex-direction:column;gap:12px;text-align:left;margin-bottom:18px">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+          <input type="checkbox" id="optAutoExtract" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+          <span>
+            <b>Автоматически разобрать разделы в папки (extracted/)</b><br>
+            <small class="muted">Распакует ext4 и erofs файловые системы, а также boot/recovery на kernel, dtb и ramdisk.</small>
+          </span>
+        </label>
+
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+          <input type="checkbox" id="optDeleteIntermediate" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+          <span>
+            <b>Удалять промежуточные контейнеры (super.img, payload.bin, .lz4)</b><br>
+            <small class="muted">Удаляет тяжелые контейнеры после извлечения из них разделов (экономит место на SSD).</small>
+          </span>
+        </label>
+
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+          <input type="checkbox" id="optDeleteArchive" style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+          <span>
+            <b>Удалить исходный архив после распаковки</b><br>
+            <small class="muted">Удалит исходный .zip, .rar, .tar.md5 или .7z файл после извлечения образов.</small>
+          </span>
+        </label>
+
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+          <input type="checkbox" id="optDeleteRawImgs" style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+          <span>
+            <b>Удалять .img образы после успешной разборки в папки</b><br>
+            <small class="muted">Оставит только папки с файлами в extracted/, удалив промежуточные .img образы.</small>
+          </span>
+        </label>
+      </div>
+
+      <div class="row">
+        <button class="btn ghost" id="btnCancelImportOpt">Отмена</button>
+        <button class="btn primary" id="btnConfirmImportOpt">Начать разборку</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка: Хранилище сохранённых устройств -->
+  <div id="deviceLibraryModal" class="modal hidden">
+    <div class="modal-card" style="width:min(680px,94vw);max-height:85vh;overflow:hidden;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:24px">🗄️</span>
+          <div>
+            <h3 style="margin:0">Хранилище устройств</h3>
+            <small class="muted">Сохранённые полные и частичные профили Android-устройств</small>
+          </div>
+        </div>
+        <button class="icon-btn" id="btnCloseDevLib">✕</button>
+      </div>
+
+      <div id="devLibList" style="flex:1;overflow-y:auto;margin:14px 0;display:flex;flex-direction:column;gap:10px">
+        <div class="empty-state">Загрузка сохранённых устройств...</div>
+      </div>
+
+      <div class="row" style="border-top:1px solid var(--line);padding-top:12px">
+        <button class="btn ghost" id="btnCloseDevLibBottom">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка: Создание файла / папки -->
+  <div id="fmNewItemModal" class="modal hidden">
+    <div class="modal-card">
+      <h2 id="fmNewItemTitle">Создать файл</h2>
+      <p class="muted" id="fmNewItemDesc">Введите относительный путь или имя внутри выбранного проекта:</p>
+      <label class="field">
+        <input id="fmNewItemInput" placeholder=" " />
+        <span id="fmNewItemPlaceholder">Имя файла (например, config/my.prop)</span>
+      </label>
+      <div class="row">
+        <button class="btn ghost" id="btnCancelFmNewItem">Отмена</button>
+        <button class="btn primary" id="btnConfirmFmNewItem">Создать</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка: Переименование объекта -->
+  <div id="fmRenameModal" class="modal hidden">
+    <div class="modal-card">
+      <h2>Переименовать</h2>
+      <p class="muted">Введите новое имя или путь для объекта:</p>
+      <label class="field">
+        <input id="fmRenameInput" placeholder=" " />
+        <span>Новое имя</span>
+      </label>
+      <div class="row">
+        <button class="btn ghost" id="btnCancelFmRename">Отмена</button>
+        <button class="btn primary" id="btnConfirmFmRename">Переименовать</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts"></div>
+  <script src="app.js"></script>
+</body>
+</html>
