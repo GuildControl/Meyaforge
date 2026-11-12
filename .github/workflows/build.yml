@@ -33,8 +33,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: src-tauri
-          # Релиз создаётся только при запуске по тегу; при ручном запуске — только артефакты
-          tagName: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
-          releaseName: "MEYAFORGE ${{ github.ref_name }}"
-          releaseDraft: true
-          prerelease: false
+          # По тегу v* — обычный релиз; при ручном запуске — rolling-релиз pre-release
+          tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'pre-release' }}
+          releaseName: ${{ github.ref_type == 'tag' && format('MEYAFORGE {0}', github.ref_name) || 'MEYAFORGE pre-release' }}
+          releaseDraft: false
+          prerelease: ${{ github.ref_type != 'tag' }}
