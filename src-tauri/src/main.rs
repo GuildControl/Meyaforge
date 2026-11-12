@@ -20,7 +20,79 @@ use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 use tauri::AppHandle;
 
-const UPDATE_REPO: &str = "meyaforge/meyaforge";
+// ---------------- Обновления ----------------
+
+#[derive(Serialize)]
+struct UpdateInfo {
+    current: String,
+    latest: Option<String>,
+    available: bool,
+    url: Option<String>,
+    notes: Option<String>,
+    error: Option<String>,
+}
+
+#[tauri::command]
+async fn check_update(app: AppHandle) -> UpdateInfo {
+    let current = app.package_info().version.to_string();
+    let res = tauri_plugin_updater::UpdaterExt::updater(&app)
+        .map_err(|e| e.to_string())
+        .and_then(|u| Ok(u));
+
+    let info = match res {
+        Ok(updater) => match updater.check().await {
+            Ok(Some(update)) => UpdateInfo {
+                current,
+                latest: Some(update.version.clone()),
+                available: true,
+                url: Some("https://github.com/GuildControl/Meyaforge/releases/latest".into()),
+                notes: update.body.clone(),
+                error: None,
+            },
+            Ok(None) => UpdateInfo {
+                current,
+                latest: None,
+                available: false,
+                url: None,
+                notes: None,
+                error: None,
+            },
+            Err(e) => UpdateInfo {
+                current,
+                latest: None,
+                available: false,
+                url: None,
+                notes: None,
+                error: Some(e.to_string()),
+            },
+        },
+        Err(e) => UpdateInfo {
+            current,
+            latest: None,
+            available: false,
+            url: None,
+            notes: None,
+            error: Some(e),
+        },
+    };
+    info
+}
+
+#[tauri::command]
+async fn install_update(app: AppHandle) -> Result<(), String> {
+    let updater = tauri_plugin_updater::UpdaterExt::updater(&app).map_err(|e| e.to_string())?;
+    let update = updater
+        .check()
+        .await
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| "Обновлений нет".to_string())?;
+
+    update
+        .download_and_install(|_, _| {}, || {})
+        .await
+        .map_err(|e| e.to_string())?;
+    app.restart();
+}
 
 // ---------------- Профиль ----------------
 
@@ -50,67 +122,6 @@ fn save_profile(profile: Profile) -> Result<(), String> {
     }
     let s = serde_json::to_string_pretty(&profile).map_err(|e| e.to_string())?;
     std::fs::write(util::root().join("profile.json"), s).map_err(|e| e.to_string())
-}
-
-// ---------------- Обновления ----------------
-
-#[derive(Serialize)]
-struct UpdateInfo {
-    current: String,
-    latest: Option<String>,
-    available: bool,
-    url: Option<String>,
-    notes: Option<String>,
-    error: Option<String>,
-}
-
-fn parse_ver(v: &str) -> Vec<u64> {
-    v.trim_start_matches(['v', 'V'])
-        .split(|c: char| c == '.' || c == '-')
-        .map(|p| p.parse().unwrap_or(0))
-        .collect()
-}
-
-#[tauri::command]
-async fn check_update(app: AppHandle) -> UpdateInfo {
-    let current = app.package_info().version.to_string();
-    let url = format!("https://api.github.com/repos/{UPDATE_REPO}/releases/latest");
-    let res = tauri::async_runtime::spawn_blocking(move || {
-        ureq::get(&url)
-            .set("User-Agent", "MeyaForge")
-            .set("Accept", "application/vnd.github+json")
-            .timeout(std::time::Duration::from_secs(8))
-            .call()
-            .map_err(|e| e.to_string())?
-            .into_json::<serde_json::Value>()
-            .map_err(|e| e.to_string())
-    })
-    .await
-    .map_err(|e| e.to_string())
-    .and_then(|r| r);
-
-    match res {
-        Ok(j) => {
-            let tag = j["tag_name"].as_str().map(str::to_owned);
-            let available = tag.as_deref().map_or(false, |t| parse_ver(t) > parse_ver(&current));
-            UpdateInfo {
-                current,
-                latest: tag,
-                available,
-                url: j["html_url"].as_str().map(str::to_owned),
-                notes: j["body"].as_str().map(str::to_owned),
-                error: None,
-            }
-        }
-        Err(e) => UpdateInfo {
-            current,
-            latest: None,
-            available: false,
-            url: None,
-            notes: None,
-            error: Some(e),
-        },
-    }
 }
 
 // ---------------- Терминал ----------------
@@ -192,6 +203,7 @@ fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let webview = util::root().join("webview");
             std::fs::create_dir_all(&webview).map_err(|e| {
@@ -207,6 +219,7 @@ fn main() {
             get_profile,
             save_profile,
             check_update,
+            install_update,
             run_command,
             wsl_status,
             wsl_install,

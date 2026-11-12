@@ -2237,7 +2237,18 @@
       $("#updateBox").classList.remove("hidden");
       await new Promise((res) => {
         $("#updSkip").onclick = res;
-        $("#updGo").onclick = () => { if (u.url) invoke("open_url", { url: u.url }); res(); };
+        $("#updGo").onclick = async () => {
+          const btn = $("#updGo");
+          btn.disabled = true;
+          btn.textContent = "Скачивание и установка…";
+          try {
+            await invoke("install_update"); // перезапустит приложение
+          } catch (e) {
+            toast("Ошибка обновления: " + e, "pink");
+            if (u.url) invoke("open_url", { url: u.url });
+            res();
+          }
+        };
       });
     } else {
       $("#splashText").textContent = u && u.error ? "GitHub недоступен — офлайн режим" : "Последняя версия ✦";

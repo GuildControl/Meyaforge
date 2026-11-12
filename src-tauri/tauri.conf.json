@@ -26,6 +26,15 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "createUpdaterArtifacts": true,
     "icon": ["icons/icon.png", "icons/icon.ico"]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUzQzBCMzQ2MTAzQzA5RkQKUldUOUNUd1FSclBBVSs1Zm5SYVlKVlpjMENPWW9MRTFybXk5N2FjOXdkalFKN2RKaERnWlR6RkIK",
+      "endpoints": [
+        "https://github.com/GuildControl/Meyaforge/releases/latest/download/latest.json"
+      ]
+    }
   }
 }
