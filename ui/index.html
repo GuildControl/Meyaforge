@@ -21,10 +21,16 @@
       <span id="topTaskLabel">Выполняется операция...</span>
       <span id="topTaskPct" class="pct"></span>
     </div>
-    <div class="win-btns">
-      <button id="wMin" title="Свернуть"><svg viewBox="0 0 12 12"><path d="M2 6h8"/></svg></button>
-      <button id="wMax" title="Развернуть"><svg viewBox="0 0 12 12"><rect x="2" y="2" width="8" height="8" rx="1"/></svg></button>
-      <button id="wClose" class="close" title="Закрыть"><svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="lang-switcher" style="display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.05);padding:2px 4px;border-radius:6px;border:1px solid var(--line)">
+        <button class="btn-lang active" data-lang="ru" style="padding:2px 6px;font-size:11px;font-weight:700;color:var(--text);border-radius:6px;background:rgba(142,197,255,.2)">RU</button>
+        <button class="btn-lang" data-lang="en" style="padding:2px 6px;font-size:11px;font-weight:700;color:var(--muted);border-radius:6px">EN</button>
+      </div>
+      <div class="win-btns">
+        <button id="wMin" title="Свернуть"><svg viewBox="0 0 12 12"><path d="M2 6h8"/></svg></button>
+        <button id="wMax" title="Развернуть"><svg viewBox="0 0 12 12"><rect x="2" y="2" width="8" height="8" rx="1"/></svg></button>
+        <button id="wClose" class="close" title="Закрыть"><svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>
+      </div>
     </div>
   </header>
 
@@ -52,17 +58,18 @@
   <main id="app" class="app hidden">
     <nav class="sidebar">
       <div class="nav-indicator"></div>
-      <button class="nav active" data-page="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Главная</span></button>
-      <button class="nav" data-page="projects"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Проекты</span></button>
-      <button class="nav" data-page="partitions"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg><span>Разделы</span></button>
-      <button class="nav" data-page="device"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg><span>Чтение устройства</span></button>
-      <button class="nav" data-page="files"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Файлы</span></button>
-      <button class="nav" data-page="bootapk"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V6a4 4 0 0 0-4-4zm-2 6V6a2 2 0 1 1 4 0v2h-4z"/></svg><span>Boot / APK</span></button>
-      <button class="nav" data-page="tools"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg><span>Инструменты</span></button>
-      <button class="nav" data-page="unpack"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg><span>Распаковка / Сборка</span></button>
-      <button class="nav" data-page="port"><svg viewBox="0 0 24 24"><path d="M4 12h12M12 6l6 6-6 6M20 4v16"/></svg><span>Портирование</span></button>
+      <button class="nav active" data-page="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span data-i18n="nav_home">Главная</span></button>
+      <button class="nav" data-page="projects"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span data-i18n="nav_projects">Проекты</span></button>
+      <button class="nav" data-page="partitions"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg><span data-i18n="nav_partitions">Разделы</span></button>
+      <button class="nav" data-page="device"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg><span data-i18n="nav_device">Чтение устройства</span></button>
+      <button class="nav" data-page="files"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span data-i18n="nav_files">Файлы</span></button>
+      <button class="nav" data-page="bootapk"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V6a4 4 0 0 0-4-4zm-2 6V6a2 2 0 1 1 4 0v2h-4z"/></svg><span data-i18n="nav_bootapk">Boot / APK</span></button>
+      <button class="nav" data-page="debloat"><svg viewBox="0 0 24 24"><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3-3h8m-10 3h12"/></svg><span data-i18n="nav_debloat">Деблоатер</span></button>
+      <button class="nav" data-page="tools"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg><span data-i18n="nav_tools">Инструменты</span></button>
+      <button class="nav" data-page="unpack"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg><span data-i18n="nav_unpack">Распаковка / Сборка</span></button>
+      <button class="nav" data-page="port"><svg viewBox="0 0 24 24"><path d="M4 12h12M12 6l6 6-6 6M20 4v16"/></svg><span data-i18n="nav_port">Портирование</span></button>
       <div class="spacer"></div>
-      <button class="nav" data-page="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15.1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6V4.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Настройки</span></button>
+      <button class="nav" data-page="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15.1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6V4.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span data-i18n="nav_settings">Настройки</span></button>
       <div class="user-chip" id="userChip">
         <div class="avatar" id="avatar">?</div>
         <div class="uinfo"><b id="uNick">Гость</b><small id="uTg">—</small></div>
@@ -88,7 +95,8 @@
             <article class="card" data-go="device" style="--c:var(--sky)"><div class="ic">📱</div><h3>Чтение устройства</h3><p>Режимы ADB/Fastboot, разделы, build.prop, fstab.</p></article>
             <article class="card" data-go="partitions" style="--c:var(--violet)"><div class="ic">🧩</div><h3>Разделы и образы</h3><p>Определение super, sparse, ext4, erofs и их разборка.</p></article>
             <article class="card" data-go="files" style="--c:var(--sky)"><div class="ic">🗂️</div><h3>Файлы & Редактор</h3><p>Дерево разделов, просмотр, редактирование и синтаксис.</p></article>
-            <article class="card" data-go="bootapk" style="--c:var(--pink)"><div class="ic">⚡</div><h3>Boot & APK</h3><p>Патчинг kernel, ramdisk, boot.img и Smali модификации APK.</p></article>
+            <article class="card" data-go="bootapk" style="--c:var(--pink)"><div class="ic">⚡</div><h3>Модификации & Патчи</h3><p>Boot/Kernel, VBMeta AVB, DTB Studio, LK OEM, Root инжектор, build.prop твики и бинарники.</p></article>
+            <article class="card" data-go="debloat" style="--c:var(--sky)"><div class="ic">🧹</div><h3>Деблоатер</h3><p>Глубокая очистка от рекламы, телеметрии Xiaomi, Samsung, Google и партнерского мусора.</p></article>
             <article class="card" data-go="tools" style="--c:var(--violet)"><div class="ic">🛠️</div><h3>Менеджер утилит</h3><p>MagiskBoot, Apktool, Uber-Signer, JADX, erofs-utils и др.</p></article>
             <article class="card" data-go="unpack" style="--c:var(--pink)"><div class="ic">📦</div><h3>Распаковка / Сборка</h3><p>Упаковка и формирование flashable zip образов.</p></article>
             <article class="card" data-go="port" style="--c:var(--violet)"><div class="ic">🧬</div><h3>Портирование</h3><p>Сравнение прошивок, перенос ядра, fstab и HAL модулей.</p></article>
@@ -406,35 +414,506 @@
           </div>
         </div>
 
-        <!-- Boot, Recovery & APK Modding -->
+        <!-- Boot, Recovery, LK & Binary Modding -->
         <div class="page" data-page="bootapk">
           <div class="page-header">
             <div>
-              <h2 class="page-title">Boot, Recovery & APK Модификации</h2>
-              <p class="muted">Быстрый доступ к разборке загрузочных ядер (MagiskBoot) и Smali декомпиляции/сборке APK (Apktool)</p>
+              <h2 class="page-title">Модификации, Патчи & Бинарники</h2>
+              <p class="muted">Комплексный патчинг boot/recovery, извлечение OEM команд из LK/Bootloader, установка заглушек в ELF (.so) и работа с APK</p>
             </div>
           </div>
 
-          <div class="grid-2col">
-            <!-- Секция Boot / Kernel / Recovery -->
+          <!-- Вкладки инструментов -->
+          <div class="filter-pills" id="patchToolsTabs">
+            <button class="f-pill active" data-ptab="boot">⚡ Boot & Kernel</button>
+            <button class="f-pill" data-ptab="root">💉 Root Инжектор</button>
+            <button class="f-pill" data-ptab="vbmeta">🔏 VBMeta & AVB</button>
+            <button class="f-pill" data-ptab="dtb">🧬 DTB / DTS Studio</button>
+            <button class="f-pill" data-ptab="lk">🛡️ LK & OEM</button>
+            <button class="f-pill" data-ptab="elf">🧩 ELF & Binary</button>
+            <button class="f-pill" data-ptab="props">📝 build.prop Твики</button>
+            <button class="f-pill" data-ptab="flasher">⚡ Fastboot Прошивка</button>
+            <button class="f-pill" data-ptab="apk">📱 APK Modding</button>
+          </div>
+
+          <!-- 1. Вкладка: Boot & Kernel Патчер -->
+          <div id="pTabBoot" class="ptab-pane">
+            <div class="grid-2col">
+              <div class="panel-box">
+                <div class="panel-head">
+                  <span class="ic">⚡</span>
+                  <div>
+                    <h3>Распаковка и Сборка Boot / Recovery</h3>
+                    <small class="muted">Управление загрузочными ядрами через MagiskBoot</small>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <button class="btn primary" id="btnSelectBootFile">Выбрать и распаковать boot.img</button>
+                  <button class="btn ghost" id="btnRepackBoot">Собрать boot из extracted/</button>
+                </div>
+                <div class="tool-hint">
+                  <span>Образ распаковывается в <code>extracted/&lt;имя&gt;</code> текущего проекта для патчинга ramdisk, fstab и cmdline.</span>
+                </div>
+                <div style="margin-top:10px">
+                  <span style="font-size:12px;color:var(--muted)">Выбрать распакованный boot из проекта:</span>
+                  <div style="display:flex;gap:8px;margin-top:4px">
+                    <input id="inputBootExtractedName" class="search-input" placeholder="Имя папки в extracted (например boot, recovery)" value="boot" />
+                    <button class="btn ghost sm" id="btnInspectBootFolder">Проинспектировать</button>
+                  </div>
+                </div>
+                <div id="bootInspectDetails" class="kv-list hidden" style="margin-top:10px;background:rgba(0,0,0,0.2);padding:10px;border-radius:6px">
+                  <div class="kv-row"><span>ОС / Патч:</span> <b id="bootInfoOs">—</b></div>
+                  <div class="kv-row"><span>Компоненты:</span> <span id="bootInfoComps">—</span></div>
+                  <div class="kv-row"><span>Текущий Cmdline:</span> <small id="bootInfoCmdline" class="code-sm" style="word-break:break-all">—</small></div>
+                  <div class="kv-row"><span>Найденные fstab:</span> <span id="bootInfoFstabs" class="code-sm">—</span></div>
+                  <div class="kv-row"><span>Найденные default.prop:</span> <span id="bootInfoProps" class="code-sm">—</span></div>
+                </div>
+              </div>
+
+              <!-- Панель комплекса патчей -->
+              <div class="panel-box">
+                <div class="panel-head">
+                  <span class="ic">🛠️</span>
+                  <div>
+                    <h3>Комплекс патчей для ядра и Ramdisk</h3>
+                    <small class="muted">Применяется к распакованному ядру в extracted/</small>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px">
+                    <input type="checkbox" id="chkPatchSelinux" checked />
+                    <span><b>SELinux Permissive</b> (androidboot.selinux=permissive enforcing=0)</span>
+                  </label>
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px">
+                    <input type="checkbox" id="chkPatchVerity" checked />
+                    <span><b>Отключить DM-Verity & AVB</b> (veritymode=disabled, удаление avb/verify из fstab)</span>
+                  </label>
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px">
+                    <input type="checkbox" id="chkPatchForceEncrypt" checked />
+                    <span><b>Отключить ForceEncrypt</b> (fileencryption/forceencrypt -&gt; encryptable)</span>
+                  </label>
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px">
+                    <input type="checkbox" id="chkPatchAdbRoot" checked />
+                    <span><b>ADB & Root по умолчанию</b> (ro.secure=0, ro.debuggable=1, adb enabled)</span>
+                  </label>
+                  <div style="margin-top:4px">
+                    <span style="font-size:12px;color:var(--muted)">Пользовательский cmdline (опционально):</span>
+                    <input id="inputCustomCmdline" class="search-input" style="max-width:100%;margin-top:4px" placeholder="Оставьте пустым, чтобы дополнить текущий cmdline" />
+                  </div>
+                </div>
+                <button class="btn primary wide" id="btnApplyBootPatches" style="margin-top:8px">⚡ Применить выбранные патчи</button>
+                <div id="bootPatchLog" class="tool-hint hidden" style="white-space:pre-wrap;max-height:160px;overflow:auto"></div>
+              </div>
+
+              <!-- Быстрый HEX Патчер Ядра -->
+              <div class="panel-box" style="grid-column: 1 / -1">
+                <div class="panel-head">
+                  <span class="ic">🔬</span>
+                  <div>
+                    <h3>Быстрый HEX-патч ядра (kernel)</h3>
+                    <small class="muted">Поиск и замена последовательностей байт в extracted/&lt;target&gt;/kernel (например, skip_initramfs ➔ want_initramfs, обход проверок security)</small>
+                  </div>
+                </div>
+                <div class="grid-2col">
+                  <div>
+                    <span style="font-size:12px;color:var(--muted)">Шаблон для поиска (HEX):</span>
+                    <input id="inputKernelHexFind" class="search-input" style="max-width:100%;margin-top:4px" placeholder="73 6B 69 70 5F 69 6E 69 74 72 61 6D 66 73" />
+                  </div>
+                  <div>
+                    <span style="font-size:12px;color:var(--muted)">HEX замены (такой же длины):</span>
+                    <input id="inputKernelHexReplace" class="search-input" style="max-width:100%;margin-top:4px" placeholder="77 61 6E 74 5F 69 6E 69 74 72 61 6D 66 73" />
+                  </div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap">
+                  <button class="btn primary sm" id="btnApplyKernelHex">Применить HEX-патч к ядру</button>
+                  <button class="btn ghost sm" id="btnPresetSkipInitramfs">Пресет: skip_initramfs ➔ want_initramfs</button>
+                  <button class="btn ghost sm" id="btnPresetEnforcing">Пресет: enforcing=1 ➔ enforcing=0</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Вкладка: Root Инжектор -->
+          <div id="pTabRoot" class="ptab-pane hidden">
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">💉</span>
+                <div>
+                  <h3>Внедрение Root-решений в образ (Magisk / KernelSU / APatch)</h3>
+                  <small class="muted">Автоматическая интеграция в ramdisk и ядро перед обратной сборкой boot.img</small>
+                </div>
+              </div>
+              <div class="form-row">
+                <input id="inputRootBootFolder" class="search-input" style="max-width:240px" placeholder="Папка ядра в extracted/ (boot)" value="boot" />
+                <button class="btn ghost" id="btnCheckRootStatus">Проверить текущий статус</button>
+              </div>
+              <div id="rootStatusBox" class="tool-hint hidden" style="margin-top:6px">
+                <div id="rootStatusText"></div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:6px;padding:14px;margin-top:10px">
+                <h4 style="font-size:14px;margin-bottom:8px">Выберите решение для внедрения:</h4>
+                <div class="grid-2col">
+                  <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px">
+                    <input type="radio" name="root_type" value="magisk" checked style="margin-top:3px" />
+                    <div>
+                      <b>Magisk (Ramdisk init.rc + overlay.d)</b>
+                      <p class="muted" style="font-size:12px;margin:2px 0 0">Разворачивает структуру overlay.d/sbin и хуки автозапуска post-fs-data</p>
+                    </div>
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px">
+                    <input type="radio" name="root_type" value="kernelsu" style="margin-top:3px" />
+                    <div>
+                      <b>KernelSU интеграция</b>
+                      <p class="muted" style="font-size:12px;margin:2px 0 0">Подготовка ядра и ramdisk под встроенный ksu-драйвер ядра (SELinux permissive, ADB root)</p>
+                    </div>
+                  </label>
+                  <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px">
+                    <input type="radio" name="root_type" value="apatch" style="margin-top:3px" />
+                    <div>
+                      <b>APatch</b>
+                      <p class="muted" style="font-size:12px;margin:2px 0 0">Подготовка к патчингу kallsyms ядра и развертывание SuperKey хуков</p>
+                    </div>
+                  </label>
+                </div>
+                <button class="btn primary" id="btnInjectRoot" style="margin-top:14px">⚡ Внедрить выбранный Root в образ</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Вкладка: VBMeta & AVB 2.0 / 3.0 -->
+          <div id="pTabVbmeta" class="ptab-pane hidden">
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">🔏</span>
+                <div>
+                  <h3>VBMeta & Android Verified Boot (AVB 2.0 / 3.0)</h3>
+                  <small class="muted">Анализ заголовков AVB0, отключение проверок верификации и генерация пустых образов</small>
+                </div>
+              </div>
+              <div class="form-row">
+                <button class="btn primary" id="btnSelectVbmeta">Выбрать vbmeta.img для анализа</button>
+                <button class="btn ghost danger" id="btnPatchVbmetaFlags">Отключить Verity & Verification в образе</button>
+                <button class="btn ghost" id="btnGenerateBlankVbmeta">Сгенерировать пустую vbmeta.img (4 КБ)</button>
+              </div>
+              <div id="vbmetaInfoCard" class="kv-list hidden" style="margin-top:10px;background:rgba(0,0,0,0.2);padding:14px;border-radius:6px">
+                <div class="kv-row"><span>Файл:</span> <b id="vbmetaFile">—</b></div>
+                <div class="kv-row"><span>Версия libavb:</span> <span id="vbmetaLibVer" class="code-sm">—</span></div>
+                <div class="kv-row"><span>Алгоритм подписи:</span> <b id="vbmetaAlgorithm" style="color:var(--pink)">—</b></div>
+                <div class="kv-row"><span>Флаги (flags):</span> <code id="vbmetaFlagsHex" class="code-sm">—</code></div>
+                <div class="kv-row"><span>Статус Verity:</span> <b id="vbmetaStatusVerity">—</b></div>
+                <div class="kv-row"><span>Статус Verification:</span> <b id="vbmetaStatusVerification">—</b></div>
+                <div class="kv-row"><span>Разделы в VBMeta:</span> <span id="vbmetaParts" class="code-sm">—</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Вкладка: DTB / DTS Studio -->
+          <div id="pTabDtb" class="ptab-pane hidden">
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">🧬</span>
+                <div>
+                  <h3>Device Tree Studio (DTB / DTBO & DTS)</h3>
+                  <small class="muted">Анализ скомпилированных деревьев устройств (FDT 0xD00DFEED), декомпиляция в DTS и сборка</small>
+                </div>
+              </div>
+              <div class="form-row">
+                <button class="btn primary" id="btnSelectDtbFile">Выбрать DTB / DTBO файл</button>
+                <button class="btn ghost" id="btnDecompileDtb">Декомпилировать в .dts</button>
+                <button class="btn ghost" id="btnCompileDts">Собрать .dts ➔ .dtb</button>
+              </div>
+              <div id="dtbDetailsCard" class="kv-list hidden" style="margin-top:10px;background:rgba(0,0,0,0.2);padding:14px;border-radius:6px">
+                <div class="kv-row"><span>Плата / Модель:</span> <b id="dtbModel" style="color:var(--sky)">—</b></div>
+                <div class="kv-row"><span>Тип:</span> <span id="dtbType">—</span></div>
+                <div class="kv-row"><span>Размер FDT:</span> <span id="dtbSize">—</span></div>
+                <div class="kv-row"><span>Совместимость (compatible):</span> <div id="dtbCompatiblePills" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
+                <div class="kv-row"><span>Аргументы запуска (bootargs):</span> <small id="dtbBootargs" class="code-sm" style="word-break:break-all">—</small></div>
+                <div class="kv-row"><span>Обнаруженные узлы железа:</span> <div id="dtbNodesPills" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Вкладка: LK & OEM Команды -->
+          <div id="pTabLk" class="ptab-pane hidden">
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">🛡️</span>
+                <div>
+                  <h3>Анализатор LK (Little Kernel), ABL / XBL и Bootloader</h3>
+                  <small class="muted">Поиск скрытых fastboot OEM команд, разделов, флагов безопасности и SoC сигнатур</small>
+                </div>
+              </div>
+              <div class="form-row">
+                <button class="btn primary" id="btnSelectLkFile">Выбрать файл загрузчика (.bin / .img / .elf)</button>
+                <button class="btn ghost" id="btnAnalyzeLkFromProject">Анализировать раздел lk/abl из проекта</button>
+                <button class="btn ghost" id="btnCopyOemCmds" style="margin-left:auto">📋 Копировать список OEM команд</button>
+              </div>
+              <div id="lkSummaryBar" class="status-pills hidden" style="margin-top:8px">
+                <span class="pill">Платформа: <b id="lkPlatform">—</b></span>
+                <span class="pill">Размер: <b id="lkSize">—</b></span>
+                <span class="pill">OEM команд: <b id="lkOemCount">0</b></span>
+                <span class="pill">Fastboot команд: <b id="lkFbCount">0</b></span>
+                <span class="pill">Разделов в LK: <b id="lkPartsCount">0</b></span>
+              </div>
+
+              <!-- Таблицы результатов анализа LK -->
+              <div id="lkResultsWrap" class="hidden" style="display:flex;flex-direction:column;gap:14px;margin-top:10px">
+                <!-- Таблица OEM команд -->
+                <div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                    <h4 style="font-size:14px;display:flex;align-items:center;gap:6px">
+                      <span>⚡ Найденные Fastboot OEM команды</span>
+                    </h4>
+                    <input id="inputLkOemFilter" class="search-input" style="max-width:320px;padding:4px 10px;font-size:12px" placeholder="Фильтр OEM команд (например: unlock, lock, reboot, key)..." />
+                  </div>
+                  <div class="table-card" style="max-height:260px;overflow:auto">
+                    <table class="parts-table">
+                      <thead>
+                        <tr>
+                          <th style="width:35%">Команда</th>
+                          <th style="width:20%">Смещение (Offset)</th>
+                          <th style="width:45%">Строка в бинарнике</th>
+                        </tr>
+                      </thead>
+                      <tbody id="lkOemTbody"></tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="grid-2col">
+                  <div>
+                    <h4 style="font-size:13px;margin-bottom:6px">📌 Разделы, на которые ссылается LK</h4>
+                    <div id="lkPartsPills" style="display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow:auto;background:rgba(0,0,0,0.2);padding:10px;border-radius:6px"></div>
+                  </div>
+                  <div>
+                    <h4 style="font-size:13px;margin-bottom:6px">🔒 Флаги безопасности & Tamper проверки</h4>
+                    <div id="lkSecurityPills" style="display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow:auto;background:rgba(0,0,0,0.2);padding:10px;border-radius:6px"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Вкладка: ELF & Binary Патчер (Заглушки) -->
+          <div id="pTabElf" class="ptab-pane hidden">
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">🧩</span>
+                <div>
+                  <h3>ELF & Binary Патчер — Извлечение функций и установка заглушек</h3>
+                  <small class="muted">Модификация нативных библиотек (.so) и исполняемых файлов Android (ARM, AArch64, x86)</small>
+                </div>
+              </div>
+              <div class="form-row">
+                <button class="btn primary" id="btnSelectElfFile">Выбрать бинарный файл (.so / elf / exe)</button>
+                <button class="btn ghost danger" id="btnRestoreElfBackup">Восстановить из .bak</button>
+              </div>
+
+              <div id="elfMetaBar" class="status-pills hidden" style="margin-top:6px">
+                <span class="pill">Файл: <b id="elfFileName">—</b></span>
+                <span class="pill">Архитектура: <b id="elfArch">—</b></span>
+                <span class="pill">Тип: <b id="elfType">—</b></span>
+                <span class="pill">Функций/Символов: <b id="elfSymCount">0</b></span>
+                <span class="pill" id="elfBackupStatus"><i></i>Бэкап: нет</span>
+              </div>
+
+              <div id="elfWorkspace" class="hidden" style="display:flex;flex-direction:column;gap:14px;margin-top:10px">
+                <!-- Панель управления патчем -->
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:6px;padding:14px">
+                  <h4 style="font-size:14px;margin-bottom:10px">🛠️ Установка заглушки на функцию</h4>
+                  <div class="grid-2col">
+                    <div>
+                      <span style="font-size:12px;color:var(--muted)">Выбранная функция (символ):</span>
+                      <input id="inputTargetSymbol" class="search-input" style="max-width:100%;margin-top:4px" placeholder="Кликните по функции в таблице ниже или введите имя" />
+                      <div style="display:flex;gap:10px;margin-top:8px">
+                        <div style="flex:1">
+                          <span style="font-size:12px;color:var(--muted)">Или ручное смещение (HEX):</span>
+                          <input id="inputTargetOffset" class="search-input" style="max-width:100%;margin-top:4px" placeholder="0x1A40 (необязательно)" />
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <span style="font-size:12px;color:var(--muted)">Тип заглушки / Патча:</span>
+                      <select id="selStubType" class="search-input" style="max-width:100%;margin-top:4px">
+                        <option value="return_0">Return 0 (SUCCESS / FALSE) — mov w0, #0; ret</option>
+                        <option value="return_1">Return 1 (TRUE) — mov w0, #1; ret</option>
+                        <option value="return_minus_1">Return -1 (ERROR) — mov w0, -1; ret</option>
+                        <option value="return_void">Return Void — ret / bx lr</option>
+                        <option value="nop">NOP Fill (Заполнение инструкциями NOP)</option>
+                        <option value="custom_hex">Пользовательские HEX-байты</option>
+                      </select>
+                      <div id="customHexRow" class="hidden" style="margin-top:8px">
+                        <span style="font-size:12px;color:var(--muted)">HEX строка (например: 00 00 A0 E3 1E FF 2F E1):</span>
+                        <input id="inputCustomHex" class="search-input" style="max-width:100%;margin-top:4px" placeholder="00 00 A0 E3..." />
+                      </div>
+                      <div id="nopCountRow" class="hidden" style="margin-top:8px">
+                        <span style="font-size:12px;color:var(--muted)">Количество байт NOP:</span>
+                        <input id="inputNopCount" type="number" class="search-input" style="max-width:100%;margin-top:4px" value="4" />
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+                    <button class="btn primary" id="btnApplyElfPatch">⚡ Применить патч (Установить заглушку)</button>
+                    <span id="patchStatusLabel" class="tool-hint hidden"></span>
+                  </div>
+                </div>
+
+                <!-- Панель замены строк в бинарнике -->
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:6px;padding:14px">
+                  <h4 style="font-size:14px;margin-bottom:6px">🔤 Замена строк в бинарнике (String Patcher)</h4>
+                  <small class="muted">Безопасная замена ASCII строк внутри .so/bin с сохранением размера (например <code>su</code> ➔ <code>xx</code>, <code>test-keys</code> ➔ <code>release-keys</code>)</small>
+                  <div class="grid-2col" style="margin-top:10px">
+                    <div>
+                      <span style="font-size:12px;color:var(--muted)">Исходная строка (в бинарнике):</span>
+                      <input id="inputStrOld" class="search-input" style="max-width:100%;margin-top:4px" placeholder="например /system/xbin/su" />
+                    </div>
+                    <div>
+                      <span style="font-size:12px;color:var(--muted)">Новая строка (не длиннее исходной):</span>
+                      <input id="inputStrNew" class="search-input" style="max-width:100%;margin-top:4px" placeholder="например /system/xbin/xx" />
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+                    <button class="btn primary sm" id="btnApplyStrPatch">Заменить строку в бинарнике</button>
+                    <span id="strPatchStatus" class="tool-hint hidden"></span>
+                  </div>
+                </div>
+
+                <!-- Таблица символов с поиском -->
+                <div>
+                  <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+                    <input id="inputElfFilter" class="search-input" placeholder="Быстрый поиск функции (например: check, verify, root, signature, security, license)..." />
+                    <button class="btn ghost sm" id="btnFilterRootChecks">Фильтр: Проверки безопасности</button>
+                  </div>
+                  <div class="table-card" style="max-height:360px;overflow:auto">
+                    <table class="parts-table">
+                      <thead>
+                        <tr>
+                          <th style="width:40%">Имя функции / Символа</th>
+                          <th style="width:15%">Адрес</th>
+                          <th style="width:15%">Смещение в файле</th>
+                          <th style="width:15%">Привязка (Bind)</th>
+                          <th style="width:15%">Действие</th>
+                        </tr>
+                      </thead>
+                      <tbody id="elfSymbolsTbody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Вкладка: build.prop Твики и Спуфинг -->
+          <div id="pTabProps" class="ptab-pane hidden">
+            <div class="panel-box">
+              <div class="panel-head">
+                <span class="ic">📝</span>
+                <div>
+                  <h3>Каталог твиков build.prop / system.prop и Спуфинг</h3>
+                  <small class="muted">Готовые пресеты (Pixel 8 Pro, оптимизация батареи, ускорение UI, отключение логирования)</small>
+                </div>
+              </div>
+              <div class="form-row">
+                <button class="btn primary" id="btnSelectPropFile">Выбрать файл .prop</button>
+                <button class="btn ghost danger" id="btnRestorePropBackup">Восстановить из .bak</button>
+              </div>
+              <div id="propFileBar" class="status-pills hidden" style="margin-top:6px">
+                <span class="pill">Файл: <b id="propFileName">—</b></span>
+                <span class="pill">Свойств: <b id="propTotalCount">0</b></span>
+                <span class="pill" id="propDuplPill" style="color:#ff8fab">Дубликатов: 0</span>
+              </div>
+              <div id="propWorkspace" class="hidden" style="display:flex;flex-direction:column;gap:14px;margin-top:10px">
+                <!-- Сетка пресетов -->
+                <div>
+                  <h4 style="font-size:14px;margin-bottom:8px">🔥 Готовые пресеты твиков:</h4>
+                  <div class="grid" id="propPresetsGrid"></div>
+                </div>
+                <!-- Таблица свойств -->
+                <div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                    <h4 style="font-size:14px">Все свойства файла:</h4>
+                    <input id="inputPropSearch" class="search-input" style="max-width:320px;padding:4px 10px;font-size:12px" placeholder="Поиск по свойствам..." />
+                  </div>
+                  <div class="table-card" style="max-height:300px;overflow:auto">
+                    <table class="parts-table">
+                      <thead>
+                        <tr>
+                          <th style="width:40%">Ключ</th>
+                          <th style="width:50%">Значение</th>
+                          <th style="width:10%">Стр.</th>
+                        </tr>
+                      </thead>
+                      <tbody id="propEntriesTbody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Вкладка: Fastboot Flasher -->
+          <div id="pTabFlasher" class="ptab-pane hidden">
             <div class="panel-box">
               <div class="panel-head">
                 <span class="ic">⚡</span>
                 <div>
-                  <h3>Boot / Kernel / Recovery (MagiskBoot)</h3>
-                  <small class="muted">Распаковка на kernel, ramdisk.cpio, dtb и обратная перепаковка</small>
+                  <h3>Fastboot Прошивальщик и Сервисные режимы (EDL / BROM)</h3>
+                  <small class="muted">Прошивка разделов по слотам, управление FastbootD и аварийная перезагрузка</small>
                 </div>
               </div>
-              <div class="form-row">
-                <button class="btn primary" id="btnSelectBootFile">Выбрать boot.img / recovery.img</button>
-                <button class="btn ghost" id="btnRepackBoot">Собрать из extracted/</button>
+              <div class="form-row" style="align-items:center">
+                <button class="btn primary" id="btnRefreshFbDevices">🔄 Проверить устройства</button>
+                <div id="fbDeviceStatus" style="font-size:13px;color:var(--sky)">Устройства не обнаружены</div>
               </div>
-              <div class="tool-hint">
-                <span>Требуется утилита: <b>MagiskBoot</b> (проверьте наличие в разделе «Инструменты»).</span>
+
+              <div class="grid-2col" style="margin-top:10px">
+                <!-- Панель прошивки -->
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:6px;padding:14px">
+                  <h4 style="font-size:14px;margin-bottom:8px">⚡ Прошивка раздела</h4>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <div>
+                      <span style="font-size:12px;color:var(--muted)">Имя раздела:</span>
+                      <input id="inputFlashPartition" class="search-input" style="max-width:100%;margin-top:4px" placeholder="boot, super, vbmeta, recovery..." value="boot" />
+                    </div>
+                    <div>
+                      <span style="font-size:12px;color:var(--muted)">Файл образа (.img):</span>
+                      <div style="display:flex;gap:6px;margin-top:4px">
+                        <input id="inputFlashImgPath" class="search-input" style="flex:1" placeholder="Путь к файлу образа..." />
+                        <button class="btn ghost sm" id="btnPickFlashImg">Обзор...</button>
+                      </div>
+                    </div>
+                    <div>
+                      <span style="font-size:12px;color:var(--muted)">Слот устройства:</span>
+                      <select id="selFlashSlot" class="search-input" style="max-width:100%;margin-top:4px">
+                        <option value="current">Текущий активный слот</option>
+                        <option value="a">Слот A (_a)</option>
+                        <option value="b">Слот B (_b)</option>
+                        <option value="both">Без суффикса слота</option>
+                      </select>
+                    </div>
+                    <button class="btn primary" id="btnExecuteFlash" style="margin-top:6px">⚡ Начать прошивку</button>
+                    <div id="flashLogBox" class="tool-hint hidden" style="white-space:pre-wrap;max-height:160px;overflow:auto"></div>
+                  </div>
+                </div>
+
+                <!-- Панель перезагрузки и режимов -->
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:6px;padding:14px">
+                  <h4 style="font-size:14px;margin-bottom:8px">🔄 Сервисные команды и режимы</h4>
+                  <small class="muted">Отправка команд перезагрузки на подключенное устройство</small>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+                    <button class="btn ghost sm" data-fb-reboot="system">В систему (Reboot)</button>
+                    <button class="btn ghost sm" data-fb-reboot="bootloader">В Bootloader</button>
+                    <button class="btn ghost sm" data-fb-reboot="recovery">В Recovery</button>
+                    <button class="btn ghost sm" data-fb-reboot="fastbootd">В FastbootD</button>
+                    <button class="btn ghost danger sm" style="grid-column: 1 / -1" data-fb-reboot="edl">🚨 В аварийный режим EDL (Qualcomm 9008)</button>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
 
-            <!-- Секция APK Modding -->
+          <!-- 4. Вкладка: APK Modding -->
+          <div id="pTabApk" class="ptab-pane hidden">
             <div class="panel-box">
               <div class="panel-head">
                 <span class="ic">📱</span>
@@ -451,6 +930,74 @@
                 <span>Требуются: <b>Java (JRE)</b>, <b>Apktool</b>, <b>Uber-APK-Signer</b>.</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Деблоатер (Debloat Studio) -->
+        <div class="page" data-page="debloat">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Деблоатер прошивок & Очистка мусора</h2>
+              <p class="muted">Глубокое сканирование и пакетное удаление рекламы, телеметрии и тяжелых приложений из extracted/ с безопасным бэкапом</p>
+            </div>
+            <div class="actions">
+              <select id="debloatProjectSelect" class="search-input" style="width:220px;padding:8px 12px">
+                <option value="">Выберите проект...</option>
+              </select>
+              <button class="btn primary" id="btnScanDebloat">🔍 Сканировать приложения</button>
+              <button class="btn ghost danger" id="btnRestoreDebloat">Восстановить из removed_bloat/</button>
+            </div>
+          </div>
+
+          <!-- Сводная панель -->
+          <div id="debloatSummaryBox" class="panel-box hidden" style="margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+              <div class="status-pills" style="margin:0">
+                <span class="pill">Всего системных приложений: <b id="debTotalFound">0</b></span>
+                <span class="pill" style="border-color:rgba(255,107,138,0.4);color:#ff8fab">Мусорных / Рекламных: <b id="debBloatCount">0</b></span>
+                <span class="pill" style="border-color:rgba(142,197,255,0.4);color:var(--sky)">Освобождаемый объём: <b id="debTotalFreed">0 МБ</b></span>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center">
+                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer">
+                  <input type="checkbox" id="chkDebloatBackup" checked />
+                  <span>Безопасный бэкап в <code>removed_bloat/</code></span>
+                </label>
+                <button class="btn danger sm" id="btnExecuteDebloat">🗑️ Удалить выбранные приложения (<span id="debSelectedCount">0</span>)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Фильтры по вендорам и категориям -->
+          <div class="filter-pills" id="debloatFilters" style="margin-bottom:12px">
+            <button class="f-pill active" data-debcat="all">Все обнаруженные</button>
+            <button class="f-pill" data-debcat="ad_telemetry">Реклама & Телеметрия</button>
+            <button class="f-pill" data-debcat="vendor_bloat">Вендорские сервисы</button>
+            <button class="f-pill" data-debcat="google_heavy">Тяжелые сервисы Google</button>
+            <button class="f-pill" data-debcat="partner_apps">Партнерские приложения</button>
+            <button class="f-pill" id="btnDebloatSelectAll" style="margin-left:auto">Выбрать все</button>
+            <button class="f-pill" id="btnDebloatDeselectAll">Снять выделение</button>
+          </div>
+
+          <!-- Поиск и таблица -->
+          <div style="display:flex;gap:10px;margin-bottom:10px">
+            <input id="inputDebloatFilter" class="search-input" placeholder="Быстрый поиск приложения (например: Analytics, MSA, Bixby, Chrome, Joyose)..." style="flex:1" />
+          </div>
+
+          <div class="table-card" style="max-height:540px;overflow:auto">
+            <table class="parts-table">
+              <thead>
+                <tr>
+                  <th style="width:5%"><input type="checkbox" id="chkDebloatHeader" checked /></th>
+                  <th style="width:25%">Приложение</th>
+                  <th style="width:35%">Описание и назначение</th>
+                  <th style="width:20%">Путь в extracted/</th>
+                  <th style="width:15%">Размер на диске</th>
+                </tr>
+              </thead>
+              <tbody id="debloatTbody">
+                <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">Выберите проект и нажмите «Сканировать приложения» для поиска рекламных и фоновых пакетов.</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -611,7 +1158,7 @@
                 Выберите разделы из <code>images/</code> для включения в таблицу динамических разделов:
               </p>
 
-              <div id="superPartitionsCheckList" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;background:rgba(10,20,55,.4);padding:10px 14px;border-radius:8px;border:1px solid var(--line)">
+              <div id="superPartitionsCheckList" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;background:rgba(10,20,55,.4);padding:10px 14px;border-radius:6px;border:1px solid var(--line)">
                 <span class="muted" style="font-size:12px">Нет образов в images/</span>
               </div>
 
@@ -878,9 +1425,20 @@
 
         <!-- Настройки -->
         <div class="page" data-page="settings">
-          <h2 class="page-title">Настройки</h2>
+          <h2 class="page-title" data-i18n="settings_title">Настройки</h2>
+
+          <!-- Выбор языка -->
           <div class="panel" style="margin-bottom:18px">
-            <h3>Профиль автора</h3>
+            <h3 data-i18n="settings_lang">Язык интерфейса</h3>
+            <p class="muted">Выберите язык для интерфейса MEYAFORGE и уведомлений Telegram бота:</p>
+            <div style="display:flex;gap:10px;margin-top:6px">
+              <button class="btn ghost btn-set-lang" data-set-lang="ru">🇷🇺 Русский (RU)</button>
+              <button class="btn ghost btn-set-lang" data-set-lang="en">🇬🇧 English (EN)</button>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-bottom:18px">
+            <h3 data-i18n="settings_author">Профиль автора</h3>
             <p class="muted">Эти данные подставляются в релизы прошивок.</p>
             <button class="btn primary" id="editProfile">Редактировать профиль</button>
           </div>
@@ -1116,6 +1674,21 @@
       <p class="form-err" id="profileErr"></p>
       <button class="btn primary wide" type="submit">Сохранить и продолжить</button>
     </form>
+  </div>
+
+  <!-- Универсальное модальное окно подтверждения удаления / действий -->
+  <div id="universalConfirmModal" class="modal hidden">
+    <div class="modal-card">
+      <div id="confirmModalIcon" style="text-align:center;font-size:36px;margin-bottom:6px">🗑️</div>
+      <h2 id="confirmModalTitle">Подтверждение удаления</h2>
+      <p class="muted" id="confirmModalDesc" style="line-height:1.6">
+        Вы действительно хотите выполнить это действие?
+      </p>
+      <div class="row" style="margin-top:16px;display:flex;justify-content:flex-end;gap:10px">
+        <button class="btn ghost" id="btnCancelConfirmModal">Отмена</button>
+        <button class="btn danger" id="btnOkConfirmModal">Удалить</button>
+      </div>
+    </div>
   </div>
 
   <!-- Модалка: Подтверждение опасного действия (сканирование / логирование) -->

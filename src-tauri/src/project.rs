@@ -181,6 +181,31 @@ pub fn get_project(name: String) -> Result<Detail, String> {
 }
 
 #[tauri::command]
+pub fn delete_partition(app: AppHandle, name: String, part: String) -> Result<(), String> {
+    let d = pdir(&name)?;
+    if part.contains(['/', '\\']) || part.contains("..") {
+        return Err("Недопустимое имя раздела".into());
+    }
+    spawn_task(app, format!("Удаление файлов раздела {part} ({name})"), move |_| {
+        let img_path = d.join("images").join(format!("{part}.img"));
+        let ext_dir = d.join("extracted").join(&part);
+        let mut removed = Vec::new();
+        if img_path.exists() {
+            let _ = fs::remove_file(long(&img_path));
+            removed.push("образ .img");
+        }
+        if ext_dir.exists() {
+            let _ = fs::remove_dir_all(long(&ext_dir));
+            removed.push("папка extracted");
+        }
+        if removed.is_empty() {
+            return Err(format!("Файлы раздела {part} не найдены"));
+        }
+        Ok(format!("Раздел {part} успешно удален [{}]", removed.join(", ")))
+    })
+}
+
+#[tauri::command]
 pub fn delete_project(app: AppHandle, name: String) -> Result<(), String> {
     let d = pdir(&name)?;
     spawn_task(app, format!("Удаление проекта {name}"), move |_| {

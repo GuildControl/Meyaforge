@@ -19,6 +19,176 @@
     $("#wClose").onclick = () => w.close();
   }
 
+  /* ---------- МУЛЬТИЯЗЫЧНОСТЬ (i18n) ---------- */
+  let currentLang = localStorage.getItem("meya_lang") || "ru";
+  let langDict = {};
+  let sortedDictKeys = [];
+  const originalRuDOMTexts = new Map();
+
+  function translateText(str) {
+    if (!str) return str;
+    const trimmed = str.trim();
+    const norm = trimmed.replace(/\s+/g, " ");
+    if (langDict[trimmed] && langDict[trimmed] !== trimmed) return str.replace(trimmed, langDict[trimmed]);
+    if (langDict[norm] && langDict[norm] !== norm) return langDict[norm];
+    if (langDict[str] && langDict[str] !== str) return langDict[str];
+    let replaced = str;
+    for (const k of sortedDictKeys) {
+      if (k.length >= 2 && replaced.includes(k)) {
+        replaced = replaced.replaceAll(k, langDict[k]);
+      }
+    }
+    return replaced;
+  }
+
+  function t(str) {
+    return translateText(str);
+  }
+
+  async function loadLanguage(lang) {
+    try {
+      const res = await fetch(`lang/${lang}.json`);
+      if (!res.ok) throw new Error("Status " + res.status);
+      langDict = await res.json();
+      sortedDictKeys = Object.keys(langDict)
+        .filter((k) => langDict[k] && langDict[k] !== k)
+        .sort((a, b) => b.length - a.length);
+      currentLang = lang;
+      localStorage.setItem("meya_lang", lang);
+      applyLanguage();
+      updateLangUiButtons();
+
+      // Синхронизируем язык с Telegram ботом, если конфиг загружен
+      try {
+        const cfg = await invoke("tg_get_config");
+        if (cfg && cfg.lang !== lang) {
+          cfg.lang = lang;
+          await invoke("tg_save_config", { config: cfg });
+        }
+      } catch (ignored) {}
+    } catch (e) {
+      console.warn("Could not load language:", lang, e);
+    }
+  }
+
+  function applyLanguage() {
+    // 1. По data-i18n
+    $$("[data-i18n]").forEach(el => {
+      const key = el.dataset.i18n;
+      if (langDict[key]) {
+        el.textContent = langDict[key];
+      }
+    });
+
+    // 2. Глубокий обход DOM дерева для текстовых узлов
+    function walkTextNodes(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const val = node.nodeValue;
+        if (!val) return;
+        const txt = val.trim();
+        if (txt) {
+          if (!originalRuDOMTexts.has(node)) {
+            originalRuDOMTexts.set(node, val);
+          }
+          const orig = originalRuDOMTexts.get(node);
+          const translated = translateText(orig);
+          if (node.nodeValue !== translated) {
+            node.nodeValue = translated;
+          }
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName !== "SCRIPT" && node.tagName !== "STYLE") {
+        // Placeholders, titles, optgroup labels
+        if (node.placeholder || node.dataset.origPlaceholder) {
+          if (!node.dataset.origPlaceholder) node.dataset.origPlaceholder = node.placeholder;
+          const orig = node.dataset.origPlaceholder;
+          const translated = translateText(orig);
+          if (node.placeholder !== translated) node.placeholder = translated;
+        }
+        if (node.title || node.dataset.origTitle) {
+          if (!node.dataset.origTitle) node.dataset.origTitle = node.title;
+          const orig = node.dataset.origTitle;
+          const translated = translateText(orig);
+          if (node.title !== translated) node.title = translated;
+        }
+        if (node.label || node.dataset.origLabel) {
+          if (!node.dataset.origLabel) node.dataset.origLabel = node.label;
+          const orig = node.dataset.origLabel;
+          const translated = translateText(orig);
+          if (node.label !== translated) node.label = translated;
+        }
+        node.childNodes.forEach(walkTextNodes);
+      }
+    }
+
+    walkTextNodes(document.body);
+  }
+
+  function updateLangUiButtons() {
+    $$(".btn-lang").forEach(btn => {
+      const l = btn.dataset.lang;
+      if (l === currentLang) {
+        btn.classList.add("active");
+        btn.style.background = "rgba(142,197,255,.2)";
+        btn.style.color = "var(--text)";
+      } else {
+        btn.classList.remove("active");
+        btn.style.background = "transparent";
+        btn.style.color = "var(--muted)";
+      }
+    });
+
+    $$(".btn-set-lang").forEach(btn => {
+      const l = btn.dataset.setLang;
+      if (l === currentLang) {
+        btn.className = "btn primary btn-set-lang";
+      } else {
+        btn.className = "btn ghost btn-set-lang";
+      }
+    });
+  }
+
+  // Клики по переключателям языков
+  $$(".btn-lang").forEach(btn => {
+    btn.onclick = () => {
+      const l = btn.dataset.lang;
+      if (l && l !== currentLang) {
+        loadLanguage(l);
+        toast(l === "en" ? "Language switched to English" : "Язык переключен на русский", "pink");
+      }
+    };
+  });
+
+  $$(".btn-set-lang").forEach(btn => {
+    btn.onclick = () => {
+      const l = btn.dataset.setLang;
+      if (l) {
+        loadLanguage(l);
+        toast(l === "en" ? "Language switched to English" : "Язык переключен на русский", "pink");
+      }
+    };
+  });
+
+  // Загружаем язык при старте
+  loadLanguage(currentLang);
+
+  // Наблюдатель за динамически добавляемыми элементами в DOM
+  let isTranslating = false;
+  let translateTimer = null;
+  const domObserver = new MutationObserver((mutations) => {
+    if (!isTranslating) {
+      if (translateTimer) clearTimeout(translateTimer);
+      translateTimer = setTimeout(() => {
+        isTranslating = true;
+        try {
+          applyLanguage();
+        } finally {
+          setTimeout(() => { isTranslating = false; }, 50);
+        }
+      }, 50);
+    }
+  });
+  domObserver.observe(document.body, { childList: true, subtree: true });
+
   /* ---------- фон: частицы ---------- */
   const cv = $("#bg"), cx = cv.getContext("2d");
   let pts = [];
@@ -50,14 +220,15 @@
 
   /* ---------- утилиты UI ---------- */
   function toast(msg, kind = "") {
-    const t = document.createElement("div");
-    t.className = "toast " + kind; t.textContent = msg; $("#toasts").append(t);
-    setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 300); }, 3400);
+    const tEl = document.createElement("div");
+    tEl.className = "toast " + kind; tEl.textContent = t(msg); $("#toasts").append(tEl);
+    setTimeout(() => { tEl.classList.add("out"); setTimeout(() => tEl.remove(), 300); }, 3400);
   }
 
   function formatBytes(bytes) {
-    if (!bytes || bytes <= 0) return "0 Б";
-    const k = 1024, dm = 2, sizes = ["Б", "КБ", "МБ", "ГБ", "ТБ"];
+    if (!bytes || bytes <= 0) return currentLang === "en" ? "0 B" : "0 Б";
+    const k = 1024, dm = 2;
+    const sizes = currentLang === "en" ? ["B", "KB", "MB", "GB", "TB"] : ["Б", "КБ", "МБ", "ГБ", "ТБ"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
   }
@@ -99,7 +270,13 @@
     if (page === "device") { checkDeviceQuick(); loadSavedDevicesCount(); }
     if (page === "settings") loadTelegramConfig();
     if (page === "unpack") initRepackPage();
+    if (page === "debloat") initDebloatPage();
     if (page === "port") initPortingPage();
+
+    // Применяем перевод ко всем динамическим блокам открытой страницы
+    if (currentLang === "en") {
+      setTimeout(applyLanguage, 50);
+    }
   }
   $$(".nav").forEach((n) => (n.onclick = () => go(n.dataset.page)));
   addEventListener("resize", () => go($(".nav.active").dataset.page));
@@ -109,15 +286,23 @@
   const body = $("#termBody"), tin = $("#termIn"), state = $("#termState");
   const hist = []; let hi = 0, busy = false;
   function line(text, cls = "") {
-    const d = document.createElement("div"); d.className = "l " + cls; d.textContent = text; body.append(d);
+    const d = document.createElement("div"); d.className = "l " + cls; d.textContent = t(text); body.append(d);
     while (body.childElementCount > 2000) body.firstChild.remove();
     body.scrollTop = body.scrollHeight;
   }
-  function setBusy(b) { busy = b; state.textContent = b ? "выполняется…" : "готов"; state.classList.toggle("busy", b); }
+  function setBusy(b) {
+    busy = b;
+    state.textContent = b ? t("выполняется…") : t("готов");
+    state.classList.toggle("busy", b);
+  }
   
   if (T) {
     T.event.listen("term", ({ payload }) => {
-      if (payload.kind === "exit") { line(`[завершено, код ${payload.text}]`, payload.text === "0" ? "sys" : "err"); setBusy(false); }
+      if (payload.kind === "exit") {
+        const exitText = currentLang === "en" ? `[finished, code ${payload.text}]` : `[завершено, код ${payload.text}]`;
+        line(exitText, payload.text === "0" ? "sys" : "err");
+        setBusy(false);
+      }
       else line(payload.text, payload.kind === "err" ? "err" : (payload.kind === "sys" ? "sys" : ""));
     });
 
@@ -125,7 +310,7 @@
       const tb = $("#topTaskBar");
       if (payload.active) {
         tb.classList.remove("hidden");
-        $("#topTaskLabel").textContent = payload.label;
+        $("#topTaskLabel").textContent = t(payload.label);
         $("#topTaskPct").textContent = payload.pct >= 0 ? `${payload.pct}%` : "";
       } else {
         tb.classList.add("hidden");
@@ -192,16 +377,23 @@
           e.stopPropagation();
           selectProject(item.meta.name);
         };
-        card.querySelector(".btn-del-proj").onclick = async (e) => {
+        card.querySelector(".btn-del-proj").onclick = (e) => {
           e.stopPropagation();
-          if (confirm(`Удалить проект «${item.meta.name}» со всеми файлами?`)) {
-            try {
-              await invoke("delete_project", { name: item.meta.name });
-              if (currentProject === item.meta.name) currentProject = null;
-              toast(`Проект ${item.meta.name} удален`);
-              refreshProjects();
-            } catch (err) { toast("Ошибка: " + err); }
-          }
+          showConfirmDialog({
+            title: `Удаление проекта ${item.meta.name}`,
+            desc: `Вы действительно хотите безвозвратно удалить проект <b>${item.meta.name}</b> со всеми распакованными файлами и образами?`,
+            icon: "🗑️",
+            okText: "Удалить проект",
+            okDanger: true,
+            onConfirm: async () => {
+              try {
+                await invoke("delete_project", { name: item.meta.name });
+                if (currentProject === item.meta.name) currentProject = null;
+                toast(`Проект ${item.meta.name} удален`);
+                refreshProjects();
+              } catch (err) { toast("Ошибка: " + err); }
+            }
+          });
         };
         card.onclick = () => selectProject(item.meta.name);
         list.appendChild(card);
@@ -289,6 +481,7 @@
         }
 
         const isBoot = ["boot", "vendor_boot", "recovery", "init_boot"].includes(p.name.toLowerCase()) || p.kind === "boot" || p.kind === "vendor_boot";
+        const isLk = ["lk", "lk2", "abl", "xbl", "bootloader"].includes(p.name.toLowerCase()) || p.name.toLowerCase().startsWith("lk");
         const canExtract = ["ext4", "erofs", "super"].includes(p.kind) || (p.kind === "sparse" && ["ext4", "erofs"].includes(p.inner)) || isBoot;
         const canUnsparse = p.kind === "sparse";
 
@@ -298,11 +491,33 @@
           <td>${formatBytes(p.size)}</td>
           <td>${p.extracted ? '<span class="tag-extracted"><i></i> Разобран</span>' : '<span class="tag-not-extracted">Не разобран</span>'}</td>
           <td style="text-align:right">
+            ${isLk ? `<button class="btn sm ghost btn-lk-analyze" title="Извлечь Fastboot OEM команды">OEM LK</button> ` : ''}
+            ${isBoot ? `<button class="btn sm ghost btn-boot-patch" title="Патчер ядра">Патчи</button> ` : ''}
             ${canUnsparse ? `<button class="btn sm ghost btn-unsparse">В raw</button> ` : ''}
             ${canExtract ? `<button class="btn sm primary btn-extract">${p.extracted ? 'Переразобрать' : (isBoot ? 'Разобрать boot' : 'Разобрать')}</button> ` : ''}
-            ${p.extracted ? `<button class="btn sm ghost btn-open-extracted">Папка</button>` : ''}
+            ${p.extracted ? `<button class="btn sm ghost btn-open-extracted">Папка</button> ` : ''}
+            <button class="btn sm danger btn-part-del" title="Удалить образ или папку раздела">Удалить</button>
           </td>
         `;
+
+        const bLk = tr.querySelector(".btn-lk-analyze");
+        if (bLk) {
+          bLk.onclick = () => {
+            go("bootapk");
+            switchPatchTab("lk");
+            analyzeLkPartition(p.name);
+          };
+        }
+
+        const bBoot = tr.querySelector(".btn-boot-patch");
+        if (bBoot) {
+          bBoot.onclick = () => {
+            go("bootapk");
+            switchPatchTab("boot");
+            $("#inputBootExtractedName").value = p.name;
+            inspectBootFolder(p.name);
+          };
+        }
 
         const bExtract = tr.querySelector(".btn-extract");
         if (bExtract) {
@@ -327,6 +542,28 @@
         const bOpenExt = tr.querySelector(".btn-open-extracted");
         if (bOpenExt) {
           bOpenExt.onclick = () => invoke("open_in_explorer", { name: currentProject, sub: `extracted/${p.name}` });
+        }
+
+        const bDelPart = tr.querySelector(".btn-part-del");
+        if (bDelPart) {
+          bDelPart.onclick = () => {
+            showConfirmDialog({
+              title: `Удаление раздела ${p.name}`,
+              desc: `Удалить файлы раздела <b>${p.name}</b> (образ images/${p.name}.img и папку extracted/${p.name}) из проекта <b>${currentProject}</b>?<br><br><span style="color:#ff8fab">Данные раздела будут удалены с диска только после нажатия «Удалить раздел».</span>`,
+              icon: "🗑️",
+              okText: "Удалить раздел",
+              okDanger: true,
+              onConfirm: async () => {
+                try {
+                  await invoke("delete_partition", { name: currentProject, part: p.name });
+                  toast(`Раздел ${p.name} удален`);
+                  loadCurrentProjectDetails();
+                } catch (err) {
+                  toast("Ошибка удаления раздела: " + err);
+                }
+              }
+            });
+          };
         }
 
         tbody.appendChild(tr);
@@ -429,6 +666,42 @@
       }
     } catch (_) {}
   }
+
+  // Универсальное модальное окно подтверждения удаления / опасных действий
+  let pendingModalConfirm = null;
+
+  function showConfirmDialog({ title, desc, icon = "🗑️", okText = "Удалить", okDanger = true, onConfirm }) {
+    $("#confirmModalIcon").textContent = icon;
+    $("#confirmModalTitle").textContent = title;
+    $("#confirmModalDesc").innerHTML = desc;
+    const okBtn = $("#btnOkConfirmModal");
+    okBtn.textContent = okText;
+    if (okDanger) {
+      okBtn.className = "btn danger";
+    } else {
+      okBtn.className = "btn primary";
+    }
+    pendingModalConfirm = onConfirm;
+    $("#universalConfirmModal").classList.remove("hidden");
+  }
+
+  $("#btnCancelConfirmModal").onclick = () => {
+    $("#universalConfirmModal").classList.add("hidden");
+    pendingModalConfirm = null;
+  };
+
+  $("#btnOkConfirmModal").onclick = async () => {
+    $("#universalConfirmModal").classList.add("hidden");
+    if (pendingModalConfirm) {
+      const action = pendingModalConfirm;
+      pendingModalConfirm = null;
+      try {
+        await action();
+      } catch (err) {
+        console.error("Action error:", err);
+      }
+    }
+  };
 
   // Окно предупреждения перед операциями
   let pendingDeviceAction = null;
@@ -894,7 +1167,126 @@
     };
   });
 
-  /* ---------- Boot & APK действия ---------- */
+  /* ---------- Модификации, Патчи & Бинарники ---------- */
+  function switchPatchTab(tab) {
+    $$("#patchToolsTabs .f-pill").forEach(b => b.classList.toggle("active", b.dataset.ptab === tab));
+    $("#pTabBoot").classList.toggle("hidden", tab !== "boot");
+    $("#pTabRoot").classList.toggle("hidden", tab !== "root");
+    $("#pTabVbmeta").classList.toggle("hidden", tab !== "vbmeta");
+    $("#pTabDtb").classList.toggle("hidden", tab !== "dtb");
+    $("#pTabLk").classList.toggle("hidden", tab !== "lk");
+    $("#pTabElf").classList.toggle("hidden", tab !== "elf");
+    $("#pTabProps").classList.toggle("hidden", tab !== "props");
+    $("#pTabFlasher").classList.toggle("hidden", tab !== "flasher");
+    $("#pTabApk").classList.toggle("hidden", tab !== "apk");
+  }
+
+  $$("#patchToolsTabs .f-pill").forEach(btn => {
+    btn.onclick = () => switchPatchTab(btn.dataset.ptab);
+  });
+
+  // --- 1. Boot & Kernel Патчер ---
+  async function inspectBootFolder(name) {
+    if (!currentProject) {
+      toast("Сначала выберите проект!", "pink");
+      return;
+    }
+    try {
+      const d = await invoke("boot_inspect_extracted", { project: currentProject, targetName: name });
+      $("#bootInspectDetails").classList.remove("hidden");
+      $("#bootInfoOs").textContent = `${d.os_version || 'не указана'} (патч: ${d.os_patch_level || '—'})`;
+      
+      const comps = [];
+      if (d.has_kernel) comps.push("kernel");
+      if (d.has_ramdisk) comps.push("ramdisk");
+      if (d.has_header) comps.push("header");
+      if (d.has_dtb) comps.push("dtb");
+      $("#bootInfoComps").textContent = comps.join(", ") || "не найдены";
+      
+      $("#bootInfoCmdline").textContent = d.cmdline || "(пусто)";
+      if (d.cmdline) {
+        $("#inputCustomCmdline").value = d.cmdline;
+      }
+
+      $("#bootInfoFstabs").textContent = d.fstab_files.length > 0 
+        ? d.fstab_files.map(f => f.split(/[\\/]/).pop()).join(", ") 
+        : "нет";
+
+      $("#bootInfoProps").textContent = d.prop_files.length > 0 
+        ? d.prop_files.map(f => f.split(/[\\/]/).pop()).join(", ") 
+        : "нет";
+
+      toast(`Проинспектирован extracted/${name}`, "sky");
+    } catch (e) {
+      toast("Ошибка инспекции boot: " + e);
+    }
+  }
+
+  $("#btnInspectBootFolder").onclick = () => {
+    const name = $("#inputBootExtractedName").value.trim() || "boot";
+    inspectBootFolder(name);
+  };
+
+  $("#btnApplyBootPatches").onclick = async () => {
+    if (!currentProject) {
+      toast("Сначала выберите проект!", "pink");
+      return;
+    }
+    const targetName = $("#inputBootExtractedName").value.trim() || "boot";
+    const customCmd = $("#inputCustomCmdline").value.trim();
+
+    const options = {
+      selinux_permissive: $("#chkPatchSelinux").checked,
+      disable_dm_verity: $("#chkPatchVerity").checked,
+      disable_force_encrypt: $("#chkPatchForceEncrypt").checked,
+      enable_adb_root: $("#chkPatchAdbRoot").checked,
+      custom_cmdline: customCmd ? customCmd : null
+    };
+
+    try {
+      const logs = await invoke("boot_apply_patches", { project: currentProject, targetName, options });
+      const logBox = $("#bootPatchLog");
+      logBox.classList.remove("hidden");
+      logBox.textContent = "✔ Результаты патчинга:\n" + logs.map(l => "• " + l).join("\n");
+      toast("Патчи успешно применены к extracted/" + targetName, "sky");
+      inspectBootFolder(targetName);
+    } catch (e) {
+      toast("Ошибка применения патчей: " + e);
+    }
+  };
+
+  $("#btnApplyKernelHex").onclick = async () => {
+    if (!currentProject) {
+      toast("Сначала выберите проект!", "pink");
+      return;
+    }
+    const targetName = $("#inputBootExtractedName").value.trim() || "boot";
+    const patternHex = $("#inputKernelHexFind").value.trim();
+    const replaceHex = $("#inputKernelHexReplace").value.trim();
+    if (!patternHex || !replaceHex) {
+      toast("Укажите шаблон поиска и замены в HEX!");
+      return;
+    }
+    try {
+      const res = await invoke("boot_kernel_hex_patch", { project: currentProject, targetName, patternHex, replaceHex });
+      toast(res, "sky");
+    } catch (e) {
+      toast("Ошибка HEX-патча ядра: " + e);
+    }
+  };
+
+  $("#btnPresetSkipInitramfs").onclick = () => {
+    $("#inputKernelHexFind").value = "73 6B 69 70 5F 69 6E 69 74 72 61 6D 66 73";
+    $("#inputKernelHexReplace").value = "77 61 6E 74 5F 69 6E 69 74 72 61 6D 66 73";
+    toast("Загружен пресет: skip_initramfs ➔ want_initramfs", "pink");
+  };
+
+  $("#btnPresetEnforcing").onclick = () => {
+    $("#inputKernelHexFind").value = "65 6E 66 6F 72 63 69 6E 67 3D 31";
+    $("#inputKernelHexReplace").value = "65 6E 66 6F 72 63 69 6E 67 3D 30";
+    toast("Загружен пресет: enforcing=1 ➔ enforcing=0", "pink");
+  };
+
   $("#btnSelectBootFile").onclick = async () => {
     if (!currentProject) {
       toast("Сначала выберите или создайте проект!", "pink");
@@ -920,7 +1312,7 @@
       toast("Сначала выберите проект!", "pink");
       return;
     }
-    const name = prompt("Введите имя папки из extracted/ (например boot или recovery):", "boot");
+    const name = prompt("Введите имя папки из extracted/ (например boot или recovery):", $("#inputBootExtractedName").value || "boot");
     if (name) {
       try {
         await invoke("repack_boot", { project: currentProject, targetName: name });
@@ -929,6 +1321,794 @@
     }
   };
 
+  // --- Вкладка: Root Инжектор ---
+  $("#btnCheckRootStatus").onclick = async () => {
+    if (!currentProject) {
+      toast("Сначала выберите проект!", "pink");
+      return;
+    }
+    const folder = $("#inputRootBootFolder").value.trim() || "boot";
+    try {
+      const st = await invoke("root_inspect", { project: currentProject, targetFolder: folder });
+      const box = $("#rootStatusBox");
+      const text = $("#rootStatusText");
+      box.classList.remove("hidden");
+      
+      const parts = [];
+      parts.push(`<b>Magisk:</b> ${st.has_magisk ? '<span style="color:var(--sky)">Обнаружен</span>' : '<span style="color:var(--muted)">Нет</span>'}`);
+      parts.push(`<b>KernelSU:</b> ${st.has_kernelsu ? '<span style="color:var(--sky)">Обнаружен</span>' : '<span style="color:var(--muted)">Нет</span>'}`);
+      parts.push(`<b>APatch:</b> ${st.has_apatch ? '<span style="color:var(--sky)">Обнаружен</span>' : '<span style="color:var(--muted)">Нет</span>'}`);
+      parts.push(`<b>Overlay.d:</b> ${st.ramdisk_has_overlay ? 'Присутствует' : 'Отсутствует'}`);
+      
+      if (st.details.length > 0) {
+        parts.push(`<br><small>${st.details.join("<br>")}</small>`);
+      }
+      text.innerHTML = parts.join(" &nbsp;|&nbsp; ");
+      toast("Статус Root-компонентов проверен", "sky");
+    } catch (e) {
+      toast("Ошибка проверки Root: " + e);
+    }
+  };
+
+  $("#btnInjectRoot").onclick = async () => {
+    if (!currentProject) {
+      toast("Сначала выберите проект!", "pink");
+      return;
+    }
+    const folder = $("#inputRootBootFolder").value.trim() || "boot";
+    const selectedRadio = document.querySelector('input[name="root_type"]:checked');
+    const rootType = selectedRadio ? selectedRadio.value : "magisk";
+
+    try {
+      const msg = await invoke("root_inject_hooks", {
+        req: {
+          project: currentProject,
+          target_boot_folder: folder,
+          root_type: rootType,
+          magisk_apk_path: null
+        }
+      });
+      toast(msg, "sky");
+      $("#btnCheckRootStatus").click();
+    } catch (e) {
+      toast("Ошибка внедрения Root: " + e);
+    }
+  };
+
+  // --- Вкладка: VBMeta & AVB ---
+  let selectedVbmetaPath = null;
+
+  $("#btnSelectVbmeta").onclick = async () => {
+    if (T && T.dialog) {
+      const file = await T.dialog.open({
+        multiple: false,
+        filters: [{ name: 'VBMeta образы', extensions: ['img', 'bin'] }]
+      });
+      if (file) {
+        selectedVbmetaPath = file;
+        try {
+          const info = await invoke("vbmeta_inspect", { filePath: file });
+          $("#vbmetaInfoCard").classList.remove("hidden");
+          $("#vbmetaFile").textContent = info.file_name;
+          $("#vbmetaLibVer").textContent = info.required_libavb_version;
+          $("#vbmetaAlgorithm").textContent = info.algorithm_name;
+          $("#vbmetaFlagsHex").textContent = `0x${info.flags.toString(16).toUpperCase()}`;
+          $("#vbmetaStatusVerity").innerHTML = info.verity_disabled ? '<span style="color:var(--sky)">Отключен (Disabled)</span>' : '<span style="color:var(--pink)">Включен (Enforcing)</span>';
+          $("#vbmetaStatusVerification").innerHTML = info.verification_disabled ? '<span style="color:var(--sky)">Отключена (Disabled)</span>' : '<span style="color:var(--pink)">Включена (Active)</span>';
+          $("#vbmetaParts").textContent = info.partitions_in_vbmeta.join(", ") || "не найдены";
+          toast("VBMeta успешно прочитан", "sky");
+        } catch (e) {
+          toast("Ошибка чтения VBMeta: " + e);
+        }
+      }
+    }
+  };
+
+  $("#btnPatchVbmetaFlags").onclick = async () => {
+    if (!selectedVbmetaPath) {
+      toast("Сначала выберите файл vbmeta.img!", "pink");
+      return;
+    }
+    try {
+      const msg = await invoke("vbmeta_patch_disable_flags", { filePath: selectedVbmetaPath });
+      toast(msg, "sky");
+      const info = await invoke("vbmeta_inspect", { filePath: selectedVbmetaPath });
+      $("#vbmetaFlagsHex").textContent = `0x${info.flags.toString(16).toUpperCase()}`;
+      $("#vbmetaStatusVerity").innerHTML = '<span style="color:var(--sky)">Отключен (Disabled)</span>';
+      $("#vbmetaStatusVerification").innerHTML = '<span style="color:var(--sky)">Отключена (Disabled)</span>';
+    } catch (e) {
+      toast("Ошибка патчинга VBMeta: " + e);
+    }
+  };
+
+  $("#btnGenerateBlankVbmeta").onclick = async () => {
+    if (!currentProject) {
+      toast("Сначала выберите проект!", "pink");
+      return;
+    }
+    const outName = prompt("Введите имя сохраняемого файла:", "vbmeta_disabled.img");
+    if (!outName) return;
+
+    if (T && T.dialog) {
+      const savePath = await T.dialog.save({
+        defaultPath: outName,
+        filters: [{ name: 'Образ VBMeta', extensions: ['img'] }]
+      });
+      if (savePath) {
+        try {
+          const msg = await invoke("vbmeta_generate_blank", { outPath: savePath });
+          toast(msg, "sky");
+        } catch (e) {
+          toast("Ошибка генерации VBMeta: " + e);
+        }
+      }
+    }
+  };
+
+  // --- Вкладка: DTB / DTS Studio ---
+  let selectedDtbPath = null;
+
+  $("#btnSelectDtbFile").onclick = async () => {
+    if (T && T.dialog) {
+      const file = await T.dialog.open({
+        multiple: false,
+        filters: [{ name: 'Device Tree (dtb, dtbo, img)', extensions: ['dtb', 'dtbo', 'img', '*'] }]
+      });
+      if (file) {
+        selectedDtbPath = file;
+        try {
+          const d = await invoke("dtb_inspect", { filePath: file });
+          $("#dtbDetailsCard").classList.remove("hidden");
+          $("#dtbModel").textContent = d.model;
+          $("#dtbType").textContent = d.is_dtbo ? "DTBO (Overlay)" : "DTB (Base FDT)";
+          $("#dtbSize").textContent = formatBytes(d.total_size || d.file_size);
+          $("#dtbBootargs").textContent = d.bootargs || "(нет явных bootargs)";
+
+          const compBox = $("#dtbCompatiblePills");
+          compBox.innerHTML = "";
+          d.compatible.forEach(c => {
+            const span = document.createElement("span");
+            span.className = "pill";
+            span.textContent = c;
+            compBox.appendChild(span);
+          });
+
+          const nodeBox = $("#dtbNodesPills");
+          nodeBox.innerHTML = "";
+          d.found_nodes.forEach(n => {
+            const span = document.createElement("span");
+            span.className = "pill";
+            span.style.background = "rgba(142,197,255,0.08)";
+            span.textContent = n;
+            nodeBox.appendChild(span);
+          });
+
+          toast("Device Tree успешно проанализирован", "sky");
+        } catch (e) {
+          toast("Ошибка анализа DTB: " + e);
+        }
+      }
+    }
+  };
+
+  $("#btnDecompileDtb").onclick = async () => {
+    if (!selectedDtbPath) {
+      toast("Сначала выберите файл DTB!", "pink");
+      return;
+    }
+    if (T && T.dialog) {
+      const saveDts = await T.dialog.save({
+        defaultPath: "decompiled.dts",
+        filters: [{ name: 'Device Tree Source', extensions: ['dts'] }]
+      });
+      if (saveDts) {
+        try {
+          const msg = await invoke("dtb_decompile_to_dts", { dtbPath: selectedDtbPath, outDtsPath: saveDts });
+          toast(msg, "sky");
+        } catch (e) {
+          toast("Ошибка декомпиляции: " + e);
+        }
+      }
+    }
+  };
+
+  $("#btnCompileDts").onclick = async () => {
+    if (T && T.dialog) {
+      const dtsFile = await T.dialog.open({
+        multiple: false,
+        filters: [{ name: 'Device Tree Source', extensions: ['dts'] }]
+      });
+      if (dtsFile) {
+        const saveDtb = await T.dialog.save({
+          defaultPath: "compiled.dtb",
+          filters: [{ name: 'Compiled Device Tree', extensions: ['dtb', 'dtbo'] }]
+        });
+        if (saveDtb) {
+          try {
+            const msg = await invoke("dtb_compile_from_dts", { dtsPath: dtsFile, outDtbPath: saveDtb });
+            toast(msg, "sky");
+          } catch (e) {
+            toast("Ошибка компиляции DTS: " + e);
+          }
+        }
+      }
+    }
+  };
+
+  // --- 2. LK & Bootloader Анализатор ---
+  let lastLkResult = null;
+
+  function renderLkResults(res) {
+    lastLkResult = res;
+    $("#lkSummaryBar").classList.remove("hidden");
+    $("#lkResultsWrap").classList.remove("hidden");
+
+    $("#lkPlatform").textContent = res.platform || "Generic";
+    $("#lkSize").textContent = formatBytes(res.file_size);
+    $("#lkOemCount").textContent = res.oem_commands.length;
+    $("#lkFbCount").textContent = res.fastboot_commands.length;
+    $("#lkPartsCount").textContent = res.partitions.length;
+
+    const tbody = $("#lkOemTbody");
+    tbody.innerHTML = "";
+    if (res.oem_commands.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted)">В этом файле не найдены явные fastboot oem команды.</td></tr>`;
+    } else {
+      res.oem_commands.forEach(cmd => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><b style="color:var(--pink)">fastboot ${cmd.name}</b></td>
+          <td><code class="code-sm">0x${cmd.offset.toString(16).toUpperCase()}</code></td>
+          <td><small class="code-sm" style="color:var(--muted)">${escapeHtml(cmd.context)}</small></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Разделы LK
+    const partsPills = $("#lkPartsPills");
+    partsPills.innerHTML = "";
+    if (res.partitions.length === 0) {
+      partsPills.innerHTML = `<span class="muted" style="font-size:12px">Разделы не обнаружены</span>`;
+    } else {
+      res.partitions.forEach(p => {
+        const span = document.createElement("span");
+        span.className = "pill";
+        span.textContent = p;
+        partsPills.appendChild(span);
+      });
+    }
+
+    // Флаги безопасности
+    const secPills = $("#lkSecurityPills");
+    secPills.innerHTML = "";
+    if (res.security_flags.length === 0) {
+      secPills.innerHTML = `<span class="muted" style="font-size:12px">Флаги безопасности не обнаружены</span>`;
+    } else {
+      res.security_flags.forEach(f => {
+        const span = document.createElement("span");
+        span.className = "pill";
+        span.style.borderColor = "rgba(255,107,138,0.4)";
+        span.style.color = "#ff8fab";
+        span.textContent = f;
+        secPills.appendChild(span);
+      });
+    }
+  }
+
+  async function analyzeLkPartition(partName) {
+    if (!currentProject) {
+      toast("Сначала выберите проект!", "pink");
+      return;
+    }
+    try {
+      toast(`Анализ раздела ${partName}...`, "pink");
+      const res = await invoke("lk_analyze_partition", { project: currentProject, partitionName: partName });
+      renderLkResults(res);
+      toast(`Найдено ${res.oem_commands.length} OEM команд в ${partName}`, "sky");
+    } catch (e) {
+      toast("Ошибка анализа LK: " + e);
+    }
+  }
+
+  $("#btnSelectLkFile").onclick = async () => {
+    if (T && T.dialog) {
+      const file = await T.dialog.open({
+        multiple: false,
+        filters: [{ name: 'Загрузчики (LK / ABL / XBL / Bootloader)', extensions: ['bin', 'img', 'elf', 'mbn'] }]
+      });
+      if (file) {
+        try {
+          toast("Анализ файла загрузчика...", "pink");
+          const res = await invoke("lk_analyze_file", { filePath: file });
+          renderLkResults(res);
+          toast(`Анализ завершен! Найдено ${res.oem_commands.length} OEM команд`, "sky");
+        } catch (e) {
+          toast("Ошибка анализа: " + e);
+        }
+      }
+    }
+  };
+
+  $("#btnAnalyzeLkFromProject").onclick = async () => {
+    if (!currentProject) {
+      toast("Сначала выберите проект!", "pink");
+      return;
+    }
+    const part = prompt("Введите имя раздела загрузчика в проекте (например lk, abl, xbl, bootloader):", "lk");
+    if (part) {
+      analyzeLkPartition(part);
+    }
+  };
+
+  $("#btnCopyOemCmds").onclick = () => {
+    if (!lastLkResult || lastLkResult.oem_commands.length === 0) {
+      toast("Сначала выполните анализ загрузчика с OEM командами!");
+      return;
+    }
+    const lines = lastLkResult.oem_commands.map(c => `fastboot ${c.name}`).join("\n");
+    navigator.clipboard.writeText(lines).then(() => {
+      toast(`Скопировано ${lastLkResult.oem_commands.length} OEM команд в буфер!`, "sky");
+    }).catch(e => toast("Ошибка буфера: " + e));
+  };
+
+  $("#inputLkOemFilter").oninput = (e) => {
+    if (!lastLkResult) return;
+    const q = e.target.value.toLowerCase().trim();
+    const tbody = $("#lkOemTbody");
+    tbody.innerHTML = "";
+    const filtered = lastLkResult.oem_commands.filter(c => !q || c.name.toLowerCase().includes(q) || c.context.toLowerCase().includes(q));
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted)">Команды не найдены по фильтру.</td></tr>`;
+      return;
+    }
+    filtered.forEach(cmd => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><b style="color:var(--pink)">fastboot ${cmd.name}</b></td>
+        <td><code class="code-sm">0x${cmd.offset.toString(16).toUpperCase()}</code></td>
+        <td><small class="code-sm" style="color:var(--muted)">${escapeHtml(cmd.context)}</small></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  };
+
+  // --- 3. ELF & Binary Патчер ---
+  let currentElfData = null;
+  let currentElfPath = null;
+
+  function renderElfTable(filterText = "") {
+    if (!currentElfData) return;
+    const tbody = $("#elfSymbolsTbody");
+    tbody.innerHTML = "";
+
+    const filter = filterText.toLowerCase();
+    const list = currentElfData.functions.filter(f => {
+      if (!filter) return true;
+      return f.name.toLowerCase().includes(filter) || f.section.toLowerCase().includes(filter);
+    });
+
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted)">Функции не найдены по фильтру.</td></tr>`;
+      return;
+    }
+
+    list.slice(0, 300).forEach(fn => {
+      const tr = document.createElement("tr");
+      tr.style.cursor = "pointer";
+      const hasOffset = fn.file_offset !== null && fn.file_offset !== undefined;
+      const offHex = hasOffset ? `0x${fn.file_offset.toString(16).toUpperCase()}` : "IMPORT";
+
+      tr.innerHTML = `
+        <td><b style="color:${hasOffset ? 'var(--text)' : 'var(--muted)'}">${escapeHtml(fn.name)}</b></td>
+        <td><code class="code-sm">0x${fn.address.toString(16).toUpperCase()}</code></td>
+        <td><code class="code-sm" style="color:${hasOffset ? 'var(--sky)' : '#ff8fab'}">${offHex}</code></td>
+        <td><span class="badge ${fn.binding === 'GLOBAL' ? 'ext4' : 'raw'}">${fn.binding}</span></td>
+        <td>
+          ${hasOffset ? `<button class="btn sm ghost btn-pick-func">Выбрать</button>` : `<small class="muted">Внешний</small>`}
+        </td>
+      `;
+
+      tr.onclick = () => {
+        if (hasOffset) {
+          $("#inputTargetSymbol").value = fn.name;
+          $("#inputTargetOffset").value = offHex;
+          $$("#elfSymbolsTbody tr").forEach(r => r.style.background = "");
+          tr.style.background = "rgba(142,197,255,0.08)";
+        }
+      };
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function analyzeElf(filePath) {
+    try {
+      toast("Анализ ELF бинарника...", "pink");
+      const res = await invoke("elf_analyze", { filePath });
+      currentElfData = res;
+      currentElfPath = filePath;
+
+      $("#elfMetaBar").classList.remove("hidden");
+      $("#elfWorkspace").classList.remove("hidden");
+
+      $("#elfFileName").textContent = res.file_name;
+      $("#elfArch").textContent = res.architecture;
+      $("#elfType").textContent = res.elf_type;
+      $("#elfSymCount").textContent = res.total_symbols;
+
+      const bakPill = $("#elfBackupStatus");
+      if (res.has_backup) {
+        bakPill.innerHTML = `<i></i>Бэкап (.bak) есть`;
+        bakPill.style.color = "var(--sky)";
+      } else {
+        bakPill.innerHTML = `<i></i>Бэкап: будет создан`;
+        bakPill.style.color = "var(--muted)";
+      }
+
+      renderElfTable();
+      toast(`Бинарник ${res.file_name} загружен: ${res.total_symbols} функций`, "sky");
+    } catch (e) {
+      toast("Ошибка анализа ELF: " + e);
+    }
+  }
+
+  $("#btnSelectElfFile").onclick = async () => {
+    if (T && T.dialog) {
+      const file = await T.dialog.open({
+        multiple: false,
+        filters: [{ name: 'ELF бинарники (*.so, bin, exe)', extensions: ['so', 'bin', 'elf', '*'] }]
+      });
+      if (file) {
+        analyzeElf(file);
+      }
+    }
+  };
+
+  $("#inputElfFilter").oninput = (e) => {
+    renderElfTable(e.target.value);
+  };
+
+  $("#btnFilterRootChecks").onclick = () => {
+    const input = $("#inputElfFilter");
+    input.value = "check|verify|root|security|signature|tamper";
+    // Фильтр по любому из ключевых слов
+    if (!currentElfData) return;
+    const keywords = ["check", "verify", "root", "security", "signature", "tamper", "license", "debug", "su"];
+    const tbody = $("#elfSymbolsTbody");
+    tbody.innerHTML = "";
+
+    const list = currentElfData.functions.filter(f => {
+      const low = f.name.toLowerCase();
+      return keywords.some(k => low.includes(k));
+    });
+
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--muted)">Функций с проверками безопасности не найдено.</td></tr>`;
+      return;
+    }
+
+    list.forEach(fn => {
+      const tr = document.createElement("tr");
+      const hasOffset = fn.file_offset !== null && fn.file_offset !== undefined;
+      const offHex = hasOffset ? `0x${fn.file_offset.toString(16).toUpperCase()}` : "IMPORT";
+
+      tr.innerHTML = `
+        <td><b style="color:${hasOffset ? 'var(--pink)' : 'var(--muted)'}">🛡️ ${escapeHtml(fn.name)}</b></td>
+        <td><code class="code-sm">0x${fn.address.toString(16).toUpperCase()}</code></td>
+        <td><code class="code-sm" style="color:${hasOffset ? 'var(--sky)' : '#ff8fab'}">${offHex}</code></td>
+        <td><span class="badge ${fn.binding === 'GLOBAL' ? 'ext4' : 'raw'}">${fn.binding}</span></td>
+        <td>
+          ${hasOffset ? `<button class="btn sm ghost btn-pick-func">Выбрать</button>` : `<small class="muted">Внешний</small>`}
+        </td>
+      `;
+
+      tr.onclick = () => {
+        if (hasOffset) {
+          $("#inputTargetSymbol").value = fn.name;
+          $("#inputTargetOffset").value = offHex;
+        }
+      };
+
+      tbody.appendChild(tr);
+    });
+  };
+
+  $("#selStubType").onchange = (e) => {
+    const v = e.target.value;
+    $("#customHexRow").classList.toggle("hidden", v !== "custom_hex");
+    $("#nopCountRow").classList.toggle("hidden", v !== "nop");
+  };
+
+  $("#btnApplyElfPatch").onclick = async () => {
+    if (!currentElfPath) {
+      toast("Сначала выберите ELF бинарник!", "pink");
+      return;
+    }
+
+    const symName = $("#inputTargetSymbol").value.trim() || null;
+    const offStr = $("#inputTargetOffset").value.trim();
+    let fileOffset = null;
+    if (offStr) {
+      fileOffset = parseInt(offStr, offStr.startsWith("0x") || offStr.startsWith("0X") ? 16 : 10);
+      if (isNaN(fileOffset)) fileOffset = null;
+    }
+
+    if (!symName && fileOffset === null) {
+      toast("Укажите функцию или смещение для патча!");
+      return;
+    }
+
+    const stubType = $("#selStubType").value;
+    const customHex = stubType === "custom_hex" ? $("#inputCustomHex").value.trim() : null;
+    const nopCount = stubType === "nop" ? parseInt($("#inputNopCount").value, 10) : null;
+
+    const req = {
+      file_path: currentElfPath,
+      symbol_name: symName,
+      file_offset: fileOffset,
+      stub_type: stubType,
+      custom_hex: customHex,
+      nop_count: nopCount
+    };
+
+    try {
+      const res = await invoke("elf_apply_patch", { req });
+      const statusLbl = $("#patchStatusLabel");
+      statusLbl.classList.remove("hidden");
+      statusLbl.innerHTML = `✔ Патч применен! Смещение <b>0x${res.offset.toString(16).toUpperCase()}</b>: <code>${res.old_bytes_hex}</code> ➔ <code style="color:var(--sky)">${res.new_bytes_hex}</code>`;
+      toast("Функция успешно пропатчена заглушкой!", "sky");
+      analyzeElf(currentElfPath);
+    } catch (e) {
+      toast("Ошибка патчинга: " + e);
+    }
+  };
+
+  $("#btnRestoreElfBackup").onclick = async () => {
+    if (!currentElfPath) {
+      toast("Файл не выбран!");
+      return;
+    }
+    if (!confirm(`Восстановить ${currentElfPath} из резервной копии (.bak)?`)) return;
+    try {
+      const msg = await invoke("elf_restore_backup", { filePath: currentElfPath });
+      toast(msg, "sky");
+      analyzeElf(currentElfPath);
+    } catch (e) {
+      toast("Ошибка восстановления: " + e);
+    }
+  };
+
+  $("#btnApplyStrPatch").onclick = async () => {
+    if (!currentElfPath) {
+      toast("Сначала выберите ELF бинарник!", "pink");
+      return;
+    }
+    const oldStr = $("#inputStrOld").value.trim();
+    const newStr = $("#inputStrNew").value.trim();
+    if (!oldStr || !newStr) {
+      toast("Введите исходную и новую строку!");
+      return;
+    }
+    try {
+      const msg = await invoke("elf_patch_string", { filePath: currentElfPath, oldStr, newStr });
+      const statusBox = $("#strPatchStatus");
+      statusBox.classList.remove("hidden");
+      statusBox.textContent = `✔ ${msg}`;
+      toast(msg, "sky");
+      analyzeElf(currentElfPath);
+    } catch (e) {
+      toast("Ошибка замены строки: " + e);
+    }
+  };
+
+  // --- Вкладка: build.prop Твики и Спуфинг ---
+  let selectedPropPath = null;
+  let currentPropData = null;
+
+  async function loadPropPresets() {
+    try {
+      const presets = await invoke("prop_list_presets");
+      const grid = $("#propPresetsGrid");
+      grid.innerHTML = "";
+      presets.forEach(p => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.style.cursor = "pointer";
+        card.innerHTML = `
+          <div class="ic">⚡</div>
+          <h3>${escapeHtml(p.name)}</h3>
+          <p>${escapeHtml(p.description)}</p>
+          <div style="margin-top:10px">
+            <button class="btn sm primary btn-apply-preset">Применить пресет</button>
+          </div>
+        `;
+        card.querySelector(".btn-apply-preset").onclick = async (e) => {
+          e.stopPropagation();
+          if (!selectedPropPath) {
+            toast("Сначала выберите файл .prop!", "pink");
+            return;
+          }
+          try {
+            const msg = await invoke("prop_apply_tweaks", { filePath: selectedPropPath, tweaks: p.props });
+            toast(msg, "sky");
+            loadPropFile(selectedPropPath);
+          } catch (err) {
+            toast("Ошибка применения твиков: " + err);
+          }
+        };
+        grid.appendChild(card);
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function renderPropTable(filterText = "") {
+    if (!currentPropData) return;
+    const tbody = $("#propEntriesTbody");
+    tbody.innerHTML = "";
+    const filter = filterText.toLowerCase();
+
+    const filtered = currentPropData.props.filter(p => {
+      if (!filter) return true;
+      return p.key.toLowerCase().includes(filter) || p.value.toLowerCase().includes(filter);
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--muted)">Свойства не найдены.</td></tr>`;
+      return;
+    }
+
+    filtered.slice(0, 300).forEach(p => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><b>${escapeHtml(p.key)}</b></td>
+        <td><code class="code-sm" style="color:var(--sky)">${escapeHtml(p.value)}</code></td>
+        <td><small class="muted">${p.line_num}</small></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function loadPropFile(filePath) {
+    try {
+      const data = await invoke("prop_read_file", { filePath });
+      selectedPropPath = filePath;
+      currentPropData = data;
+
+      $("#propFileBar").classList.remove("hidden");
+      $("#propWorkspace").classList.remove("hidden");
+
+      $("#propFileName").textContent = filePath.split(/[\\/]/).pop();
+      $("#propTotalCount").textContent = data.total_props;
+      $("#propDuplPill").textContent = `Дубликатов: ${data.duplicates.length}`;
+
+      await loadPropPresets();
+      renderPropTable();
+      toast(`Файл свойств загружен (${data.total_props} записей)`, "sky");
+    } catch (e) {
+      toast("Ошибка чтения .prop файла: " + e);
+    }
+  }
+
+  $("#btnSelectPropFile").onclick = async () => {
+    if (T && T.dialog) {
+      const file = await T.dialog.open({
+        multiple: false,
+        filters: [{ name: 'Файлы свойств Android', extensions: ['prop', 'txt', '*'] }]
+      });
+      if (file) {
+        loadPropFile(file);
+      }
+    }
+  };
+
+  $("#inputPropSearch").oninput = (e) => {
+    renderPropTable(e.target.value);
+  };
+
+  $("#btnRestorePropBackup").onclick = async () => {
+    if (!selectedPropPath) {
+      toast("Сначала выберите файл .prop!", "pink");
+      return;
+    }
+    const bak = selectedPropPath + ".bak";
+    if (!confirm(`Восстановить из резервной копии (${bak})?`)) return;
+    try {
+      await invoke("fs_copy_entry", { src: bak, dst: selectedPropPath });
+      toast("Файл свойств успешно восстановлен из .bak", "sky");
+      loadPropFile(selectedPropPath);
+    } catch (e) {
+      toast("Ошибка восстановления: " + e);
+    }
+  };
+
+  // --- Вкладка: Fastboot Flasher ---
+  async function refreshFastbootDevices() {
+    try {
+      const devs = await invoke("fb_list_devices");
+      const statusEl = $("#fbDeviceStatus");
+      if (devs.length === 0) {
+        statusEl.textContent = "Устройства Fastboot не обнаружены";
+        statusEl.style.color = "var(--muted)";
+      } else {
+        statusEl.innerHTML = devs.map(d => `Подключено: <b style="color:var(--sky)">${d.serial}</b> (${d.mode})`).join(", ");
+        statusEl.style.color = "var(--sky)";
+      }
+    } catch (e) {
+      $("#fbDeviceStatus").textContent = "Ошибка проверки Fastboot: " + e;
+    }
+  }
+
+  $("#btnRefreshFbDevices").onclick = () => {
+    refreshFastbootDevices();
+  };
+
+  $("#btnPickFlashImg").onclick = async () => {
+    if (T && T.dialog) {
+      const file = await T.dialog.open({
+        multiple: false,
+        filters: [{ name: 'Образы разделов', extensions: ['img', 'bin'] }]
+      });
+      if (file) {
+        $("#inputFlashImgPath").value = file;
+        const base = file.split(/[\\/]/).pop().replace(/\.img$/i, "").replace(/_a$|_b$/i, "");
+        if (base) {
+          $("#inputFlashPartition").value = base;
+        }
+      }
+    }
+  };
+
+  $("#btnExecuteFlash").onclick = async () => {
+    const partition = $("#inputFlashPartition").value.trim();
+    const imagePath = $("#inputFlashImgPath").value.trim();
+    const slot = $("#selFlashSlot").value;
+
+    if (!partition || !imagePath) {
+      toast("Укажите имя раздела и путь к файлу образа!", "pink");
+      return;
+    }
+
+    if (!confirm(`Вы действительно хотите прошить ${imagePath} в раздел ${partition} (слот: ${slot})?`)) {
+      return;
+    }
+
+    const logBox = $("#flashLogBox");
+    logBox.classList.remove("hidden");
+    logBox.textContent = `⏳ Запущена прошивка раздела ${partition}...\n`;
+
+    try {
+      const res = await invoke("fb_flash_partition", {
+        req: {
+          partition,
+          image_path: imagePath,
+          slot
+        }
+      });
+      logBox.textContent = res;
+      toast(`Раздел ${partition} успешно прошит!`, "sky");
+    } catch (e) {
+      logBox.textContent = "✖ " + e;
+      toast("Ошибка прошивки: " + e);
+    }
+  };
+
+  $$("[data-fb-reboot]").forEach(btn => {
+    btn.onclick = async () => {
+      const mode = btn.dataset.fbReboot;
+      try {
+        const msg = await invoke("fb_reboot_mode", { mode });
+        toast(msg, "sky");
+        setTimeout(refreshFastbootDevices, 2000);
+      } catch (e) {
+        toast("Ошибка перезагрузки: " + e);
+      }
+    };
+  });
+
+  // --- 4. APK Modding ---
   $("#btnSelectApkFile").onclick = async () => {
     if (!currentProject) {
       toast("Сначала выберите или создайте проект!", "pink");
@@ -1758,6 +2938,221 @@
     }
   };
 
+  /* ---------- ДЕБЛОАТЕР ПРОШИВОК (data-page="debloat") ---------- */
+  let currentDebloatData = null;
+  let selectedDebloatPaths = new Set();
+  let currentDebloatCategory = "all";
+
+  async function initDebloatPage() {
+    const sel = $("#debloatProjectSelect");
+    sel.innerHTML = '<option value="">Выберите проект...</option>';
+    try {
+      const items = await invoke("list_projects");
+      if (items && items.length > 0) {
+        items.forEach(it => {
+          const opt = document.createElement("option");
+          opt.value = it.meta.name;
+          opt.textContent = `${it.meta.name} (${it.parts} образов)`;
+          if (currentProject === it.meta.name) opt.selected = true;
+          sel.append(opt);
+        });
+        if (!sel.value && items.length > 0) {
+          sel.value = items[0].meta.name;
+        }
+      }
+      if (sel.value) {
+        runDebloatScan(sel.value);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  $("#debloatProjectSelect").onchange = (e) => {
+    if (e.target.value) {
+      runDebloatScan(e.target.value);
+    }
+  };
+
+  $("#btnScanDebloat").onclick = () => {
+    const proj = $("#debloatProjectSelect").value;
+    if (!proj) return toast("Сначала выберите проект!", "pink");
+    runDebloatScan(proj);
+  };
+
+  function updateDebloatSelectionSummary() {
+    $("#debSelectedCount").textContent = selectedDebloatPaths.size;
+    let selectedBytes = 0;
+    if (currentDebloatData) {
+      currentDebloatData.items.forEach(it => {
+        if (selectedDebloatPaths.has(it.full_path)) {
+          selectedBytes += it.size_bytes;
+        }
+      });
+    }
+    $("#debTotalFreed").textContent = formatBytes(selectedBytes);
+  }
+
+  function renderDebloatTable(filterText = "") {
+    const tbody = $("#debloatTbody");
+    tbody.innerHTML = "";
+
+    if (!currentDebloatData || currentDebloatData.items.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">В проекте не найдено приложений из базы мусора и рекламы. Прошивка чистая!</td></tr>`;
+      return;
+    }
+
+    const q = filterText.toLowerCase().trim();
+    const list = currentDebloatData.items.filter(it => {
+      const matchCat = currentDebloatCategory === "all" || it.category === currentDebloatCategory;
+      if (!matchCat) return false;
+      if (!q) return true;
+      return it.app_name.toLowerCase().includes(q)
+        || it.package_name.toLowerCase().includes(q)
+        || it.rel_path.toLowerCase().includes(q)
+        || it.description.toLowerCase().includes(q);
+    });
+
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">Нет приложений по выбранному фильтру.</td></tr>`;
+      return;
+    }
+
+    list.forEach(item => {
+      const tr = document.createElement("tr");
+      const isChecked = selectedDebloatPaths.has(item.full_path);
+      const badgeCat = item.category === "ad_telemetry" ? "raw" : (item.category === "google_heavy" ? "ext4" : "erofs");
+
+      tr.innerHTML = `
+        <td><input type="checkbox" class="chk-deb-item" data-path="${escapeHtml(item.full_path)}" ${isChecked ? 'checked' : ''} /></td>
+        <td>
+          <b>${escapeHtml(item.app_name)}</b><br>
+          <small class="code-sm" style="color:var(--muted)">${escapeHtml(item.package_name)}</small>
+        </td>
+        <td>
+          <span style="font-size:12.5px">${escapeHtml(item.description)}</span><br>
+          <span class="badge ${badgeCat}" style="font-size:10px;margin-top:2px">${item.category}</span>
+        </td>
+        <td><code class="code-sm">${escapeHtml(item.rel_path)}</code></td>
+        <td><b style="color:var(--sky)">${formatBytes(item.size_bytes)}</b></td>
+      `;
+
+      const chk = tr.querySelector(".chk-deb-item");
+      chk.onchange = (e) => {
+        if (e.target.checked) {
+          selectedDebloatPaths.add(item.full_path);
+        } else {
+          selectedDebloatPaths.delete(item.full_path);
+        }
+        updateDebloatSelectionSummary();
+      };
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function runDebloatScan(project) {
+    try {
+      toast(`Сканирование приложений в ${project}...`, "pink");
+      const res = await invoke("debloat_scan", { project });
+      currentDebloatData = res;
+      selectedDebloatPaths.clear();
+
+      // По умолчанию выбираем все безопасные к удалению
+      res.items.forEach(it => {
+        if (it.safe_to_remove) {
+          selectedDebloatPaths.add(it.full_path);
+        }
+      });
+
+      $("#debloatSummaryBox").classList.remove("hidden");
+      $("#debTotalFound").textContent = res.total_apps_found;
+      $("#debBloatCount").textContent = res.bloat_apps_count;
+      updateDebloatSelectionSummary();
+
+      renderDebloatTable();
+      toast(`Найдено ${res.bloat_apps_count} приложений для очистки`, "sky");
+    } catch (e) {
+      toast("Ошибка сканирования: " + e);
+    }
+  }
+
+  $$("#debloatFilters .f-pill[data-debcat]").forEach(btn => {
+    btn.onclick = () => {
+      $$("#debloatFilters .f-pill[data-debcat]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentDebloatCategory = btn.dataset.debcat;
+      renderDebloatTable($("#inputDebloatFilter").value);
+    };
+  });
+
+  $("#btnDebloatSelectAll").onclick = () => {
+    if (!currentDebloatData) return;
+    currentDebloatData.items.forEach(it => selectedDebloatPaths.add(it.full_path));
+    renderDebloatTable($("#inputDebloatFilter").value);
+    updateDebloatSelectionSummary();
+  };
+
+  $("#btnDebloatDeselectAll").onclick = () => {
+    selectedDebloatPaths.clear();
+    renderDebloatTable($("#inputDebloatFilter").value);
+    updateDebloatSelectionSummary();
+  };
+
+  $("#chkDebloatHeader").onchange = (e) => {
+    if (e.target.checked) {
+      $("#btnDebloatSelectAll").click();
+    } else {
+      $("#btnDebloatDeselectAll").click();
+    }
+  };
+
+  $("#inputDebloatFilter").oninput = (e) => {
+    renderDebloatTable(e.target.value);
+  };
+
+  $("#btnExecuteDebloat").onclick = async () => {
+    const proj = $("#debloatProjectSelect").value;
+    if (!proj) return toast("Сначала выберите проект!", "pink");
+    if (selectedDebloatPaths.size === 0) return toast("Не выбрано ни одного приложения для удаления");
+
+    const backupMode = $("#chkDebloatBackup").checked;
+    const msg = backupMode
+      ? `Переместить ${selectedDebloatPaths.size} приложений в removed_bloat/ (с возможностью восстановления)?`
+      : `ВНИМАНИЕ: Безвозвратно удалить ${selectedDebloatPaths.size} приложений из проекта?`;
+
+    if (!confirm(msg)) return;
+
+    try {
+      const res = await invoke("debloat_remove", {
+        req: {
+          project: proj,
+          target_paths: Array.from(selectedDebloatPaths),
+          backup_mode: backupMode
+        }
+      });
+
+      toast(`Успешно удалено/перемещено ${res.removed_count} приложений! Освобождено ${formatBytes(res.freed_bytes)}`, "sky");
+      runDebloatScan(proj);
+    } catch (e) {
+      toast("Ошибка деблоатинга: " + e);
+    }
+  };
+
+  $("#btnRestoreDebloat").onclick = async () => {
+    const proj = $("#debloatProjectSelect").value;
+    if (!proj) return toast("Сначала выберите проект!", "pink");
+    if (!confirm(`Восстановить все удаленные приложения из removed_bloat/ обратно в проект ${proj}?`)) return;
+
+    try {
+      const msg = await invoke("debloat_restore_all", { project: proj });
+      toast(msg, "sky");
+      runDebloatScan(proj);
+    } catch (e) {
+      toast("Ошибка восстановления: " + e);
+    }
+  };
+
   /* ---------- ФАЙЛОВЫЙ МЕНЕДЖЕР & ВСТРОЕННЫЙ РЕДАКТОР (data-page="files") ---------- */
   let fmCurrentProject = null;
   let fmCurrentFile = null;
@@ -2120,21 +3515,27 @@
   }
 
   // Удаление файла / папки
-  async function deleteFmItem(relPath, name, isDir) {
-    if (!confirm(`Удалить ${isDir ? 'папку' : 'файл'} «${name}»? Это действие необратимо.`)) {
-      return;
-    }
-    try {
-      await invoke("fs_delete_entry", { project: fmCurrentProject, relPath: relPath });
-      toast(`Удалено: ${name}`);
-      if (fmCurrentFile && fmCurrentFile.rel_path === relPath) {
-        resetFmEditor();
-        fmCurrentFile = null;
+  function deleteFmItem(relPath, name, isDir) {
+    showConfirmDialog({
+      title: `Удаление ${isDir ? 'папки' : 'файла'}`,
+      desc: `Удалить ${isDir ? 'папку' : 'файл'} <b>«${name}»</b> (${relPath})? Это действие необратимо.`,
+      icon: "🗑️",
+      okText: "Удалить",
+      okDanger: true,
+      onConfirm: async () => {
+        try {
+          await invoke("fs_delete_entry", { project: fmCurrentProject, relPath: relPath });
+          toast(`Удалено: ${name}`);
+          if (fmCurrentFile && fmCurrentFile.rel_path === relPath) {
+            resetFmEditor();
+            fmCurrentFile = null;
+          }
+          loadFmTree();
+        } catch (e) {
+          toast("Ошибка удаления: " + e);
+        }
       }
-      loadFmTree();
-    } catch (e) {
-      toast("Ошибка удаления: " + e);
-    }
+    });
   }
 
   // Модалка: Создать файл / папку
@@ -2226,8 +3627,19 @@
   /* ---------- старт приложения ---------- */
   async function boot() {
     const t0 = Date.now();
-    const u = await checkUpdate().catch(() => null);
-    await sleep(Math.max(0, 1400 - (Date.now() - t0)));
+    // Ограничиваем проверку обновлений таймаутом в 2.5 секунды, чтобы сплэш не зависал
+    const updatePromise = Promise.race([
+      checkUpdate().catch(() => null),
+      new Promise(resolve => setTimeout(() => resolve(null), 2500))
+    ]);
+
+    let u = null;
+    try {
+      u = await updatePromise;
+    } catch (_) {}
+
+    await sleep(Math.max(0, 800 - (Date.now() - t0)));
+
     if (u && u.available) {
       $("#splashImg").src = "assets/update.jpg";
       $(".progress").classList.add("hidden");
@@ -2252,11 +3664,16 @@
       });
     } else {
       $("#splashText").textContent = u && u.error ? "GitHub недоступен — офлайн режим" : "Последняя версия ✦";
-      await sleep(500);
+      await sleep(350);
     }
+
     $("#splash").classList.add("out");
     $("#app").classList.remove("hidden");
-    setTimeout(() => $("#splash").remove(), 700);
+    setTimeout(() => {
+      const sp = $("#splash");
+      if (sp) sp.remove();
+    }, 700);
+
     requestAnimationFrame(() => go("home"));
 
     line("MEYAFORGE v0.1.0 запущен. Стек Rust + Clean WebUI готов.", "sys");

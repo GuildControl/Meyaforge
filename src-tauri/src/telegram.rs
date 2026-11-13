@@ -45,15 +45,36 @@ impl Default for TriggerEvents {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TelegramConfig {
     pub bot_token: String,
     pub bot_username: String,
     pub bot_name: String,
     pub enabled: bool,
     pub poll_active: bool,
+    #[serde(default = "default_language")]
+    pub lang: String,
     pub channels: Vec<ChannelBinding>,
     pub events: TriggerEvents,
+}
+
+fn default_language() -> String {
+    "ru".to_string()
+}
+
+impl Default for TelegramConfig {
+    fn default() -> Self {
+        Self {
+            bot_token: String::new(),
+            bot_username: String::new(),
+            bot_name: String::new(),
+            enabled: false,
+            poll_active: false,
+            lang: "ru".to_string(),
+            channels: Vec::new(),
+            events: TriggerEvents::default(),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -207,7 +228,12 @@ pub fn tg_send_test_message(chat_id: Option<i64>) -> Result<String, String> {
         return Err("Нет привязанных каналов для отправки. Напишите /meyakitchen apply в канале или группе.".into());
     }
 
-    let text = "✨ <b>MEYAFORGE Тестовое уведомление</b> ✨\n\nБот успешно подключён к кухне прошивок и готов передавать статусы сборки, разборки и релизов!";
+    let is_en = cfg.lang.to_lowercase() == "en";
+    let text = if is_en {
+        "✨ <b>MEYAFORGE Test Notification</b> ✨\n\nTelegram bot is successfully connected to the firmware kitchen and ready to broadcast build progress, dumps, and release statuses!"
+    } else {
+        "✨ <b>MEYAFORGE Тестовое уведомление</b> ✨\n\nБот успешно подключён к кухне прошивок и готов передавать статусы сборки, разборки и релизов!"
+    };
     let mut sent = 0;
     for cid in targets {
         if send_msg(&cfg.bot_token, cid, text).is_ok() {
@@ -319,31 +345,57 @@ pub fn tg_poll_updates_once(app: AppHandle) -> Result<usize, String> {
                 added_or_updated += 1;
 
                 // Отправляем подтверждение в чат
-                let reply = format!(
-                    "✅ <b>MEYAFORGE Подключение успешно!</b>\n\nЧат/канал «<b>{}</b>» успешно привязан к триггеру <code>{}</code>.\nТеперь сюда будут приходить уведомления из кухни прошивок!",
-                    chat_title, valid_trigger
-                );
+                let is_en = cfg.lang.to_lowercase() == "en";
+                let reply = if is_en {
+                    format!(
+                        "✅ <b>MEYAFORGE Connected successfully!</b>\n\nChat/channel «<b>{}</b>» is now bound to trigger <code>{}</code>.\nFirmware kitchen notifications will be posted here!",
+                        chat_title, valid_trigger
+                    )
+                } else {
+                    format!(
+                        "✅ <b>MEYAFORGE Подключение успешно!</b>\n\nЧат/канал «<b>{}</b>» успешно привязан к триггеру <code>{}</code>.\nТеперь сюда будут приходить уведомления из кухни прошивок!",
+                        chat_title, valid_trigger
+                    )
+                };
                 let _ = send_msg(&cfg.bot_token, chat_id, &reply);
             } else if parts.len() >= 2 && parts[1].eq_ignore_ascii_case("status") {
+                let is_en = cfg.lang.to_lowercase() == "en";
                 let current_triggers = cfg
                     .channels
                     .iter()
                     .find(|c| c.chat_id == chat_id)
                     .map(|c| c.triggers.join(", "))
-                    .unwrap_or_else(|| "Канал не привязан".into());
+                    .unwrap_or_else(|| if is_en { "Channel not bound".into() } else { "Канал не привязан".into() });
 
-                let reply = format!(
-                    "ℹ️ <b>MEYAFORGE Статус</b>\nЧат: <b>{}</b> (ID: <code>{}</code>)\nАктивные триггеры: <b>{}</b>",
-                    chat_title, chat_id, current_triggers
-                );
+                let reply = if is_en {
+                    format!(
+                        "ℹ️ <b>MEYAFORGE Status</b>\nChat: <b>{}</b> (ID: <code>{}</code>)\nActive triggers: <b>{}</b>",
+                        chat_title, chat_id, current_triggers
+                    )
+                } else {
+                    format!(
+                        "ℹ️ <b>MEYAFORGE Статус</b>\nЧат: <b>{}</b> (ID: <code>{}</code>)\nАктивные триггеры: <b>{}</b>",
+                        chat_title, chat_id, current_triggers
+                    )
+                };
                 let _ = send_msg(&cfg.bot_token, chat_id, &reply);
             } else if parts.len() >= 2 && parts[1].eq_ignore_ascii_case("remove") {
                 cfg.channels.retain(|c| c.chat_id != chat_id);
-                let reply = "🗑️ Чат успешно отвязан от уведомлений MEYAFORGE.";
+                let is_en = cfg.lang.to_lowercase() == "en";
+                let reply = if is_en {
+                    "🗑️ Chat successfully unbound from MEYAFORGE notifications."
+                } else {
+                    "🗑️ Чат успешно отвязан от уведомлений MEYAFORGE."
+                };
                 let _ = send_msg(&cfg.bot_token, chat_id, reply);
                 added_or_updated += 1;
             } else {
-                let help = "<b>Команды MEYAFORGE:</b>\n• <code>/meyakitchen apply &lt;trigger&gt;</code> — привязать канал (триггеры: <code>all</code>, <code>build</code>, <code>release</code>, <code>import</code>, <code>device</code>)\n• <code>/meyakitchen status</code> — статус привязки\n• <code>/meyakitchen remove</code> — отвязать чат";
+                let is_en = cfg.lang.to_lowercase() == "en";
+                let help = if is_en {
+                    "<b>MEYAFORGE Commands:</b>\n• <code>/meyakitchen apply &lt;trigger&gt;</code> — bind channel (triggers: <code>all</code>, <code>build</code>, <code>release</code>, <code>import</code>, <code>device</code>)\n• <code>/meyakitchen status</code> — check binding status\n• <code>/meyakitchen remove</code> — unbind chat"
+                } else {
+                    "<b>Команды MEYAFORGE:</b>\n• <code>/meyakitchen apply &lt;trigger&gt;</code> — привязать канал (триггеры: <code>all</code>, <code>build</code>, <code>release</code>, <code>import</code>, <code>device</code>)\n• <code>/meyakitchen status</code> — статус привязки\n• <code>/meyakitchen remove</code> — отвязать чат"
+                };
                 let _ = send_msg(&cfg.bot_token, chat_id, help);
             }
         }
@@ -428,10 +480,18 @@ pub fn on_build_start(project: &str) {
         return;
     }
 
-    let text = format!(
-        "🔨 <b>Сборка прошивки: {}</b>\n\n⚙️ <b>Статус:</b> Инициализация сборки...\n📊 <b>Прогресс:</b> [░░░░░░░░░░] 0%\n🕒 <b>Время:</b> Just now",
-        project
-    );
+    let is_en = cfg.lang.to_lowercase() == "en";
+    let text = if is_en {
+        format!(
+            "🔨 <b>ROM Build: {}</b>\n\n⚙️ <b>Status:</b> Initializing build...\n📊 <b>Progress:</b> [░░░░░░░░░░] 0%\n🕒 <b>Time:</b> Just now",
+            project
+        )
+    } else {
+        format!(
+            "🔨 <b>Сборка прошивки: {}</b>\n\n⚙️ <b>Статус:</b> Инициализация сборки...\n📊 <b>Прогресс:</b> [░░░░░░░░░░] 0%\n🕒 <b>Время:</b> Just now",
+            project
+        )
+    };
 
     let mut list = Vec::new();
     for cid in channels {
@@ -474,10 +534,18 @@ pub fn on_build_progress(project: &str, stage: &str, percent: u32) {
     let empty = 10usize.saturating_sub(filled);
     let bar = format!("{}{}", "█".repeat(filled), "░".repeat(empty));
 
-    let text = format!(
-        "🔨 <b>Сборка прошивки: {}</b>\n\n⚙️ <b>Этап:</b> {}\n📊 <b>Прогресс:</b> [{}] {}%\n⏳ <i>Выполняется сборка компонентов...</i>",
-        project, stage, bar, p_clamped
-    );
+    let is_en = cfg.lang.to_lowercase() == "en";
+    let text = if is_en {
+        format!(
+            "🔨 <b>ROM Build: {}</b>\n\n⚙️ <b>Stage:</b> {}\n📊 <b>Progress:</b> [{}] {}%\n⏳ <i>Compiling components...</i>",
+            project, stage, bar, p_clamped
+        )
+    } else {
+        format!(
+            "🔨 <b>Сборка прошивки: {}</b>\n\n⚙️ <b>Этап:</b> {}\n📊 <b>Прогресс:</b> [{}] {}%\n⏳ <i>Выполняется сборка компонентов...</i>",
+            project, stage, bar, p_clamped
+        )
+    };
 
     for m in msgs.iter_mut() {
         if now.duration_since(m.last_edit) >= Duration::from_millis(1500) {
@@ -497,8 +565,13 @@ pub fn on_build_done(project: &str, file_name: &str, size_human: &str, md5: &str
     let mut guard = LIVE_BUILD_MSGS.lock().unwrap();
     if let Some(map) = guard.as_mut() {
         if let Some(msgs) = map.remove(project) {
+            let is_en = cfg.lang.to_lowercase() == "en";
             let author_line = if !author.is_empty() {
-                format!("\n👤 <b>Автор:</b> {}", author)
+                if is_en {
+                    format!("\n👤 <b>Author:</b> {}", author)
+                } else {
+                    format!("\n👤 <b>Автор:</b> {}", author)
+                }
             } else {
                 String::new()
             };
@@ -509,10 +582,17 @@ pub fn on_build_done(project: &str, file_name: &str, size_human: &str, md5: &str
                 String::new()
             };
 
-            let text = format!(
-                "✅ <b>Сборка прошивки успешно завершена!</b>\n\n📦 <b>Проект:</b> {}\n📁 <b>Файл:</b> <code>{}</code> ({})\n⏱️ <b>Время сборки:</b> {}{}{}",
-                project, file_name, size_human, duration_str, md5_line, author_line
-            );
+            let text = if is_en {
+                format!(
+                    "✅ <b>ROM Build successfully completed!</b>\n\n📦 <b>Project:</b> {}\n📁 <b>File:</b> <code>{}</code> ({})\n⏱️ <b>Build Time:</b> {}{}{}",
+                    project, file_name, size_human, duration_str, md5_line, author_line
+                )
+            } else {
+                format!(
+                    "✅ <b>Сборка прошивки успешно завершена!</b>\n\n📦 <b>Проект:</b> {}\n📁 <b>Файл:</b> <code>{}</code> ({})\n⏱️ <b>Время сборки:</b> {}{}{}",
+                    project, file_name, size_human, duration_str, md5_line, author_line
+                )
+            };
 
             for m in msgs {
                 let _ = edit_msg(&cfg.bot_token, m.chat_id, m.message_id, &text);
@@ -527,10 +607,18 @@ pub fn on_build_fail(project: &str, stage: &str, error: &str) {
     let mut guard = LIVE_BUILD_MSGS.lock().unwrap();
     if let Some(map) = guard.as_mut() {
         if let Some(msgs) = map.remove(project) {
-            let text = format!(
-                "❌ <b>Ошибка при сборке прошивки: {}</b>\n\n⚠️ <b>Сбой на этапе:</b> {}\nПричина: <code>{}</code>",
-                project, stage, error
-            );
+            let is_en = cfg.lang.to_lowercase() == "en";
+            let text = if is_en {
+                format!(
+                    "❌ <b>ROM Build Error: {}</b>\n\n⚠️ <b>Failed stage:</b> {}\nReason: <code>{}</code>",
+                    project, stage, error
+                )
+            } else {
+                format!(
+                    "❌ <b>Ошибка при сборке прошивки: {}</b>\n\n⚠️ <b>Сбой на этапе:</b> {}\nПричина: <code>{}</code>",
+                    project, stage, error
+                )
+            };
             for m in msgs {
                 let _ = edit_msg(&cfg.bot_token, m.chat_id, m.message_id, &text);
             }
@@ -550,10 +638,18 @@ pub fn on_firmware_imported(project: &str, filename: &str, parts_count: usize) {
         return;
     }
 
-    let text = format!(
-        "📥 <b>Импорт и разборка прошивки</b>\n\n📦 <b>Проект:</b> {}\n📄 <b>Исходник:</b> <code>{}</code>\n🧩 <b>Извлечено разделов:</b> {}",
-        project, filename, parts_count
-    );
+    let is_en = cfg.lang.to_lowercase() == "en";
+    let text = if is_en {
+        format!(
+            "📥 <b>Firmware Import & Extraction</b>\n\n📦 <b>Project:</b> {}\n📄 <b>Source:</b> <code>{}</code>\n🧩 <b>Extracted partitions:</b> {}",
+            project, filename, parts_count
+        )
+    } else {
+        format!(
+            "📥 <b>Импорт и разборка прошивки</b>\n\n📦 <b>Проект:</b> {}\n📄 <b>Исходник:</b> <code>{}</code>\n🧩 <b>Извлечено разделов:</b> {}",
+            project, filename, parts_count
+        )
+    };
 
     for cid in channels {
         let _ = send_msg(&cfg.bot_token, cid, &text);
@@ -572,16 +668,35 @@ pub fn on_device_scanned(brand: &str, model: &str, android: &str, parts_count: u
         return;
     }
 
+    let is_en = cfg.lang.to_lowercase() == "en";
     let status_icon = if success { "✅" } else { "⚠️" };
-    let text = format!(
-        "📱 <b>Слепок устройства {}</b>\n\n<b>Устройство:</b> {} {}\n<b>Версия Android:</b> {}\n<b>Разделов в таблице:</b> {}\n<b>Статус:</b> {}",
-        status_icon,
-        brand,
-        model,
-        android,
-        parts_count,
-        if success { "Полный анализ (ADB + Fastboot)" } else { "Частичный слепок (с ошибкой)" }
-    );
+    let status_str = if success {
+        if is_en { "Full diagnostics (ADB + Fastboot)" } else { "Полный анализ (ADB + Fastboot)" }
+    } else {
+        if is_en { "Partial dump (with errors)" } else { "Частичный слепок (с ошибкой)" }
+    };
+
+    let text = if is_en {
+        format!(
+            "📱 <b>Device Snapshot {}</b>\n\n<b>Device:</b> {} {}\n<b>Android Version:</b> {}\n<b>Partitions detected:</b> {}\n<b>Status:</b> {}",
+            status_icon,
+            brand,
+            model,
+            android,
+            parts_count,
+            status_str
+        )
+    } else {
+        format!(
+            "📱 <b>Слепок устройства {}</b>\n\n<b>Устройство:</b> {} {}\n<b>Версия Android:</b> {}\n<b>Разделов в таблице:</b> {}\n<b>Статус:</b> {}",
+            status_icon,
+            brand,
+            model,
+            android,
+            parts_count,
+            status_str
+        )
+    };
 
     for cid in channels {
         let _ = send_msg(&cfg.bot_token, cid, &text);

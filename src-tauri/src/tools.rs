@@ -117,6 +117,15 @@ const DEFAULT_REGISTRY: &str = r#"[
     "desc": "lpmake, lpunpack, lpadd — упаковка и редактирование динамических разделов (super.img)",
     "url": "https://raw.githubusercontent.com/affggh/lpmake_and_lpunpack_cygwin/master/partition_tools_cygwin64_affggh_static.zip",
     "bins": ["lpmake.exe", "lpunpack.exe", "cygwin1.dll"]
+  },
+  {
+    "id": "dtc",
+    "name": "Device Tree Compiler (dtc)",
+    "category": "Boot / Recovery",
+    "desc": "Компилятор и декомпилятор FDT / Device Tree (DTS ➔ DTB и DTB ➔ DTS)",
+    "repo": "dgibson/dtc",
+    "match": ["win64", "windows", "x86_64"],
+    "bins": ["dtc.exe"]
   }
 ]"#;
 

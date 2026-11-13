@@ -1,19 +1,28 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod android_tools;
+mod binary_patcher;
+mod boot_patcher;
 mod builder;
+mod debloat;
 mod detect;
 mod device_reader;
+mod dtb_tools;
 mod ext4x;
 mod file_manager;
+mod flasher_tools;
+mod lk_extractor;
 mod lp;
 mod porting;
 mod project;
+mod prop_tweaks;
+mod root_injector;
 mod sdat;
 mod sparse;
 mod telegram;
 mod tools;
 mod util;
+mod vbmeta_tools;
 
 use serde::{Deserialize, Serialize};
 use std::io::{BufRead, BufReader};
@@ -237,6 +246,7 @@ fn main() {
             project::create_project,
             project::get_project,
             project::delete_project,
+            project::delete_partition,
             project::open_in_explorer,
             project::import_firmware,
             project::unsparse_partition,
@@ -282,7 +292,42 @@ fn main() {
             file_manager::fs_create_folder,
             file_manager::fs_delete_entry,
             file_manager::fs_rename_entry,
-            file_manager::fs_copy_entry
+            file_manager::fs_copy_entry,
+            // lk analyzer & oem extractor
+            lk_extractor::lk_analyze_file,
+            lk_extractor::lk_analyze_partition,
+            // boot patcher
+            boot_patcher::boot_inspect_extracted,
+            boot_patcher::boot_apply_patches,
+            boot_patcher::boot_kernel_hex_patch,
+            // binary patcher & stubbing
+            binary_patcher::elf_analyze,
+            binary_patcher::elf_apply_patch,
+            binary_patcher::elf_patch_string,
+            binary_patcher::elf_restore_backup,
+            // vbmeta & avb
+            vbmeta_tools::vbmeta_inspect,
+            vbmeta_tools::vbmeta_patch_disable_flags,
+            vbmeta_tools::vbmeta_generate_blank,
+            // dtb & devicetree
+            dtb_tools::dtb_inspect,
+            dtb_tools::dtb_decompile_to_dts,
+            dtb_tools::dtb_compile_from_dts,
+            // root injector (magisk / ksu / apatch)
+            root_injector::root_inspect,
+            root_injector::root_inject_hooks,
+            // prop tweaks catalog
+            prop_tweaks::prop_list_presets,
+            prop_tweaks::prop_read_file,
+            prop_tweaks::prop_apply_tweaks,
+            // fastboot flasher & edl
+            flasher_tools::fb_list_devices,
+            flasher_tools::fb_flash_partition,
+            flasher_tools::fb_reboot_mode,
+            // debloat studio
+            debloat::debloat_scan,
+            debloat::debloat_remove,
+            debloat::debloat_restore_all
         ])
         .run(tauri::generate_context!())
         .expect("error while running MEYAFORGE");
