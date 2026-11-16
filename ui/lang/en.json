@@ -1737,5 +1737,5 @@
   "(декомпиляция/сборка)": "(decompile/build)",
   "(подпись)": "(signing)",
   "(деодекс). Всё устанавливается во вкладке «Инструменты».": "(deodex). All are installed on the «Tools» tab.",
-  "MEYAFORGE v0.1.1 запущен. Стек Rust + Clean WebUI готов.": "MEYAFORGE v0.1.1 started. Rust + Clean WebUI stack ready."
+  "MEYAFORGE v0.1.2 запущен. Стек Rust + Clean WebUI готов.": "MEYAFORGE v0.1.2 started. Rust + Clean WebUI stack ready."
 }

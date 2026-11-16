@@ -3758,7 +3758,7 @@
 
     requestAnimationFrame(() => go("home"));
 
-    line("MEYAFORGE v0.1.1 запущен. Стек Rust + Clean WebUI готов.", "sys");
+    line("MEYAFORGE v0.1.2 запущен. Стек Rust + Clean WebUI готов.", "sys");
     const p = await invoke("get_profile").catch(() => null);
     applyProfile(p);
     if (!p) setTimeout(openProfile, 450);
