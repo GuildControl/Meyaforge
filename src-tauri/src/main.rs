@@ -67,14 +67,21 @@ async fn check_update(app: AppHandle) -> UpdateInfo {
                 notes: None,
                 error: None,
             },
-            Err(e) => UpdateInfo {
-                current,
-                latest: None,
-                available: false,
-                url: None,
-                notes: None,
-                error: Some(e.to_string()),
-            },
+            Err(e) => {
+                let msg = e.to_string();
+                // 404/нет опубликованного релиза — это не «офлайн», а просто отсутствие обновлений
+                let soft = msg.contains("404")
+                    || msg.contains("valid release JSON")
+                    || msg.contains("No assets were found");
+                UpdateInfo {
+                    current,
+                    latest: None,
+                    available: false,
+                    url: None,
+                    notes: None,
+                    error: if soft { None } else { Some(msg) },
+                }
+            }
         },
         Err(e) => UpdateInfo {
             current,
