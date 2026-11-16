@@ -47,6 +47,12 @@ jobs:
           tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'pre-release' }}
           releaseName: ${{ github.ref_type == 'tag' && format('MEYAFORGE {0}', github.ref_name) || 'MEYAFORGE pre-release' }}
           # Draft, т.к. в репозитории включены immutable releases:
-          # ассеты можно загружать только в черновик, публикация — вручную на GitHub
+          # ассеты можно загружать только в черновик
           releaseDraft: true
           prerelease: ${{ github.ref_type != 'tag' }}
+
+      # Ассеты загружены — публикуем релиз автоматически
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "${{ github.ref_type == 'tag' && github.ref_name || 'pre-release' }}" --draft=false
