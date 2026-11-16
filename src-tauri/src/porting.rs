@@ -526,3 +526,106 @@ fn patch_properties_file(path: &Path, patches: &[(&str, &String)]) -> Result<(),
 
     fs::write(path, lines.join("\n")).map_err(es)
 }
+
+// ---------------- Сравнение сохранённых профилей (устройства и прошивки из хранилища) ----------------
+
+#[derive(Serialize, Clone, Debug)]
+pub struct PropDiff {
+    pub key: String,
+    pub base_val: String,
+    pub port_val: String,
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub struct SpecRow {
+    pub label: String,
+    pub base_val: String,
+    pub port_val: String,
+}
+
+#[derive(Serialize, Clone, Debug)]
+pub struct ProfileComparison {
+    pub base_title: String,
+    pub port_title: String,
+    pub base_source: String,
+    pub port_source: String,
+    pub specs: Vec<SpecRow>,
+    pub diffs: Vec<PropDiff>,
+    pub common_partitions: Vec<String>,
+    pub base_only_partitions: Vec<String>,
+    pub port_only_partitions: Vec<String>,
+}
+
+fn spec_row(label: &str, base: String, port: String) -> SpecRow {
+    SpecRow {
+        label: label.into(),
+        base_val: if base.is_empty() { "—".into() } else { base },
+        port_val: if port.is_empty() { "—".into() } else { port },
+    }
+}
+
+/// Сравнение двух профилей из хранилища устройств (живое устройство или прошивка)
+#[tauri::command]
+pub fn compare_saved_profiles(base_id: String, port_id: String) -> Result<ProfileComparison, String> {
+    let base = crate::device_reader::get_saved_device(base_id)?;
+    let port = crate::device_reader::get_saved_device(port_id)?;
+    let b = &base.data;
+    let p = &port.data;
+
+    let yn = |v: bool| if v { "да".into() } else { "нет".into() };
+    let specs = vec![
+        spec_row("Модель", b.model.clone(), p.model.clone()),
+        spec_row("Бренд", b.brand.clone(), p.brand.clone()),
+        spec_row("Устройство (device)", b.device.clone(), p.device.clone()),
+        spec_row("SoC / Платформа", b.soc.clone(), p.soc.clone()),
+        spec_row("Архитектура CPU", b.cpu_abi.clone(), p.cpu_abi.clone()),
+        spec_row("Android OS", b.android_version.clone(), p.android_version.clone()),
+        spec_row("SDK API", b.sdk_version.clone(), p.sdk_version.clone()),
+        spec_row("Патч безопасности", b.security_patch.clone(), p.security_patch.clone()),
+        spec_row("Build ID", b.build_id.clone(), p.build_id.clone()),
+        spec_row("Fingerprint", b.build_fingerprint.clone(), p.build_fingerprint.clone()),
+        spec_row("SELinux", b.selinux.clone(), p.selinux.clone()),
+        spec_row("Слоты A/B", yn(b.is_ab), yn(p.is_ab)),
+        spec_row("Динамические разделы", yn(b.is_dynamic), yn(p.is_dynamic)),
+        spec_row("Разделов в профиле", b.partitions.len().to_string(), p.partitions.len().to_string()),
+        spec_row("Свойств build.prop", b.build_props.len().to_string(), p.build_props.len().to_string()),
+    ];
+
+    // Различия свойств
+    let mut keys: std::collections::BTreeSet<&String> = b.build_props.keys().collect();
+    keys.extend(p.build_props.keys());
+    let mut diffs = Vec::new();
+    for k in keys {
+        let bv = b.build_props.get(k).cloned().unwrap_or_default();
+        let pv = p.build_props.get(k).cloned().unwrap_or_default();
+        if bv != pv {
+            diffs.push(PropDiff {
+                key: k.clone(),
+                base_val: if bv.is_empty() { "—".into() } else { bv },
+                port_val: if pv.is_empty() { "—".into() } else { pv },
+            });
+            if diffs.len() >= 400 {
+                break;
+            }
+        }
+    }
+
+    // Разделы
+    let b_parts: std::collections::BTreeSet<String> = b.partitions.iter().map(|x| x.name.clone()).collect();
+    let p_parts: std::collections::BTreeSet<String> = p.partitions.iter().map(|x| x.name.clone()).collect();
+    let common_partitions = b_parts.intersection(&p_parts).cloned().collect();
+    let base_only_partitions = b_parts.difference(&p_parts).cloned().collect();
+    let port_only_partitions = p_parts.difference(&b_parts).cloned().collect();
+
+    Ok(ProfileComparison {
+        base_title: base.title.clone(),
+        port_title: port.title.clone(),
+        base_source: base.source.clone(),
+        port_source: port.source.clone(),
+        specs,
+        diffs,
+        common_partitions,
+        base_only_partitions,
+        port_only_partitions,
+    })
+}

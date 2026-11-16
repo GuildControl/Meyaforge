@@ -746,6 +746,45 @@
     );
   };
 
+  // Сбор данных из распакованной прошивки текущего проекта
+  $("#btnScanFirmware").onclick = async () => {
+    if (!currentProject) {
+      toast("Сначала выберите проект на странице «Проекты»", "pink");
+      go("projects");
+      return;
+    }
+    const scanBox = $("#deviceScanningBox");
+    const emptyBox = $("#deviceEmptyPlaceholder");
+    const detBox = $("#deviceDetailsContent");
+    scanBox.classList.remove("hidden");
+    emptyBox.classList.add("hidden");
+    detBox.classList.add("hidden");
+    try {
+      await invoke("read_firmware_info", { project: currentProject });
+      const checkInterval = setInterval(async () => {
+        const busy = await invoke("task_busy");
+        if (!busy) {
+          clearInterval(checkInterval);
+          const profile = await invoke("get_last_scan_profile");
+          const info = await invoke("get_last_device_info");
+          if (info) {
+            displayDeviceInfo(info, profile);
+            toast("Профиль прошивки собран и сохранён в хранилище!", "pink");
+            loadSavedDevicesCount();
+          } else {
+            scanBox.classList.add("hidden");
+            emptyBox.classList.remove("hidden");
+            toast("Не удалось собрать данные из прошивки");
+          }
+        }
+      }, 1000);
+    } catch (e) {
+      scanBox.classList.add("hidden");
+      emptyBox.classList.remove("hidden");
+      toast("Ошибка сбора из прошивки: " + e);
+    }
+  };
+
   let currentScanProfile = null;
 
   function displayDeviceInfo(info, scanProfile) {
@@ -2701,6 +2740,80 @@
     } catch (e) {
       console.error(e);
     }
+
+    loadProfileCompareSelects();
+  }
+
+  /* ---------- Сравнение профилей из хранилища ---------- */
+  async function loadProfileCompareSelects() {
+    const aSel = $("#profBaseSelect");
+    const bSel = $("#profPortSelect");
+    if (!aSel || !bSel) return;
+    aSel.innerHTML = '<option value="">Профиль A (База)...</option>';
+    bSel.innerHTML = '<option value="">Профиль B (Сравнение)...</option>';
+    try {
+      const items = await invoke("list_saved_devices");
+      (items || []).forEach(it => {
+        const tag = it.source === "firmware" ? "прошивка" : "устройство";
+        [aSel, bSel].forEach(sel => {
+          const o = document.createElement("option");
+          o.value = it.id;
+          o.textContent = `${it.title} · ${tag}`;
+          sel.append(o);
+        });
+      });
+    } catch (_) {}
+  }
+
+  $("#btnCompareProfiles").onclick = async () => {
+    const a = $("#profBaseSelect").value;
+    const b = $("#profPortSelect").value;
+    if (!a || !b) return toast("Выберите два профиля для сравнения");
+    if (a === b) return toast("Выберите два разных профиля");
+    try {
+      const res = await invoke("compare_saved_profiles", { baseId: a, portId: b });
+      renderProfileComparison(res);
+    } catch (e) {
+      toast("Ошибка сравнения профилей: " + e);
+    }
+  };
+
+  function renderProfileComparison(d) {
+    $("#profCompareResult").classList.remove("hidden");
+    $("#profBaseHead").textContent = d.base_title;
+    $("#profPortHead").textContent = d.port_title;
+
+    const tb = $("#profSpecsTbody");
+    tb.innerHTML = "";
+    d.specs.forEach(r => {
+      const diff = r.base_val !== r.port_val;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td class="muted">${escapeHtml(r.label)}</td>` +
+        `<td${diff ? ' style="color:var(--pink)"' : ''}>${escapeHtml(r.base_val)}</td>` +
+        `<td${diff ? ' style="color:var(--sky)"' : ''}>${escapeHtml(r.port_val)}</td>`;
+      tb.append(tr);
+    });
+
+    $("#profCommonCount").textContent = d.common_partitions.length;
+    $("#profCommonBadges").innerHTML = d.common_partitions.length
+      ? d.common_partitions.map(p => `<span class="badge erofs">${escapeHtml(p)}</span>`).join(" ")
+      : '<span class="muted">нет</span>';
+    $("#profBaseOnlyBadges").innerHTML = d.base_only_partitions.length
+      ? d.base_only_partitions.map(p => `<span class="badge raw">${escapeHtml(p)}</span>`).join(" ")
+      : '<span class="muted">нет</span>';
+    $("#profPortOnlyBadges").innerHTML = d.port_only_partitions.length
+      ? d.port_only_partitions.map(p => `<span class="badge raw">${escapeHtml(p)}</span>`).join(" ")
+      : '<span class="muted">нет</span>';
+
+    $("#profDiffCount").textContent = d.diffs.length;
+    const dt = $("#profDiffTbody");
+    dt.innerHTML = "";
+    d.diffs.forEach(r => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td><code style="color:var(--sky)">${escapeHtml(r.key)}</code></td>` +
+        `<td>${escapeHtml(r.base_val)}</td><td>${escapeHtml(r.port_val)}</td>`;
+      dt.append(tr);
+    });
   }
 
   $("#btnCompareProjects").onclick = async () => {

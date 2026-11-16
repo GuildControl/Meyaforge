@@ -163,9 +163,10 @@ pub fn repack_partition(
         return Err(format!("Папка раздела extracted/{part} не найдена"));
     }
 
-    let images_dir = d.join("images");
-    fs::create_dir_all(&images_dir).map_err(es)?;
-    let out_img = images_dir.join(format!("{part}.img"));
+    // Результаты сборки всегда складываем в out/ проекта
+    let out_dir = d.join("out");
+    fs::create_dir_all(&out_dir).map_err(es)?;
+    let out_img = out_dir.join(format!("{part}.img"));
 
     let task_title = format!("Сборка раздела {part} ({fs_type})");
 
@@ -223,7 +224,7 @@ pub fn repack_partition(
                 }
 
                 // Временный выходной файл, чтобы не повреждать старый при ошибке
-                let tmp_out = d.join("images").join(format!("{part}.tmp.img"));
+                let tmp_out = d.join("out").join(format!("{part}.tmp.img"));
                 if tmp_out.is_file() {
                     let _ = fs::remove_file(&tmp_out);
                 }
@@ -296,7 +297,7 @@ pub fn repack_partition(
 
         crate::telegram::on_build_done(&format!("Раздел {part}"), &fname, &size_str, "", "", "");
 
-        Ok(format!("Раздел {part} успешно собран: images/{fname} ({size_str})"))
+        Ok(format!("Раздел {part} успешно собран: out/{fname} ({size_str})"))
     })
 }
 
@@ -332,9 +333,16 @@ pub fn repack_super(
         let mut part_specs = Vec::new();
 
         for part in &partitions {
-            let p_img = img_dir.join(format!("{part}.img"));
+            // Приоритет свежей сборке из out/, иначе исходный образ из images/
+            let p_out = out_dir.join(format!("{part}.img"));
+            let p_img = if p_out.is_file() {
+                ctx.log(format!("  Раздел {part}: используется свежая сборка из out/"));
+                p_out
+            } else {
+                img_dir.join(format!("{part}.img"))
+            };
             if !p_img.is_file() {
-                let err = format!("Образ раздела images/{part}.img не найден");
+                let err = format!("Образ раздела {part}.img не найден ни в out/, ни в images/");
                 crate::telegram::on_build_fail(&format!("Super.img ({project})"), "Поиск образов", &err);
                 return Err(err);
             }
@@ -456,10 +464,12 @@ pub fn build_fastboot_package(
             fs::copy(&super_in_img, pkg_dir.join("super.img")).map_err(es)?;
         }
 
-        // Копируем критические загрузочные образы
+        // Копируем критические загрузочные образы (приоритет свежей сборке из out/)
         let boot_parts = ["boot.img", "vendor_boot.img", "recovery.img", "vbmeta.img", "dtbo.img"];
         for bp in boot_parts {
-            let src = images_dir.join(bp);
+            let fresh = out_dir.join(bp);
+            let orig = images_dir.join(bp);
+            let src = if fresh.is_file() { fresh } else { orig };
             if src.is_file() {
                 ctx.log(format!("  Копирование {bp}"));
                 fs::copy(&src, pkg_dir.join(bp)).map_err(es)?;

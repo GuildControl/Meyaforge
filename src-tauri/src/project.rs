@@ -14,9 +14,9 @@ use crate::util::{copy_progress, dir, es, hidden, long, spawn_task, Ctx};
 use crate::{android_tools, ext4x, lp, sdat, sparse, tools};
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
-use std::io::{BufWriter, Write};
+use std::io::{BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::AppHandle;
 
@@ -250,12 +250,123 @@ fn copy_file(ctx: &Ctx, src: &Path, dst: &Path) -> Result<(), String> {
 fn run_payload(ctx: &Ctx, payload: &Path, out: &Path) -> Result<(), String> {
     let exe = tools::bin("payload-dumper-go", "payload-dumper-go.exe")?;
     ctx.stage("Распаковка payload.bin (A/B OTA)");
-    crate::util::run_stream(
-        ctx,
-        &exe,
-        &["-o".into(), out.to_string_lossy().into(), payload.to_string_lossy().into()],
-        None,
-    )
+    // Число потоков распаковки = числу логических ядер (2..16)
+    let conc = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(4).clamp(2, 16);
+    ctx.log(format!(
+        "$ payload-dumper-go -c {} -o {} {}",
+        conc,
+        out.display(),
+        payload.display()
+    ));
+    let mut c = Command::new(&exe);
+    c.arg("-c")
+        .arg(conc.to_string())
+        .arg("-o")
+        .arg(out)
+        .arg(payload)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+    if let Some(d) = exe.parent() {
+        c.current_dir(d);
+    }
+    let mut child = hidden(&mut c)
+        .spawn()
+        .map_err(|e| format!("не удалось запустить {}: {e}", exe.display()))?;
+    let stdout = child.stdout.take().unwrap();
+    let stderr = child.stderr.take().unwrap();
+    let app = ctx.app.clone();
+    let t = std::thread::spawn(move || filter_payload_output(&app, stderr));
+    filter_payload_output(&ctx.app, stdout);
+    let _ = t.join();
+    let st = child.wait().map_err(es)?;
+    if st.success() {
+        Ok(())
+    } else {
+        Err(format!("утилита завершилась с кодом {}", st.code().unwrap_or(-1)))
+    }
+}
+
+/// Разбирает поток payload-dumper-go: \r-обновления прогресс-бара схлопываются
+/// в одну строку на раздел — «[vendor] Раздел распакован успешно».
+fn filter_payload_output(app: &AppHandle, mut r: impl Read) {
+    let mut done: Vec<String> = Vec::new();
+    let mut total: Option<usize> = None;
+    let mut expect_list = false;
+    let handle = |seg: &[u8], done: &mut Vec<String>, total: &mut Option<usize>, expect_list: &mut bool| {
+        let s = String::from_utf8_lossy(seg).trim().to_string();
+        if s.is_empty() {
+            return;
+        }
+        let low = s.to_lowercase();
+        if low.contains("error") || low.contains("failed") || low.contains("panic") {
+            crate::util::emit(app, "err", s);
+            return;
+        }
+        // Блок «Found partitions:» — за ним строка со списком всех разделов
+        if low.starts_with("found partitions") {
+            *expect_list = true;
+            return;
+        }
+        if *expect_list {
+            *expect_list = false;
+            let names: Vec<String> = s
+                .split(',')
+                .filter_map(|item| item.split('(').next().map(|n| n.trim().to_string()))
+                .filter(|n| !n.is_empty())
+                .collect();
+            if !names.is_empty() {
+                *total = Some(names.len());
+                crate::util::emit(app, "out", format!("Найдено разделов: {} ({})", names.len(), names.join(", ")));
+            }
+            return;
+        }
+        let Some(pct_pos) = s.find('%') else { return };
+        let name: String = s
+            .chars()
+            .take_while(|c| !matches!(c, ':' | ' ' | '['))
+            .collect::<String>()
+            .trim_end_matches(".img")
+            .to_string();
+        let num: String = s[..pct_pos]
+            .chars()
+            .rev()
+            .take_while(|c| c.is_ascii_digit() || *c == '.')
+            .collect::<String>()
+            .chars()
+            .rev()
+            .collect();
+        if let Ok(pct) = num.parse::<f64>() {
+            if pct >= 100.0 && !name.is_empty() && !done.contains(&name) {
+                done.push(name.clone());
+                let prefix = match *total {
+                    Some(t) => format!("[{}/{}]", done.len(), t),
+                    None => format!("[{}]", done.len()),
+                };
+                crate::util::emit(app, "out", format!("{prefix} [{name}] Раздел распакован успешно"));
+            }
+        }
+    };
+    let mut buf = [0u8; 8192];
+    let mut seg: Vec<u8> = Vec::new();
+    while let Ok(n) = r.read(&mut buf) {
+        if n == 0 {
+            break;
+        }
+        for &b in &buf[..n] {
+            if b == b'\n' || b == b'\r' {
+                if !seg.is_empty() {
+                    handle(&seg, &mut done, &mut total, &mut expect_list);
+                    seg.clear();
+                }
+            } else {
+                seg.push(b);
+            }
+        }
+    }
+    if !seg.is_empty() {
+        handle(&seg, &mut done, &mut total, &mut expect_list);
+    }
 }
 
 /// Распаковка любых архивов: zip, tar, tar.gz, tar.md5, rar, 7z через bsdtar (System32) с fallback

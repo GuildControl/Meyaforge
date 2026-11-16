@@ -175,6 +175,7 @@
               <button class="btn ghost" id="btnOpenLogsModal"><svg class="svgi" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg> Снять логи</button>
               <label><input type="checkbox" id="scanBootImages" /> Сохранить lk и boot</label>
               <button class="btn primary" id="btnScanDevice"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Просканировать устройство</button>
+              <button class="btn ghost" id="btnScanFirmware" title="Собрать данные из распакованной прошивки текущего проекта"><svg class="svgi" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/></svg> Собрать из прошивки</button>
             </div>
           </div>
 
@@ -1239,6 +1240,70 @@
                 </select>
                 <button class="btn primary" id="btnCompareProjects"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Сравнить</button>
               </div>
+            </div>
+          </div>
+
+          <!-- Сравнение профилей из хранилища (устройства и прошивки) -->
+          <div class="panel-box" style="margin-bottom:18px">
+            <div class="panel-head">
+              <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg></span>
+              <div>
+                <h3>Сравнение профилей из хранилища</h3>
+                <small class="muted">Профили живых устройств и распакованных прошивок (собираются в разделе «Устройство»)</small>
+              </div>
+            </div>
+            <div class="form-row" style="align-items:center">
+              <select id="profBaseSelect" class="search-input" style="flex:1;max-width:none">
+                <option value="">Профиль A (База)...</option>
+              </select>
+              <span style="color:var(--sky)"><svg class="svgi" viewBox="0 0 24 24"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg></span>
+              <select id="profPortSelect" class="search-input" style="flex:1;max-width:none">
+                <option value="">Профиль B (Сравнение)...</option>
+              </select>
+              <button class="btn primary sm" id="btnCompareProfiles" style="white-space:nowrap"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Сравнить профили</button>
+            </div>
+            <div id="profCompareResult" class="hidden" style="margin-top:14px">
+              <div class="table-card" style="margin-bottom:12px">
+                <table class="parts-table" style="font-size:12.5px">
+                  <thead>
+                    <tr>
+                      <th style="width:26%">Параметр</th>
+                      <th id="profBaseHead">A</th>
+                      <th id="profPortHead">B</th>
+                    </tr>
+                  </thead>
+                  <tbody id="profSpecsTbody"></tbody>
+                </table>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;font-size:12.5px;margin-bottom:12px">
+                <div>
+                  <span class="muted">Общие разделы (<span id="profCommonCount">0</span>):</span>
+                  <div id="profCommonBadges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+                </div>
+                <div style="border-top:1px solid var(--line);padding-top:8px">
+                  <span class="muted">Только в A:</span>
+                  <div id="profBaseOnlyBadges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+                </div>
+                <div style="border-top:1px solid var(--line);padding-top:8px">
+                  <span class="muted">Только в B:</span>
+                  <div id="profPortOnlyBadges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+                </div>
+              </div>
+              <details>
+                <summary style="cursor:pointer;font-size:13px;color:var(--sky)">Различия build.prop (<span id="profDiffCount">0</span>)</summary>
+                <div class="table-card" style="margin-top:8px;max-height:300px;overflow-y:auto">
+                  <table class="parts-table" style="font-size:12px">
+                    <thead>
+                      <tr>
+                        <th style="width:34%">Ключ</th>
+                        <th>A</th>
+                        <th>B</th>
+                      </tr>
+                    </thead>
+                    <tbody id="profDiffTbody"></tbody>
+                  </table>
+                </div>
+              </details>
             </div>
           </div>
 

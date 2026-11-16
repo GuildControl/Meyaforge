@@ -275,6 +275,7 @@ fn main() {
             device_reader::get_last_device_info,
             device_reader::get_last_scan_profile,
             device_reader::read_device_info_deep,
+            device_reader::read_firmware_info,
             device_reader::read_device_logs,
             device_reader::list_saved_devices,
             device_reader::get_saved_device,
@@ -296,6 +297,7 @@ fn main() {
             builder::build_fastboot_package,
             // porting engine
             porting::compare_projects,
+            porting::compare_saved_profiles,
             porting::apply_porting_transfer,
             // file manager
             file_manager::fs_list_dir,

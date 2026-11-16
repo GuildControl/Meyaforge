@@ -95,7 +95,13 @@ pub struct SavedDeviceProfile {
     pub success: bool,
     pub failure_stage: Option<String>,
     pub failure_error: Option<String>,
+    #[serde(default = "default_source")]
+    pub source: String, // "device" — живое устройство, "firmware" — распакованная прошивка
     pub data: ComprehensiveDeviceInfo,
+}
+
+fn default_source() -> String {
+    "device".into()
 }
 
 /// Краткая сводка профиля для списка в интерфейсе
@@ -114,6 +120,8 @@ pub struct DeviceSummary {
     pub failure_error: Option<String>,
     pub partitions_count: usize,
     pub props_count: usize,
+    #[serde(default = "default_source")]
+    pub source: String,
 }
 
 fn devices_dir() -> PathBuf {
@@ -840,6 +848,7 @@ pub fn list_saved_devices() -> Result<Vec<DeviceSummary>, String> {
                             failure_error: p.failure_error,
                             partitions_count: p.data.partitions.len(),
                             props_count: p.data.build_props.len(),
+                            source: p.source.clone(),
                         });
                     }
                 }
@@ -960,6 +969,7 @@ pub fn read_device_info_deep(app: AppHandle, include_boot_images: Option<bool>) 
             success: true,
             failure_stage: None,
             failure_error: None,
+            source: "device".into(),
             data: ComprehensiveDeviceInfo::default(),
         };
 
@@ -1235,4 +1245,251 @@ pub async fn read_device_logs(log_type: String) -> Result<String, String> {
     .await
     .map_err(|e| e.to_string())
     .and_then(|r| r)
+}
+
+// ---------------- Сбор данных из распакованной прошивки (offline) ----------------
+
+/// Парсинг build.prop-файла в карту свойств
+fn parse_prop_file(path: &Path, map: &mut BTreeMap<String, String>) -> usize {
+    let mut count = 0;
+    if let Ok(text) = fs::read_to_string(path) {
+        for line in text.lines() {
+            let t = line.trim();
+            if t.starts_with('#') || t.is_empty() {
+                continue;
+            }
+            if let Some((k, v)) = t.split_once('=') {
+                map.insert(k.trim().to_string(), v.trim().to_string());
+                count += 1;
+            }
+        }
+    }
+    count
+}
+
+fn prop(map: &BTreeMap<String, String>, keys: &[&str]) -> String {
+    for k in keys {
+        if let Some(v) = map.get(*k) {
+            if !v.is_empty() {
+                return v.clone();
+            }
+        }
+    }
+    String::new()
+}
+
+/// Рекурсивный поиск fstab-файлов в папке (глубина до 4 уровней)
+fn find_fstabs(dir: &Path, depth: u8, acc: &mut Vec<PathBuf>) {
+    if depth == 0 || acc.len() >= 8 {
+        return;
+    }
+    if let Ok(entries) = fs::read_dir(dir) {
+        for e in entries.flatten() {
+            let p = e.path();
+            if p.is_dir() {
+                find_fstabs(&p, depth - 1, acc);
+            } else if p
+                .file_name()
+                .map_or(false, |n| n.to_string_lossy().starts_with("fstab"))
+            {
+                acc.push(p);
+            }
+        }
+    }
+}
+
+/// Глубокий сбор данных из распакованной прошивки проекта (extracted/, images/).
+/// Результат сохраняется в то же хранилище, что и профили живых устройств,
+/// с пометкой source = "firmware" — для сравнения в разделе «Портирование».
+#[tauri::command]
+pub fn read_firmware_info(app: AppHandle, project: String) -> Result<(), String> {
+    if project.is_empty() || project.contains(['/', '\\']) || project.contains("..") {
+        return Err("некорректное имя проекта".into());
+    }
+    let proj_dir = dir("projects").join(&project);
+    if !proj_dir.is_dir() {
+        return Err(format!("Проект «{project}» не найден"));
+    }
+
+    spawn_task(app, format!("Сбор данных из прошивки {project}"), move |ctx| {
+        if let Ok(mut g) = LAST_DEVICE_SCAN.lock() {
+            *g = None;
+        }
+        if let Ok(mut g) = LAST_SCAN_PROFILE.lock() {
+            *g = None;
+        }
+
+        let mut info = ComprehensiveDeviceInfo::default();
+        info.mode = DeviceMode {
+            serial: project.clone(),
+            mode: "firmware".into(),
+            description: "Распакованная прошивка (offline)".into(),
+        };
+
+        // 1. build.prop из всех разделов
+        ctx.stage("1/3: Чтение build.prop из распакованных разделов...");
+        let prop_candidates = [
+            "extracted/system/build.prop",
+            "extracted/system/system/build.prop",
+            "extracted/system_ext/build.prop",
+            "extracted/product/build.prop",
+            "extracted/vendor/build.prop",
+            "extracted/vendor/etc/build.prop",
+            "extracted/odm/build.prop",
+            "extracted/odm/etc/build.prop",
+        ];
+        let mut props = BTreeMap::new();
+        let mut props_files = 0;
+        for rel in prop_candidates {
+            let p = proj_dir.join(rel);
+            if p.is_file() {
+                let n = parse_prop_file(&p, &mut props);
+                if n > 0 {
+                    props_files += 1;
+                    ctx.log(format!("  {rel}: {n} свойств"));
+                }
+            }
+        }
+        if props.is_empty() {
+            ctx.err("  build.prop не найдены — разберите system/vendor разделы проекта");
+        }
+        ctx.log(format!("  Итого собрано {} свойств из {} файлов", props.len(), props_files));
+
+        // 2. Производные характеристики из свойств
+        info.brand = prop(&props, &["ro.product.brand", "ro.product.system.brand", "ro.product.vendor.brand", "ro.product.product.brand"]);
+        info.manufacturer = prop(&props, &["ro.product.manufacturer", "ro.product.system.manufacturer", "ro.product.vendor.manufacturer"]);
+        info.model = prop(&props, &["ro.product.model", "ro.product.system.model", "ro.product.vendor.model", "ro.product.product.model"]);
+        info.device = prop(&props, &["ro.product.device", "ro.product.system.device", "ro.product.vendor.device", "ro.product.product.device"]);
+        info.product = prop(&props, &["ro.product.name", "ro.product.system.name", "ro.product.vendor.name"]);
+        info.soc = prop(&props, &["ro.soc.model", "ro.hardware", "ro.board.platform", "ro.hardware.chipname"]);
+        info.cpu_abi = prop(&props, &["ro.product.cpu.abi", "ro.product.cpu.abilist"]);
+        info.android_version = prop(&props, &["ro.build.version.release", "ro.system.build.version.release", "ro.vendor.build.version.release"]);
+        info.sdk_version = prop(&props, &["ro.build.version.sdk", "ro.system.build.version.sdk"]);
+        info.security_patch = prop(&props, &["ro.build.version.security_patch", "ro.vendor.build.security_patch"]);
+        info.build_id = prop(&props, &["ro.build.id", "ro.system.build.id"]);
+        info.build_fingerprint = prop(&props, &["ro.build.fingerprint", "ro.system.build.fingerprint", "ro.vendor.build.fingerprint"]);
+        info.display = prop(&props, &["ro.build.display.id", "ro.system.build.display.id"]);
+        info.selinux = prop(&props, &["ro.build.selinux"]);
+        info.is_ab = prop(&props, &["ro.build.ab_update"]) == "true";
+        info.is_dynamic = prop(&props, &["ro.dynamic_partitions"]) == "true";
+        info.slot = if info.is_ab { "a/b".into() } else { "—".into() };
+        info.build_props = props;
+
+        // 3. Разделы: образы из images/ + папки из extracted/
+        ctx.stage("2/3: Инвентаризация разделов прошивки...");
+        let mut seen: Vec<String> = Vec::new();
+        let images_dir = proj_dir.join("images");
+        if images_dir.is_dir() {
+            if let Ok(entries) = fs::read_dir(&images_dir) {
+                for e in entries.flatten() {
+                    let p = e.path();
+                    let is_img = p.extension().map_or(false, |x| x.eq_ignore_ascii_case("img"));
+                    if p.is_file() && is_img {
+                        let name = p.file_stem().unwrap_or_default().to_string_lossy().to_string();
+                        let fs_kind = crate::detect::detect(&p).map(|d| d.kind.to_string()).unwrap_or_else(|_| "img".into());
+                        let size = p.metadata().map(|m| m.len()).unwrap_or(0);
+                        info.partitions.push(PartitionInfo {
+                            name: name.clone(),
+                            filesystem: fs_kind,
+                            size_human: format!("{:.1} МБ", size as f64 / 1048576.0),
+                            mount_point: format!("/{name}"),
+                            block_device: format!("images/{name}.img"),
+                        });
+                        seen.push(name);
+                    }
+                }
+            }
+        }
+        let ext_dir = proj_dir.join("extracted");
+        if ext_dir.is_dir() {
+            if let Ok(entries) = fs::read_dir(&ext_dir) {
+                for e in entries.flatten() {
+                    let p = e.path();
+                    if p.is_dir() {
+                        let name = e.file_name().to_string_lossy().to_string();
+                        if !seen.contains(&name) {
+                            info.partitions.push(PartitionInfo {
+                                name: name.clone(),
+                                filesystem: "extracted".into(),
+                                size_human: "—".into(),
+                                mount_point: format!("/{name}"),
+                                block_device: format!("extracted/{name}/"),
+                            });
+                            seen.push(name);
+                        }
+                    }
+                }
+            }
+        }
+        info.partitions.sort_by(|a, b| a.name.cmp(&b.name));
+        ctx.log(format!("  Найдено разделов: {}", info.partitions.len()));
+
+        // 4. fstab из загрузочных разделов
+        ctx.stage("3/3: Поиск fstab в загрузочных разделах...");
+        let mut fstab_text = String::new();
+        if ext_dir.is_dir() {
+            if let Ok(entries) = fs::read_dir(&ext_dir) {
+                for e in entries.flatten() {
+                    let p = e.path();
+                    if !p.is_dir() {
+                        continue;
+                    }
+                    let name = e.file_name().to_string_lossy().to_lowercase();
+                    if !(name.contains("boot") || name.contains("recovery") || name.contains("lk")) {
+                        continue;
+                    }
+                    let mut found = Vec::new();
+                    find_fstabs(&p, 4, &mut found);
+                    for f in found {
+                        if let Ok(text) = fs::read_to_string(&f) {
+                            let rel = f.strip_prefix(&proj_dir).unwrap_or(&f);
+                            fstab_text.push_str(&format!("# ===== {} =====\n{}\n\n", rel.display(), text.trim()));
+                        }
+                    }
+                }
+            }
+        }
+        info.raw_fstab = fstab_text.trim().to_string();
+        ctx.log(if info.raw_fstab.is_empty() {
+            "  fstab не найден".to_string()
+        } else {
+            "  fstab собран из загрузочных разделов".to_string()
+        });
+
+        // Сохранение профиля
+        let now_secs = current_timestamp();
+        let mut profile = SavedDeviceProfile {
+            id: format!("dev_{}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos()),
+            title: format!("Прошивка: {project}"),
+            timestamp: now_secs,
+            date_human: format_epoch_seconds(now_secs),
+            success: true,
+            failure_stage: None,
+            failure_error: None,
+            source: "firmware".into(),
+            data: info.clone(),
+        };
+
+        if let Err(error) = save_device_profile_file(&profile) {
+            profile.success = false;
+            profile.failure_stage = Some("Сохранение профиля".into());
+            profile.failure_error = Some(error);
+        } else {
+            ctx.log("  Профиль прошивки сохранён в хранилище устройств.");
+        }
+
+        if let Ok(mut g) = LAST_DEVICE_SCAN.lock() {
+            *g = Some(info.clone());
+        }
+        if let Ok(mut g) = LAST_SCAN_PROFILE.lock() {
+            *g = Some(profile.clone());
+        }
+
+        crate::telegram::on_device_scanned("Прошивка", &project, &info.android_version, info.partitions.len(), profile.success);
+
+        Ok(format!(
+            "Сбор из прошивки завершен: {} {} (Android: {}, разделов: {}, свойств: {})",
+            info.brand, info.model, info.android_version, info.partitions.len(), info.build_props.len()
+        ))
+    })
 }

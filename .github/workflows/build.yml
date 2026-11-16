@@ -1,9 +1,8 @@
 name: Build
 
 on:
+  # Собираем только релизы по тегам v* (пуши в main сборку не запускают)
   push:
-    branches:
-      - main
     tags:
       - "v*"
   workflow_dispatch:

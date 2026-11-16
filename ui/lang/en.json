@@ -1737,5 +1737,22 @@
   "(декомпиляция/сборка)": "(decompile/build)",
   "(подпись)": "(signing)",
   "(деодекс). Всё устанавливается во вкладке «Инструменты».": "(deodex). All are installed on the «Tools» tab.",
-  "MEYAFORGE v0.1.4 запущен. Стек Rust + Clean WebUI готов.": "MEYAFORGE v0.1.4 started. Rust + Clean WebUI stack ready."
+  "MEYAFORGE v0.1.4 запущен. Стек Rust + Clean WebUI готов.": "MEYAFORGE v0.1.4 started. Rust + Clean WebUI stack ready.",
+  "Собрать из прошивки": "Collect from firmware",
+  "Сравнение профилей из хранилища": "Compare storage profiles",
+  "Профили живых устройств и распакованных прошивок (собираются в разделе «Устройство»)": "Profiles of live devices and unpacked firmware (collected in the Device section)",
+  "Профиль A (База)...": "Profile A (Base)...",
+  "Профиль B (Сравнение)...": "Profile B (Compare)...",
+  "Сравнить профили": "Compare profiles",
+  "Только в A:": "Only in A:",
+  "Только в B:": "Only in B:",
+  "Различия build.prop (": "build.prop differences (",
+  "Сначала выберите проект на странице «Проекты»": "Select a project on the Projects page first",
+  "Профиль прошивки собран и сохранён в хранилище!": "Firmware profile collected and saved to storage!",
+  "Не удалось собрать данные из прошивки": "Failed to collect firmware data",
+  "Ошибка сбора из прошивки: ": "Firmware collect error: ",
+  "Выберите два профиля для сравнения": "Select two profiles to compare",
+  "Выберите два разных профиля": "Select two different profiles",
+  "Ошибка сравнения профилей: ": "Profile comparison error: ",
+  "Собрать данные из распакованной прошивки текущего проекта": "Collect data from the unpacked firmware of the current project"
 }
