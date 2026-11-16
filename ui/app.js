@@ -3759,7 +3759,7 @@
 
     requestAnimationFrame(() => go("home"));
 
-    line("MEYAFORGE v0.1.3 запущен. Стек Rust + Clean WebUI готов.", "sys");
+    line("MEYAFORGE v0.1.4 запущен. Стек Rust + Clean WebUI готов.", "sys");
     const p = await invoke("get_profile").catch(() => null);
     applyProfile(p);
     if (!p) setTimeout(openProfile, 450);

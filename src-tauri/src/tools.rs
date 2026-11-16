@@ -70,9 +70,7 @@ const DEFAULT_REGISTRY: &str = r#"[
     "name": "smali",
     "category": "APK Modding",
     "desc": "Ассемблер Smali → DEX: сборка classes.dex при деодексе и патчинге кода",
-    "repo": "JesusFreke/smali",
-    "match": ["smali", ".jar"],
-    "exclude": ["baksmali"],
+    "url": "https://bitbucket.org/JesusFreke/smali/downloads/smali-2.5.2.jar",
     "bins": ["smali.jar"]
   },
   {
@@ -80,8 +78,7 @@ const DEFAULT_REGISTRY: &str = r#"[
     "name": "baksmali",
     "category": "APK Modding",
     "desc": "Дизассемблер ODEX/DEX → Smali: деодекс прошивок с bootclasspath",
-    "repo": "JesusFreke/smali",
-    "match": ["baksmali", ".jar"],
+    "url": "https://bitbucket.org/JesusFreke/smali/downloads/baksmali-2.5.2.jar",
     "bins": ["baksmali.jar"]
   },
   {
@@ -142,8 +139,7 @@ const DEFAULT_REGISTRY: &str = r#"[
     "name": "Device Tree Compiler (dtc)",
     "category": "Boot / Recovery",
     "desc": "Компилятор и декомпилятор FDT / Device Tree (DTS ➔ DTB и DTB ➔ DTS)",
-    "repo": "dgibson/dtc",
-    "match": ["win64", "windows", "x86_64"],
+    "url": "https://github.com/mathworks/dtc-build/releases/download/mathworks_dtcbinaries_win_R27.1.0/dtc-v1.7.2_win_binaries.zip",
     "bins": ["dtc.exe"]
   }
 ]"#;
