@@ -1,6 +1,6 @@
 [package]
 name = "meyaforge"
-version = "0.1.2"
+version = "0.1.3"
 description = "MEYAFORGE — firmware kitchen"
 edition = "2021"
 

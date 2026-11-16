@@ -547,7 +547,8 @@
 
         const bOpenExt = tr.querySelector(".btn-open-extracted");
         if (bOpenExt) {
-          bOpenExt.onclick = () => invoke("open_in_explorer", { name: currentProject, sub: `extracted/${p.name}` });
+          bOpenExt.onclick = () => invoke("open_in_explorer", { name: currentProject, sub: `extracted/${p.name}` })
+            .catch(err => toast("Не удалось открыть папку: " + err, "pink"));
         }
 
         const bDelPart = tr.querySelector(".btn-part-del");
@@ -3758,7 +3759,7 @@
 
     requestAnimationFrame(() => go("home"));
 
-    line("MEYAFORGE v0.1.2 запущен. Стек Rust + Clean WebUI готов.", "sys");
+    line("MEYAFORGE v0.1.3 запущен. Стек Rust + Clean WebUI готов.", "sys");
     const p = await invoke("get_profile").catch(() => null);
     applyProfile(p);
     if (!p) setTimeout(openProfile, 450);

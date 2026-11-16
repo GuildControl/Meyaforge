@@ -215,13 +215,22 @@ pub fn delete_project(app: AppHandle, name: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn open_in_explorer(name: String, sub: String) -> Result<(), String> {
+pub fn open_in_explorer(name: String, sub: Option<String>) -> Result<(), String> {
     let mut p = pdir(&name)?;
-    if !sub.is_empty() {
-        if sub.contains("..") {
-            return Err("bad path".into());
+    if let Some(sub) = sub {
+        if !sub.is_empty() {
+            if sub.contains("..") {
+                return Err("bad path".into());
+            }
+            p = p.join(&sub);
         }
-        p = p.join(sub);
+    }
+    // explorer.exe открывает «Документы», если путь не существует —
+    // поднимаемся к ближайшему существующему предку
+    while !p.exists() {
+        if !p.pop() {
+            return Err("нечего открыть: путь не существует".into());
+        }
     }
     let mut c = Command::new("explorer");
     c.arg(&p);
