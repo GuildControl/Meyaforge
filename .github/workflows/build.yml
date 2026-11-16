@@ -46,5 +46,7 @@ jobs:
           # По тегу v* — обычный релиз; при ручном запуске — rolling-релиз pre-release
           tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'pre-release' }}
           releaseName: ${{ github.ref_type == 'tag' && format('MEYAFORGE {0}', github.ref_name) || 'MEYAFORGE pre-release' }}
-          releaseDraft: false
+          # Draft, т.к. в репозитории включены immutable releases:
+          # ассеты можно загружать только в черновик, публикация — вручную на GitHub
+          releaseDraft: true
           prerelease: ${{ github.ref_type != 'tag' }}
