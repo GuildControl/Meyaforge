@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod android_tools;
+mod apk_kitchen;
 mod binary_patcher;
 mod boot_patcher;
 mod builder;
@@ -257,6 +258,11 @@ fn main() {
             android_tools::repack_boot,
             android_tools::decompile_apk,
             android_tools::build_apk,
+            // apk kitchen
+            apk_kitchen::apk_scan_project,
+            apk_kitchen::apk_list_decompiled,
+            apk_kitchen::apk_decompile_project,
+            apk_kitchen::apk_deodex,
             // device reader & library
             device_reader::device_detect,
             device_reader::get_last_device_info,

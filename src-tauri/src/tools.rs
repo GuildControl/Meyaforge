@@ -66,6 +66,25 @@ const DEFAULT_REGISTRY: &str = r#"[
     "bins": ["jadx-gui.bat", "jadx.bat"]
   },
   {
+    "id": "smali",
+    "name": "smali",
+    "category": "APK Modding",
+    "desc": "Ассемблер Smali → DEX: сборка classes.dex при деодексе и патчинге кода",
+    "repo": "JesusFreke/smali",
+    "match": ["smali", ".jar"],
+    "exclude": ["baksmali"],
+    "bins": ["smali.jar"]
+  },
+  {
+    "id": "baksmali",
+    "name": "baksmali",
+    "category": "APK Modding",
+    "desc": "Дизассемблер ODEX/DEX → Smali: деодекс прошивок с bootclasspath",
+    "repo": "JesusFreke/smali",
+    "match": ["baksmali", ".jar"],
+    "bins": ["baksmali.jar"]
+  },
+  {
     "id": "payload-dumper-go",
     "name": "payload-dumper-go",
     "category": "Partitions",

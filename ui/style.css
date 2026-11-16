@@ -294,3 +294,11 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .fm-binary-box{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px;color:var(--muted);text-align:center}
 .fm-binary-box .ic{font-size:48px}
 .fm-image-preview{max-width:90%;max-height:80%;object-fit:contain;border-radius:6px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+
+/* ---------- SVG иконки (замена emoji) ---------- */
+.svgi{width:1em;height:1em;vertical-align:-0.13em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.btn .svgi{font-size:1.05em}
+.f-pill .svgi{font-size:1.05em}
+.icon-btn .svgi{width:13px;height:13px;vertical-align:0}
+.ic .svgi{vertical-align:0}
+.fm-chevron .svgi{width:10px;height:10px}

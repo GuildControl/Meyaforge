@@ -14,7 +14,7 @@
     <div class="brand" data-tauri-drag-region>
       <img src="assets/icon.png" alt="" />
       <span class="logo-text">MEYA<b>FORGE</b></span>
-      <span class="ver" id="appVer">v0.1.0</span>
+      <span class="ver" id="appVer">v0.1.1</span>
     </div>
     <div class="task-bar-indicator hidden" id="topTaskBar">
       <span class="spinner-mini"></span>
@@ -63,7 +63,8 @@
       <button class="nav" data-page="partitions"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg><span data-i18n="nav_partitions">Разделы</span></button>
       <button class="nav" data-page="device"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg><span data-i18n="nav_device">Чтение устройства</span></button>
       <button class="nav" data-page="files"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span data-i18n="nav_files">Файлы</span></button>
-      <button class="nav" data-page="bootapk"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 0-4 4v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V6a4 4 0 0 0-4-4zm-2 6V6a2 2 0 1 1 4 0v2h-4z"/></svg><span data-i18n="nav_bootapk">Boot / APK</span></button>
+      <button class="nav" data-page="bootapk"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg><span data-i18n="nav_patches">Патчи</span></button>
+      <button class="nav" data-page="apk"><svg viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/></svg><span data-i18n="nav_apk">APK Kitchen</span></button>
       <button class="nav" data-page="debloat"><svg viewBox="0 0 24 24"><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3-3h8m-10 3h12"/></svg><span data-i18n="nav_debloat">Деблоатер</span></button>
       <button class="nav" data-page="tools"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg><span data-i18n="nav_tools">Инструменты</span></button>
       <button class="nav" data-page="unpack"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg><span data-i18n="nav_unpack">Распаковка / Сборка</span></button>
@@ -82,7 +83,7 @@
         <div class="page active" data-page="home">
           <div class="hero">
             <div>
-              <h1>Привет, <span class="grad" id="heroNick">кузнец</span> ✦</h1>
+              <h1>Привет, <span class="grad" id="heroNick">кузнец</span> <svg class="svgi" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg></h1>
               <p>Кухня для модификации, портирования и сборки Android-прошивок.</p>
             </div>
             <div class="status-pills">
@@ -91,15 +92,15 @@
             </div>
           </div>
           <div class="grid">
-            <article class="card" data-go="projects" style="--c:var(--pink)"><div class="ic">📁</div><h3>Проекты</h3><p>Управление рабочими пространствами прошивок.</p></article>
-            <article class="card" data-go="device" style="--c:var(--sky)"><div class="ic">📱</div><h3>Чтение устройства</h3><p>Режимы ADB/Fastboot, разделы, build.prop, fstab.</p></article>
-            <article class="card" data-go="partitions" style="--c:var(--violet)"><div class="ic">🧩</div><h3>Разделы и образы</h3><p>Определение super, sparse, ext4, erofs и их разборка.</p></article>
-            <article class="card" data-go="files" style="--c:var(--sky)"><div class="ic">🗂️</div><h3>Файлы & Редактор</h3><p>Дерево разделов, просмотр, редактирование и синтаксис.</p></article>
-            <article class="card" data-go="bootapk" style="--c:var(--pink)"><div class="ic">⚡</div><h3>Модификации & Патчи</h3><p>Boot/Kernel, VBMeta AVB, DTB Studio, LK OEM, Root инжектор, build.prop твики и бинарники.</p></article>
-            <article class="card" data-go="debloat" style="--c:var(--sky)"><div class="ic">🧹</div><h3>Деблоатер</h3><p>Глубокая очистка от рекламы, телеметрии Xiaomi, Samsung, Google и партнерского мусора.</p></article>
-            <article class="card" data-go="tools" style="--c:var(--violet)"><div class="ic">🛠️</div><h3>Менеджер утилит</h3><p>MagiskBoot, Apktool, Uber-Signer, JADX, erofs-utils и др.</p></article>
-            <article class="card" data-go="unpack" style="--c:var(--pink)"><div class="ic">📦</div><h3>Распаковка / Сборка</h3><p>Упаковка и формирование flashable zip образов.</p></article>
-            <article class="card" data-go="port" style="--c:var(--violet)"><div class="ic">🧬</div><h3>Портирование</h3><p>Сравнение прошивок, перенос ядра, fstab и HAL модулей.</p></article>
+            <article class="card" data-go="projects" style="--c:var(--pink)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><h3>Проекты</h3><p>Управление рабочими пространствами прошивок.</p></article>
+            <article class="card" data-go="device" style="--c:var(--sky)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg></div><h3>Чтение устройства</h3><p>Режимы ADB/Fastboot, разделы, build.prop, fstab.</p></article>
+            <article class="card" data-go="partitions" style="--c:var(--violet)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M19.4 7.85c-.05.32.06.65.29.88l1.57 1.57c.47.47.7 1.08.7 1.7s-.23 1.23-.7 1.7l-1.61 1.61a.98.98 0 0 1-.84.28c-.47-.07-.8-.48-.97-.93a2.5 2.5 0 1 0-3.21 3.21c.45.17.86.5.93.97a.98.98 0 0 1-.28.84l-1.61 1.61a2.4 2.4 0 0 1-1.7.7 2.4 2.4 0 0 1-1.7-.7l-1.57-1.57a1.03 1.03 0 0 0-.88-.29c-.49.07-.84.5-1.02.97a2.5 2.5 0 1 1-3.24-3.24c.47-.17.9-.53.97-1.02a1.03 1.03 0 0 0-.29-.88L2.7 12.3A2.4 2.4 0 0 1 2 10.6c0-.62.24-1.23.7-1.7L4.3 7.3c.24-.24.58-.35.92-.3.51.07.88.52 1.07 1.01a2.5 2.5 0 1 0 3.26-3.26c-.48-.2-.93-.56-1.01-1.07-.05-.34.06-.68.3-.92l1.53-1.53A2.4 2.4 0 0 1 12 1.3c.62 0 1.23.24 1.7.7l1.57 1.57c.23.23.56.34.88.29.49-.07.84-.5 1.02-.97a2.5 2.5 0 1 1 3.24 3.24c-.47.17-.9.53-.97 1.02z"/></svg></div><h3>Разделы и образы</h3><p>Определение super, sparse, ext4, erofs и их разборка.</p></article>
+            <article class="card" data-go="files" style="--c:var(--sky)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg></div><h3>Файлы & Редактор</h3><p>Дерево разделов, просмотр, редактирование и синтаксис.</p></article>
+            <article class="card" data-go="bootapk" style="--c:var(--pink)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>Модификации & Патчи</h3><p>Boot/Kernel, VBMeta AVB, DTB Studio, LK OEM, Root инжектор, build.prop твики и бинарники.</p></article>
+            <article class="card" data-go="debloat" style="--c:var(--sky)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m14.62 17.9-10.68-2.92"/><path d="M18.38 2.62a1 1 0 1 1 3 3L17.36 9.64a.5.5 0 0 0 0 .71l.94.94a2.41 2.41 0 0 1 0 3.41l-.94.94a.5.5 0 0 1-.71 0L8.35 7.35a.5.5 0 0 1 0-.71l.94-.94a2.41 2.41 0 0 1 3.41 0l.94.94a.5.5 0 0 0 .71 0z"/><path d="M9 8c-1.8 2.71-3.97 3.46-6.58 3.95a.51.51 0 0 0-.3.82l7.32 8.88a1 1 0 0 0 1.18.2C12.74 20.41 16 16.79 16 15"/></svg></div><h3>Деблоатер</h3><p>Глубокая очистка от рекламы, телеметрии Xiaomi, Samsung, Google и партнерского мусора.</p></article>
+            <article class="card" data-go="tools" style="--c:var(--violet)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><h3>Менеджер утилит</h3><p>MagiskBoot, Apktool, Uber-Signer, JADX, erofs-utils и др.</p></article>
+            <article class="card" data-go="unpack" style="--c:var(--pink)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg></div><h3>Распаковка / Сборка</h3><p>Упаковка и формирование flashable zip образов.</p></article>
+            <article class="card" data-go="port" style="--c:var(--violet)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m10 16 1.5 1.5"/><path d="m14 8-1.5-1.5"/><path d="M15 2c-1.8 2-2.52 4-2.81 6"/><path d="m16.5 10.5 1 1"/><path d="m17 6-2.9-2.9"/><path d="M2 15c6.67-6 13.33 0 20-6"/><path d="m20 9 .9.9"/><path d="M3.1 14.1 4 15"/><path d="m6.5 12.5 1 1"/><path d="m7 18 2.9 2.9"/><path d="M9 22c1.8-2 2.52-4 2.81-6"/></svg></div><h3>Портирование</h3><p>Сравнение прошивок, перенос ядра, fstab и HAL модулей.</p></article>
           </div>
         </div>
 
@@ -127,14 +128,14 @@
               <h2 class="page-title" id="partitionsTitle">Управление разделами</h2>
             </div>
             <div class="actions" id="projectActionsWrap">
-              <button class="btn ghost" id="btnImportFirmware" disabled>📥 Импорт прошивки / образа</button>
-              <button class="btn ghost" id="btnExtractAllParts" disabled>⚡ Разобрать все разделы</button>
-              <button class="btn ghost" id="btnOpenProjFolder" disabled>📂 Папка проекта</button>
+              <button class="btn ghost" id="btnImportFirmware" disabled><svg class="svgi" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Импорт прошивки / образа</button>
+              <button class="btn ghost" id="btnExtractAllParts" disabled><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> Разобрать все разделы</button>
+              <button class="btn ghost" id="btnOpenProjFolder" disabled><svg class="svgi" viewBox="0 0 24 24"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg> Папка проекта</button>
             </div>
           </div>
 
           <div id="noProjectSelected" class="empty-placeholder">
-            <div class="ic">📁</div>
+            <div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
             <h3>Проект не выбран</h3>
             <p class="muted">Выберите существующий проект во вкладке «Проекты» или создайте новый, чтобы приступить к работе с образами.</p>
             <button class="btn primary" id="btnGoToProjects">Перейти к проектам</button>
@@ -170,10 +171,10 @@
               <p class="muted">Глубокий анализ устройства в режимах Android OS, Recovery, Sideload, Fastboot и FastbootD</p>
             </div>
             <div class="actions">
-              <button class="btn ghost" id="btnOpenDevLib">🗄️ Хранилище (<span id="savedDevicesCount">0</span>)</button>
-              <button class="btn ghost" id="btnOpenLogsModal">📋 Снять логи</button>
+              <button class="btn ghost" id="btnOpenDevLib"><svg class="svgi" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg> Хранилище (<span id="savedDevicesCount">0</span>)</button>
+              <button class="btn ghost" id="btnOpenLogsModal"><svg class="svgi" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg> Снять логи</button>
               <label><input type="checkbox" id="scanBootImages" /> Сохранить lk и boot</label>
-              <button class="btn primary" id="btnScanDevice">🔍 Просканировать устройство</button>
+              <button class="btn primary" id="btnScanDevice"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Просканировать устройство</button>
             </div>
           </div>
 
@@ -184,11 +185,11 @@
           </div>
 
           <div id="deviceEmptyPlaceholder" class="empty-placeholder">
-            <div class="ic">🔌</div>
+            <div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8z"/></svg></div>
             <h3>Устройство не просканировано</h3>
             <p class="muted">Подключите телефон по USB с включенной отладкой по USB (ADB) или переведите в режим Fastboot / Recovery, затем нажмите «Просканировать устройство».</p>
             <div style="display:flex;gap:10px;justify-content:center;margin-top:10px">
-              <button class="btn ghost" id="btnOpenDevLibFromEmpty">🗄️ Открыть из хранилища</button>
+              <button class="btn ghost" id="btnOpenDevLibFromEmpty"><svg class="svgi" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg> Открыть из хранилища</button>
               <button class="btn primary" onclick="document.getElementById('btnScanDevice').click()">Начать сканирование</button>
             </div>
           </div>
@@ -197,14 +198,14 @@
             <!-- Предупреждающий баннер при ошибке сканирования -->
             <div id="devScanErrorBanner" class="info-banner hidden" style="border-left:4px solid #ff8fab;background:rgba(255,143,171,.1);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:14px">
               <div style="display:flex;align-items:flex-start;gap:12px">
-                <span style="font-size:24px">⚠️</span>
+                <span style="font-size:24px"><svg class="svgi" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
                 <div>
                   <h4 style="margin:0 0 4px;color:#ff8fab">Сканирование завершилось с ошибкой</h4>
                   <div style="font-size:12.5px;color:var(--text)" id="devScanErrorDesc">Сбой на этапе...</div>
                   <small class="muted">Ниже отображены все параметры, которые удалось считать до прерывания.</small>
                 </div>
               </div>
-              <button class="btn primary" id="btnSavePartialScan" style="white-space:nowrap">💾 Сохранить устройство</button>
+              <button class="btn primary" id="btnSavePartialScan" style="white-space:nowrap"><svg class="svgi" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Сохранить устройство</button>
             </div>
 
             <!-- Режим и статус -->
@@ -279,7 +280,7 @@
             <!-- Дополнительная информация -->
             <div class="panel-box" style="margin-top:16px">
               <div class="panel-head">
-                <span class="ic">🔋</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/><line x1="6" y1="11" x2="6" y2="13"/><line x1="10" y1="11" x2="10" y2="13"/></svg></span>
                 <div>
                   <h3>Батарея, Память и Ядро</h3>
                   <small class="muted">Системные показатели из dumpsys и procfs</small>
@@ -419,21 +420,19 @@
           <div class="page-header">
             <div>
               <h2 class="page-title">Модификации, Патчи & Бинарники</h2>
-              <p class="muted">Комплексный патчинг boot/recovery, извлечение OEM команд из LK/Bootloader, установка заглушек в ELF (.so) и работа с APK</p>
+              <p class="muted">Комплексный патчинг boot/recovery, извлечение OEM команд из LK/Bootloader и установка заглушек в ELF (.so)</p>
             </div>
           </div>
 
           <!-- Вкладки инструментов -->
           <div class="filter-pills" id="patchToolsTabs">
-            <button class="f-pill active" data-ptab="boot">⚡ Boot & Kernel</button>
-            <button class="f-pill" data-ptab="root">💉 Root Инжектор</button>
-            <button class="f-pill" data-ptab="vbmeta">🔏 VBMeta & AVB</button>
-            <button class="f-pill" data-ptab="dtb">🧬 DTB / DTS Studio</button>
-            <button class="f-pill" data-ptab="lk">🛡️ LK & OEM</button>
-            <button class="f-pill" data-ptab="elf">🧩 ELF & Binary</button>
-            <button class="f-pill" data-ptab="props">📝 build.prop Твики</button>
-            <button class="f-pill" data-ptab="flasher">⚡ Fastboot Прошивка</button>
-            <button class="f-pill" data-ptab="apk">📱 APK Modding</button>
+            <button class="f-pill active" data-ptab="boot"><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> Boot & Kernel</button>
+            <button class="f-pill" data-ptab="root"><svg class="svgi" viewBox="0 0 24 24"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/></svg> Root Инжектор</button>
+            <button class="f-pill" data-ptab="vbmeta"><svg class="svgi" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> VBMeta & AVB</button>
+            <button class="f-pill" data-ptab="dtb"><svg class="svgi" viewBox="0 0 24 24"><path d="m10 16 1.5 1.5"/><path d="m14 8-1.5-1.5"/><path d="M15 2c-1.8 2-2.52 4-2.81 6"/><path d="m16.5 10.5 1 1"/><path d="m17 6-2.9-2.9"/><path d="M2 15c6.67-6 13.33 0 20-6"/><path d="m20 9 .9.9"/><path d="M3.1 14.1 4 15"/><path d="m6.5 12.5 1 1"/><path d="m7 18 2.9 2.9"/><path d="M9 22c1.8-2 2.52-4 2.81-6"/></svg> DTB / DTS Studio</button>
+            <button class="f-pill" data-ptab="lk"><svg class="svgi" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg> LK & OEM</button>
+            <button class="f-pill" data-ptab="elf"><svg class="svgi" viewBox="0 0 24 24"><path d="M19.4 7.85c-.05.32.06.65.29.88l1.57 1.57c.47.47.7 1.08.7 1.7s-.23 1.23-.7 1.7l-1.61 1.61a.98.98 0 0 1-.84.28c-.47-.07-.8-.48-.97-.93a2.5 2.5 0 1 0-3.21 3.21c.45.17.86.5.93.97a.98.98 0 0 1-.28.84l-1.61 1.61a2.4 2.4 0 0 1-1.7.7 2.4 2.4 0 0 1-1.7-.7l-1.57-1.57a1.03 1.03 0 0 0-.88-.29c-.49.07-.84.5-1.02.97a2.5 2.5 0 1 1-3.24-3.24c.47-.17.9-.53.97-1.02a1.03 1.03 0 0 0-.29-.88L2.7 12.3A2.4 2.4 0 0 1 2 10.6c0-.62.24-1.23.7-1.7L4.3 7.3c.24-.24.58-.35.92-.3.51.07.88.52 1.07 1.01a2.5 2.5 0 1 0 3.26-3.26c-.48-.2-.93-.56-1.01-1.07-.05-.34.06-.68.3-.92l1.53-1.53A2.4 2.4 0 0 1 12 1.3c.62 0 1.23.24 1.7.7l1.57 1.57c.23.23.56.34.88.29.49-.07.84-.5 1.02-.97a2.5 2.5 0 1 1 3.24 3.24c-.47.17-.9.53-.97 1.02z"/></svg> ELF & Binary</button>
+            <button class="f-pill" data-ptab="props"><svg class="svgi" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> build.prop Твики</button>
           </div>
 
           <!-- 1. Вкладка: Boot & Kernel Патчер -->
@@ -441,7 +440,7 @@
             <div class="grid-2col">
               <div class="panel-box">
                 <div class="panel-head">
-                  <span class="ic">⚡</span>
+                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
                   <div>
                     <h3>Распаковка и Сборка Boot / Recovery</h3>
                     <small class="muted">Управление загрузочными ядрами через MagiskBoot</small>
@@ -473,7 +472,7 @@
               <!-- Панель комплекса патчей -->
               <div class="panel-box">
                 <div class="panel-head">
-                  <span class="ic">🛠️</span>
+                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
                   <div>
                     <h3>Комплекс патчей для ядра и Ramdisk</h3>
                     <small class="muted">Применяется к распакованному ядру в extracted/</small>
@@ -501,17 +500,17 @@
                     <input id="inputCustomCmdline" class="search-input" style="max-width:100%;margin-top:4px" placeholder="Оставьте пустым, чтобы дополнить текущий cmdline" />
                   </div>
                 </div>
-                <button class="btn primary wide" id="btnApplyBootPatches" style="margin-top:8px">⚡ Применить выбранные патчи</button>
+                <button class="btn primary wide" id="btnApplyBootPatches" style="margin-top:8px"><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> Применить выбранные патчи</button>
                 <div id="bootPatchLog" class="tool-hint hidden" style="white-space:pre-wrap;max-height:160px;overflow:auto"></div>
               </div>
 
               <!-- Быстрый HEX Патчер Ядра -->
               <div class="panel-box" style="grid-column: 1 / -1">
                 <div class="panel-head">
-                  <span class="ic">🔬</span>
+                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg></span>
                   <div>
                     <h3>Быстрый HEX-патч ядра (kernel)</h3>
-                    <small class="muted">Поиск и замена последовательностей байт в extracted/&lt;target&gt;/kernel (например, skip_initramfs ➔ want_initramfs, обход проверок security)</small>
+                    <small class="muted">Поиск и замена последовательностей байт в extracted/&lt;target&gt;/kernel (например, skip_initramfs → want_initramfs, обход проверок security)</small>
                   </div>
                 </div>
                 <div class="grid-2col">
@@ -526,8 +525,8 @@
                 </div>
                 <div style="display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap">
                   <button class="btn primary sm" id="btnApplyKernelHex">Применить HEX-патч к ядру</button>
-                  <button class="btn ghost sm" id="btnPresetSkipInitramfs">Пресет: skip_initramfs ➔ want_initramfs</button>
-                  <button class="btn ghost sm" id="btnPresetEnforcing">Пресет: enforcing=1 ➔ enforcing=0</button>
+                  <button class="btn ghost sm" id="btnPresetSkipInitramfs">Пресет: skip_initramfs → want_initramfs</button>
+                  <button class="btn ghost sm" id="btnPresetEnforcing">Пресет: enforcing=1 → enforcing=0</button>
                 </div>
               </div>
             </div>
@@ -537,7 +536,7 @@
           <div id="pTabRoot" class="ptab-pane hidden">
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic">💉</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/></svg></span>
                 <div>
                   <h3>Внедрение Root-решений в образ (Magisk / KernelSU / APatch)</h3>
                   <small class="muted">Автоматическая интеграция в ramdisk и ядро перед обратной сборкой boot.img</small>
@@ -575,7 +574,7 @@
                     </div>
                   </label>
                 </div>
-                <button class="btn primary" id="btnInjectRoot" style="margin-top:14px">⚡ Внедрить выбранный Root в образ</button>
+                <button class="btn primary" id="btnInjectRoot" style="margin-top:14px"><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> Внедрить выбранный Root в образ</button>
               </div>
             </div>
           </div>
@@ -584,7 +583,7 @@
           <div id="pTabVbmeta" class="ptab-pane hidden">
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic">🔏</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
                 <div>
                   <h3>VBMeta & Android Verified Boot (AVB 2.0 / 3.0)</h3>
                   <small class="muted">Анализ заголовков AVB0, отключение проверок верификации и генерация пустых образов</small>
@@ -611,7 +610,7 @@
           <div id="pTabDtb" class="ptab-pane hidden">
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic">🧬</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m10 16 1.5 1.5"/><path d="m14 8-1.5-1.5"/><path d="M15 2c-1.8 2-2.52 4-2.81 6"/><path d="m16.5 10.5 1 1"/><path d="m17 6-2.9-2.9"/><path d="M2 15c6.67-6 13.33 0 20-6"/><path d="m20 9 .9.9"/><path d="M3.1 14.1 4 15"/><path d="m6.5 12.5 1 1"/><path d="m7 18 2.9 2.9"/><path d="M9 22c1.8-2 2.52-4 2.81-6"/></svg></span>
                 <div>
                   <h3>Device Tree Studio (DTB / DTBO & DTS)</h3>
                   <small class="muted">Анализ скомпилированных деревьев устройств (FDT 0xD00DFEED), декомпиляция в DTS и сборка</small>
@@ -620,7 +619,7 @@
               <div class="form-row">
                 <button class="btn primary" id="btnSelectDtbFile">Выбрать DTB / DTBO файл</button>
                 <button class="btn ghost" id="btnDecompileDtb">Декомпилировать в .dts</button>
-                <button class="btn ghost" id="btnCompileDts">Собрать .dts ➔ .dtb</button>
+                <button class="btn ghost" id="btnCompileDts">Собрать .dts → .dtb</button>
               </div>
               <div id="dtbDetailsCard" class="kv-list hidden" style="margin-top:10px;background:rgba(0,0,0,0.2);padding:14px;border-radius:6px">
                 <div class="kv-row"><span>Плата / Модель:</span> <b id="dtbModel" style="color:var(--sky)">—</b></div>
@@ -637,7 +636,7 @@
           <div id="pTabLk" class="ptab-pane hidden">
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic">🛡️</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></span>
                 <div>
                   <h3>Анализатор LK (Little Kernel), ABL / XBL и Bootloader</h3>
                   <small class="muted">Поиск скрытых fastboot OEM команд, разделов, флагов безопасности и SoC сигнатур</small>
@@ -646,7 +645,7 @@
               <div class="form-row">
                 <button class="btn primary" id="btnSelectLkFile">Выбрать файл загрузчика (.bin / .img / .elf)</button>
                 <button class="btn ghost" id="btnAnalyzeLkFromProject">Анализировать раздел lk/abl из проекта</button>
-                <button class="btn ghost" id="btnCopyOemCmds" style="margin-left:auto">📋 Копировать список OEM команд</button>
+                <button class="btn ghost" id="btnCopyOemCmds" style="margin-left:auto"><svg class="svgi" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg> Копировать список OEM команд</button>
               </div>
               <div id="lkSummaryBar" class="status-pills hidden" style="margin-top:8px">
                 <span class="pill">Платформа: <b id="lkPlatform">—</b></span>
@@ -662,7 +661,7 @@
                 <div>
                   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
                     <h4 style="font-size:14px;display:flex;align-items:center;gap:6px">
-                      <span>⚡ Найденные Fastboot OEM команды</span>
+                      <span><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> Найденные Fastboot OEM команды</span>
                     </h4>
                     <input id="inputLkOemFilter" class="search-input" style="max-width:320px;padding:4px 10px;font-size:12px" placeholder="Фильтр OEM команд (например: unlock, lock, reboot, key)..." />
                   </div>
@@ -682,11 +681,11 @@
 
                 <div class="grid-2col">
                   <div>
-                    <h4 style="font-size:13px;margin-bottom:6px">📌 Разделы, на которые ссылается LK</h4>
+                    <h4 style="font-size:13px;margin-bottom:6px"><svg class="svgi" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1z"/></svg> Разделы, на которые ссылается LK</h4>
                     <div id="lkPartsPills" style="display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow:auto;background:rgba(0,0,0,0.2);padding:10px;border-radius:6px"></div>
                   </div>
                   <div>
-                    <h4 style="font-size:13px;margin-bottom:6px">🔒 Флаги безопасности & Tamper проверки</h4>
+                    <h4 style="font-size:13px;margin-bottom:6px"><svg class="svgi" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Флаги безопасности & Tamper проверки</h4>
                     <div id="lkSecurityPills" style="display:flex;flex-wrap:wrap;gap:6px;max-height:140px;overflow:auto;background:rgba(0,0,0,0.2);padding:10px;border-radius:6px"></div>
                   </div>
                 </div>
@@ -698,7 +697,7 @@
           <div id="pTabElf" class="ptab-pane hidden">
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic">🧩</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M19.4 7.85c-.05.32.06.65.29.88l1.57 1.57c.47.47.7 1.08.7 1.7s-.23 1.23-.7 1.7l-1.61 1.61a.98.98 0 0 1-.84.28c-.47-.07-.8-.48-.97-.93a2.5 2.5 0 1 0-3.21 3.21c.45.17.86.5.93.97a.98.98 0 0 1-.28.84l-1.61 1.61a2.4 2.4 0 0 1-1.7.7 2.4 2.4 0 0 1-1.7-.7l-1.57-1.57a1.03 1.03 0 0 0-.88-.29c-.49.07-.84.5-1.02.97a2.5 2.5 0 1 1-3.24-3.24c.47-.17.9-.53.97-1.02a1.03 1.03 0 0 0-.29-.88L2.7 12.3A2.4 2.4 0 0 1 2 10.6c0-.62.24-1.23.7-1.7L4.3 7.3c.24-.24.58-.35.92-.3.51.07.88.52 1.07 1.01a2.5 2.5 0 1 0 3.26-3.26c-.48-.2-.93-.56-1.01-1.07-.05-.34.06-.68.3-.92l1.53-1.53A2.4 2.4 0 0 1 12 1.3c.62 0 1.23.24 1.7.7l1.57 1.57c.23.23.56.34.88.29.49-.07.84-.5 1.02-.97a2.5 2.5 0 1 1 3.24 3.24c-.47.17-.9.53-.97 1.02z"/></svg></span>
                 <div>
                   <h3>ELF & Binary Патчер — Извлечение функций и установка заглушек</h3>
                   <small class="muted">Модификация нативных библиотек (.so) и исполняемых файлов Android (ARM, AArch64, x86)</small>
@@ -720,7 +719,7 @@
               <div id="elfWorkspace" class="hidden" style="display:flex;flex-direction:column;gap:14px;margin-top:10px">
                 <!-- Панель управления патчем -->
                 <div style="background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:6px;padding:14px">
-                  <h4 style="font-size:14px;margin-bottom:10px">🛠️ Установка заглушки на функцию</h4>
+                  <h4 style="font-size:14px;margin-bottom:10px"><svg class="svgi" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Установка заглушки на функцию</h4>
                   <div class="grid-2col">
                     <div>
                       <span style="font-size:12px;color:var(--muted)">Выбранная функция (символ):</span>
@@ -753,15 +752,15 @@
                     </div>
                   </div>
                   <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
-                    <button class="btn primary" id="btnApplyElfPatch">⚡ Применить патч (Установить заглушку)</button>
+                    <button class="btn primary" id="btnApplyElfPatch"><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> Применить патч (Установить заглушку)</button>
                     <span id="patchStatusLabel" class="tool-hint hidden"></span>
                   </div>
                 </div>
 
                 <!-- Панель замены строк в бинарнике -->
                 <div style="background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:6px;padding:14px">
-                  <h4 style="font-size:14px;margin-bottom:6px">🔤 Замена строк в бинарнике (String Patcher)</h4>
-                  <small class="muted">Безопасная замена ASCII строк внутри .so/bin с сохранением размера (например <code>su</code> ➔ <code>xx</code>, <code>test-keys</code> ➔ <code>release-keys</code>)</small>
+                  <h4 style="font-size:14px;margin-bottom:6px"><svg class="svgi" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg> Замена строк в бинарнике (String Patcher)</h4>
+                  <small class="muted">Безопасная замена ASCII строк внутри .so/bin с сохранением размера (например <code>su</code> → <code>xx</code>, <code>test-keys</code> → <code>release-keys</code>)</small>
                   <div class="grid-2col" style="margin-top:10px">
                     <div>
                       <span style="font-size:12px;color:var(--muted)">Исходная строка (в бинарнике):</span>
@@ -807,7 +806,7 @@
           <div id="pTabProps" class="ptab-pane hidden">
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic">📝</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
                 <div>
                   <h3>Каталог твиков build.prop / system.prop и Спуфинг</h3>
                   <small class="muted">Готовые пресеты (Pixel 8 Pro, оптимизация батареи, ускорение UI, отключение логирования)</small>
@@ -825,7 +824,7 @@
               <div id="propWorkspace" class="hidden" style="display:flex;flex-direction:column;gap:14px;margin-top:10px">
                 <!-- Сетка пресетов -->
                 <div>
-                  <h4 style="font-size:14px;margin-bottom:8px">🔥 Готовые пресеты твиков:</h4>
+                  <h4 style="font-size:14px;margin-bottom:8px"><svg class="svgi" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> Готовые пресеты твиков:</h4>
                   <div class="grid" id="propPresetsGrid"></div>
                 </div>
                 <!-- Таблица свойств -->
@@ -851,85 +850,79 @@
             </div>
           </div>
 
-          <!-- Вкладка: Fastboot Flasher -->
-          <div id="pTabFlasher" class="ptab-pane hidden">
-            <div class="panel-box">
-              <div class="panel-head">
-                <span class="ic">⚡</span>
-                <div>
-                  <h3>Fastboot Прошивальщик и Сервисные режимы (EDL / BROM)</h3>
-                  <small class="muted">Прошивка разделов по слотам, управление FastbootD и аварийная перезагрузка</small>
-                </div>
-              </div>
-              <div class="form-row" style="align-items:center">
-                <button class="btn primary" id="btnRefreshFbDevices">🔄 Проверить устройства</button>
-                <div id="fbDeviceStatus" style="font-size:13px;color:var(--sky)">Устройства не обнаружены</div>
-              </div>
+        </div>
 
-              <div class="grid-2col" style="margin-top:10px">
-                <!-- Панель прошивки -->
-                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:6px;padding:14px">
-                  <h4 style="font-size:14px;margin-bottom:8px">⚡ Прошивка раздела</h4>
-                  <div style="display:flex;flex-direction:column;gap:10px">
-                    <div>
-                      <span style="font-size:12px;color:var(--muted)">Имя раздела:</span>
-                      <input id="inputFlashPartition" class="search-input" style="max-width:100%;margin-top:4px" placeholder="boot, super, vbmeta, recovery..." value="boot" />
-                    </div>
-                    <div>
-                      <span style="font-size:12px;color:var(--muted)">Файл образа (.img):</span>
-                      <div style="display:flex;gap:6px;margin-top:4px">
-                        <input id="inputFlashImgPath" class="search-input" style="flex:1" placeholder="Путь к файлу образа..." />
-                        <button class="btn ghost sm" id="btnPickFlashImg">Обзор...</button>
-                      </div>
-                    </div>
-                    <div>
-                      <span style="font-size:12px;color:var(--muted)">Слот устройства:</span>
-                      <select id="selFlashSlot" class="search-input" style="max-width:100%;margin-top:4px">
-                        <option value="current">Текущий активный слот</option>
-                        <option value="a">Слот A (_a)</option>
-                        <option value="b">Слот B (_b)</option>
-                        <option value="both">Без суффикса слота</option>
-                      </select>
-                    </div>
-                    <button class="btn primary" id="btnExecuteFlash" style="margin-top:6px">⚡ Начать прошивку</button>
-                    <div id="flashLogBox" class="tool-hint hidden" style="white-space:pre-wrap;max-height:160px;overflow:auto"></div>
-                  </div>
-                </div>
-
-                <!-- Панель перезагрузки и режимов -->
-                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:6px;padding:14px">
-                  <h4 style="font-size:14px;margin-bottom:8px">🔄 Сервисные команды и режимы</h4>
-                  <small class="muted">Отправка команд перезагрузки на подключенное устройство</small>
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
-                    <button class="btn ghost sm" data-fb-reboot="system">В систему (Reboot)</button>
-                    <button class="btn ghost sm" data-fb-reboot="bootloader">В Bootloader</button>
-                    <button class="btn ghost sm" data-fb-reboot="recovery">В Recovery</button>
-                    <button class="btn ghost sm" data-fb-reboot="fastbootd">В FastbootD</button>
-                    <button class="btn ghost danger sm" style="grid-column: 1 / -1" data-fb-reboot="edl">🚨 В аварийный режим EDL (Qualcomm 9008)</button>
-                  </div>
-                </div>
-              </div>
+        <!-- APK Kitchen -->
+        <div class="page" data-page="apk">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">APK Kitchen</h2>
+              <p class="muted">Полный цикл работы с приложениями: поиск APK в прошивке, декомпиляция, деодекс, редактирование ресурсов и Smali, сборка и подпись</p>
+            </div>
+            <div class="actions">
+              <select id="apkProjectSelect" class="search-input" style="width:220px;padding:8px 12px">
+                <option value="">Выберите проект...</option>
+              </select>
+              <button class="btn ghost" id="btnApkRefresh"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg> Обновить</button>
+              <button class="btn primary" id="btnApkPickExternal"><svg class="svgi" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Декомпилировать APK с диска</button>
             </div>
           </div>
 
-          <!-- 4. Вкладка: APK Modding -->
-          <div id="pTabApk" class="ptab-pane hidden">
-            <div class="panel-box">
-              <div class="panel-head">
-                <span class="ic">📱</span>
-                <div>
-                  <h3>APK Декомпиляция и Сборка</h3>
-                  <small class="muted">Разборка ресурсов и Smali с помощью Apktool, сборка и подпись</small>
-                </div>
-              </div>
-              <div class="form-row">
-                <button class="btn primary" id="btnSelectApkFile">Декомпилировать APK</button>
-                <button class="btn ghost" id="btnBuildApk">Собрать & Подписать APK</button>
-              </div>
-              <div class="tool-hint">
-                <span>Требуются: <b>Java (JRE)</b>, <b>Apktool</b>, <b>Uber-APK-Signer</b>.</span>
+          <div class="info-banner" id="apkSummaryBanner">
+            <span class="info-tag">Найдено APK: <b id="apkFoundCount">0</b></span>
+            <span class="info-tag">С ODEX (требуют деодекса): <b id="apkOdexCount">0</b></span>
+            <span class="info-tag">Декомпилировано: <b id="apkDecCount">0</b></span>
+          </div>
+
+          <div class="panel-box">
+            <div class="panel-head">
+              <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/></svg></span>
+              <div>
+                <h3>Приложения в прошивке</h3>
+                <small class="muted">Все APK из разобранных разделов проекта (system/app, priv-app, product, vendor и др.)</small>
               </div>
             </div>
+            <div class="table-card">
+              <table class="parts-table">
+                <thead>
+                  <tr>
+                    <th>Приложение</th>
+                    <th>Путь</th>
+                    <th>Размер</th>
+                    <th>ODEX</th>
+                    <th style="text-align:right">Действия</th>
+                  </tr>
+                </thead>
+                <tbody id="apkScanTbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel-box" style="margin-top:16px">
+            <div class="panel-head">
+              <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg></span>
+              <div>
+                <h3>Декомпилированные приложения</h3>
+                <small class="muted">extracted/apk_* — правьте ресурсы и Smali во встроенном редакторе, затем соберите и подпишите</small>
+              </div>
+            </div>
+            <div class="table-card">
+              <table class="parts-table">
+                <thead>
+                  <tr>
+                    <th>Папка</th>
+                    <th>Содержимое</th>
+                    <th>Файлов</th>
+                    <th style="text-align:right">Действия</th>
+                  </tr>
+                </thead>
+                <tbody id="apkDecTbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="tool-hint" style="margin-top:14px">
+            <span>Требуются: <b>Java (JRE)</b>, <b>Apktool</b> (декомпиляция/сборка), <b>Uber-APK-Signer</b> (подпись), <b>baksmali + smali</b> (деодекс). Всё устанавливается во вкладке «Инструменты».</span>
           </div>
         </div>
 
@@ -944,7 +937,7 @@
               <select id="debloatProjectSelect" class="search-input" style="width:220px;padding:8px 12px">
                 <option value="">Выберите проект...</option>
               </select>
-              <button class="btn primary" id="btnScanDebloat">🔍 Сканировать приложения</button>
+              <button class="btn primary" id="btnScanDebloat"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Сканировать приложения</button>
               <button class="btn ghost danger" id="btnRestoreDebloat">Восстановить из removed_bloat/</button>
             </div>
           </div>
@@ -962,7 +955,7 @@
                   <input type="checkbox" id="chkDebloatBackup" checked />
                   <span>Безопасный бэкап в <code>removed_bloat/</code></span>
                 </label>
-                <button class="btn danger sm" id="btnExecuteDebloat">🗑️ Удалить выбранные приложения (<span id="debSelectedCount">0</span>)</button>
+                <button class="btn danger sm" id="btnExecuteDebloat"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> Удалить выбранные приложения (<span id="debSelectedCount">0</span>)</button>
               </div>
             </div>
           </div>
@@ -1009,7 +1002,7 @@
               <p class="muted">Внешние бинарники для работы с прошивками. Скачиваются и обновляются напрямую с GitHub Releases в один клик</p>
             </div>
             <div class="actions">
-              <button class="btn ghost" id="btnCheckToolsUpdates">🔄 Проверить обновления инструментов</button>
+              <button class="btn ghost" id="btnCheckToolsUpdates"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg> Проверить обновления инструментов</button>
             </div>
           </div>
           <div class="filter-pills" id="toolCategoryFilters">
@@ -1036,10 +1029,10 @@
               <select id="fmProjectSelect" class="search-input" style="width:220px;padding:8px 12px">
                 <option value="">Выберите проект...</option>
               </select>
-              <button class="btn ghost sm" id="btnFmNewFile">📄 Новый файл</button>
-              <button class="btn ghost sm" id="btnFmNewFolder">📁 Новая папка</button>
-              <button class="btn ghost sm" id="btnFmRefresh">🔄 Обновить</button>
-              <button class="btn ghost sm" id="btnFmOpenExplorer">📂 В проводнике</button>
+              <button class="btn ghost sm" id="btnFmNewFile"><svg class="svgi" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Новый файл</button>
+              <button class="btn ghost sm" id="btnFmNewFolder"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Новая папка</button>
+              <button class="btn ghost sm" id="btnFmRefresh"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg> Обновить</button>
+              <button class="btn ghost sm" id="btnFmOpenExplorer"><svg class="svgi" viewBox="0 0 24 24"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg> В проводнике</button>
             </div>
           </div>
 
@@ -1064,9 +1057,9 @@
                 <div class="fm-meta-group">
                   <span id="fmStatsBadge" style="font-size:12px;color:var(--muted)"></span>
                   <span class="badge raw" id="fmLangBadge" style="display:none">TXT</span>
-                  <button class="btn sm ghost" id="btnFmCopyPath" style="display:none" title="Копировать относительный путь">📋 Путь</button>
-                  <button class="btn sm ghost danger" id="btnFmDeleteCurrent" style="display:none" title="Удалить файл">🗑️</button>
-                  <button class="btn sm primary" id="btnFmSaveFile" style="display:none">💾 Сохранить (Ctrl+S)</button>
+                  <button class="btn sm ghost" id="btnFmCopyPath" style="display:none" title="Копировать относительный путь"><svg class="svgi" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg> Путь</button>
+                  <button class="btn sm ghost danger" id="btnFmDeleteCurrent" style="display:none" title="Удалить файл"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
+                  <button class="btn sm primary" id="btnFmSaveFile" style="display:none"><svg class="svgi" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Сохранить (Ctrl+S)</button>
                 </div>
               </div>
 
@@ -1074,7 +1067,7 @@
               <div class="fm-body" id="fmBody">
                 <!-- Пустое состояние -->
                 <div id="fmEmptyEditor" class="fm-binary-box" style="width:100%">
-                  <div class="ic">📄</div>
+                  <div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <h3>Выберите файл в дереве слева</h3>
                   <p style="max-width:360px">
                     Поддерживается редактирование текстовых файлов (<code>build.prop</code>, <code>fstab</code>, <code>.rc</code>, <code>.xml</code>, <code>.sh</code>, <code>.json</code>), предпросмотр изображений и анализ бинарных файлов.
@@ -1095,7 +1088,7 @@
 
                 <!-- Бинарные файлы -->
                 <div id="fmBinaryViewWrap" class="fm-binary-box hidden" style="width:100%">
-                  <div class="ic">💿</div>
+                  <div class="ic"><svg class="svgi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg></div>
                   <h3 id="fmBinaryName">Образ раздела / Бинарный файл</h3>
                   <p id="fmBinaryDesc" style="max-width:440px">
                     Этот файл является бинарным (скомпилированным) и не может быть отредактирован как текст.
@@ -1120,8 +1113,8 @@
               <select id="repackProjectSelect" class="search-input" style="width:220px;padding:8px 12px">
                 <option value="">Выберите проект...</option>
               </select>
-              <button class="btn ghost" id="btnRefreshRepack">🔄 Обновить</button>
-              <button class="btn ghost" id="btnOpenOutDir">📂 Папка out/</button>
+              <button class="btn ghost" id="btnRefreshRepack"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg> Обновить</button>
+              <button class="btn ghost" id="btnOpenOutDir"><svg class="svgi" viewBox="0 0 24 24"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg> Папка out/</button>
             </div>
           </div>
 
@@ -1130,12 +1123,12 @@
             <!-- Блок сборки разделов -->
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic">🔨</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m15 12-8.37 8.37a1 1 0 1 1-3-3L12 9"/><path d="m12 9 2.5-2.5L18 10l-2.5 2.5z"/><path d="M14.5 6.5 17 4l3 3-2.5 2.5"/></svg></span>
                 <div style="flex:1">
                   <h3>1. Сборка разделов из extracted/</h3>
                   <small class="muted">Упаковка модифицированных файлов обратно в .img образы</small>
                 </div>
-                <button class="btn sm ghost" id="btnRepackAllExtracted">⚡ Собрать все</button>
+                <button class="btn sm ghost" id="btnRepackAllExtracted"><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> Собрать все</button>
               </div>
 
               <div id="repackExtractedList" style="display:flex;flex-direction:column;gap:10px;max-height:360px;overflow-y:auto">
@@ -1146,7 +1139,7 @@
             <!-- Блок сборки super.img -->
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic">📦</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg></span>
                 <div style="flex:1">
                   <h3>2. Сборка динамического super.img</h3>
                   <small class="muted">Генерация LP метаданных и объединение образов через lpmake</small>
@@ -1173,7 +1166,7 @@
               </div>
 
               <button class="btn primary" id="btnRunRepackSuper" style="width:100%">
-                📦 Собрать super.img (lpmake)
+                <svg class="svgi" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg> Собрать super.img (lpmake)
               </button>
             </div>
           </div>
@@ -1183,7 +1176,7 @@
             <!-- Блок генерации релиза -->
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic">🚀</span>
+                <span class="ic"></span>
                 <div>
                   <h3>3. Формирование готовой прошивки (Fastboot ROM)</h3>
                   <small class="muted">Создание пакета для быстрой прошивки с автоматическими скриптами</small>
@@ -1206,7 +1199,7 @@
                 </div>
 
                 <button class="btn primary" id="btnBuildFastbootPkg">
-                  🚀 Сформировать Fastboot ROM пакет
+                   Сформировать Fastboot ROM пакет
                 </button>
               </div>
             </div>
@@ -1214,7 +1207,7 @@
             <!-- Блок готовых файлов сборки -->
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic">📁</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
                 <div>
                   <h3>Файлы в папке out/ (<span id="repackOutCount">0</span>)</h3>
                   <small class="muted">Результаты сборки ядер, разделов и супер-образов</small>
@@ -1240,18 +1233,18 @@
                 <select id="portBaseSelect" class="search-input" style="width:190px;padding:8px 12px">
                   <option value="">База (Сток)...</option>
                 </select>
-                <span style="color:var(--pink);font-weight:bold;font-size:16px">➔</span>
+                <span style="color:var(--pink);font-weight:bold;font-size:16px">→</span>
                 <select id="portPortSelect" class="search-input" style="width:190px;padding:8px 12px">
                   <option value="">Порт (Донор)...</option>
                 </select>
-                <button class="btn primary" id="btnCompareProjects">🔍 Сравнить</button>
+                <button class="btn primary" id="btnCompareProjects"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Сравнить</button>
               </div>
             </div>
           </div>
 
           <!-- Начальное пустое состояние -->
           <div id="portEmptyState" class="empty-placeholder">
-            <div class="ic">🧬</div>
+            <div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m10 16 1.5 1.5"/><path d="m14 8-1.5-1.5"/><path d="M15 2c-1.8 2-2.52 4-2.81 6"/><path d="m16.5 10.5 1 1"/><path d="m17 6-2.9-2.9"/><path d="M2 15c6.67-6 13.33 0 20-6"/><path d="m20 9 .9.9"/><path d="M3.1 14.1 4 15"/><path d="m6.5 12.5 1 1"/><path d="m7 18 2.9 2.9"/><path d="M9 22c1.8-2 2.52-4 2.81-6"/></svg></div>
             <h3>Выберите проекты Базы и Порта</h3>
             <p class="muted">
               <b>База (Сток)</b> — родная прошивка вашего устройства, откуда будут взяты ядро, fstab и аппаратные библиотеки.<br>
@@ -1264,7 +1257,7 @@
             <!-- Баннер совместимости -->
             <div class="device-status-banner" style="justify-content:space-between;margin-bottom:18px">
               <div style="display:flex;align-items:center;gap:16px">
-                <div style="font-size:36px" id="portScoreIcon">⚖️</div>
+                <div style="font-size:36px" id="portScoreIcon"><svg class="svgi" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg></div>
                 <div>
                   <h3 style="margin:0;font-size:18px">
                     Совместимость: <span id="portScoreVal" style="color:var(--pink)">100%</span>
@@ -1272,7 +1265,7 @@
                   <div id="portScoreNotes" style="display:flex;flex-direction:column;gap:3px;margin-top:4px;font-size:12.5px;color:var(--muted)"></div>
                 </div>
               </div>
-              <button class="btn ghost sm" id="btnRecompareProjects">🔄 Перепроверить</button>
+              <button class="btn ghost sm" id="btnRecompareProjects"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg> Перепроверить</button>
             </div>
 
             <!-- Сетка: Сравнение характеристик (База vs Порт) -->
@@ -1280,7 +1273,7 @@
               <!-- Спецификации Базы -->
               <div class="panel-box">
                 <div class="panel-head">
-                  <span class="ic">📱</span>
+                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg></span>
                   <div>
                     <h3 id="portBaseTitle">Базовое устройство (Сток)</h3>
                     <small class="muted">Источник драйверов и конфигураций железа</small>
@@ -1292,7 +1285,7 @@
               <!-- Спецификации Порта -->
               <div class="panel-box">
                 <div class="panel-head">
-                  <span class="ic">✨</span>
+                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg></span>
                   <div>
                     <h3 id="portPortTitle">Портируемая прошивка (Донор)</h3>
                     <small class="muted">Источник системных разделов (system, product)</small>
@@ -1307,7 +1300,7 @@
               <!-- Разделы -->
               <div class="panel-box">
                 <div class="panel-head">
-                  <span class="ic">🧩</span>
+                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M19.4 7.85c-.05.32.06.65.29.88l1.57 1.57c.47.47.7 1.08.7 1.7s-.23 1.23-.7 1.7l-1.61 1.61a.98.98 0 0 1-.84.28c-.47-.07-.8-.48-.97-.93a2.5 2.5 0 1 0-3.21 3.21c.45.17.86.5.93.97a.98.98 0 0 1-.28.84l-1.61 1.61a2.4 2.4 0 0 1-1.7.7 2.4 2.4 0 0 1-1.7-.7l-1.57-1.57a1.03 1.03 0 0 0-.88-.29c-.49.07-.84.5-1.02.97a2.5 2.5 0 1 1-3.24-3.24c.47-.17.9-.53.97-1.02a1.03 1.03 0 0 0-.29-.88L2.7 12.3A2.4 2.4 0 0 1 2 10.6c0-.62.24-1.23.7-1.7L4.3 7.3c.24-.24.58-.35.92-.3.51.07.88.52 1.07 1.01a2.5 2.5 0 1 0 3.26-3.26c-.48-.2-.93-.56-1.01-1.07-.05-.34.06-.68.3-.92l1.53-1.53A2.4 2.4 0 0 1 12 1.3c.62 0 1.23.24 1.7.7l1.57 1.57c.23.23.56.34.88.29.49-.07.84-.5 1.02-.97a2.5 2.5 0 1 1 3.24 3.24c-.47.17-.9.53-.97 1.02z"/></svg></span>
                   <div>
                     <h3>Сравнение структуры разделов</h3>
                     <small class="muted">Общие и уникальные разделы в обоих проектах</small>
@@ -1332,7 +1325,7 @@
               <!-- HAL Модули -->
               <div class="panel-box">
                 <div class="panel-head">
-                  <span class="ic">⚙️</span>
+                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="m4.9 4.9 2.15 2.15"/><path d="m16.95 16.95 2.15 2.15"/><path d="m19.1 4.9-2.15 2.15"/><path d="m7.05 16.95-2.15 2.15"/></svg></span>
                   <div>
                     <h3>Аппаратные библиотеки (Vendor HAL)</h3>
                     <small class="muted">Камера, аудио, сенсоры, дисплей и биометрия</small>
@@ -1357,7 +1350,7 @@
             <!-- Мастер портирования: Выбор действий и Применение -->
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic">🪄</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m15 4V2"/><path d="m15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></svg></span>
                 <div>
                   <h3>Мастер портирования: Перенос и синхронизация</h3>
                   <small class="muted">Выберите компоненты, которые автоматика перенесёт из Базы в проект Порта</small>
@@ -1416,7 +1409,7 @@
 
               <div class="row" style="margin-top:10px;justify-content:flex-end">
                 <button class="btn primary" id="btnApplyPortingTransfer" style="padding:12px 28px;font-size:14px">
-                  🚀 Применить портирование к проекту
+                   Применить портирование к проекту
                 </button>
               </div>
             </div>
@@ -1432,8 +1425,8 @@
             <h3 data-i18n="settings_lang">Язык интерфейса</h3>
             <p class="muted">Выберите язык для интерфейса MEYAFORGE и уведомлений Telegram бота:</p>
             <div style="display:flex;gap:10px;margin-top:6px">
-              <button class="btn ghost btn-set-lang" data-set-lang="ru">🇷🇺 Русский (RU)</button>
-              <button class="btn ghost btn-set-lang" data-set-lang="en">🇬🇧 English (EN)</button>
+              <button class="btn ghost btn-set-lang" data-set-lang="ru">Русский (RU)</button>
+              <button class="btn ghost btn-set-lang" data-set-lang="en">English (EN)</button>
             </div>
           </div>
 
@@ -1447,13 +1440,13 @@
           <div class="panel-box" style="margin-bottom:18px">
             <div class="page-header" style="margin-bottom:14px">
               <div>
-                <h3 style="margin:0;font-size:18px">🤖 Telegram Бот & Уведомления</h3>
+                <h3 style="margin:0;font-size:18px"><svg class="svgi" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg> Telegram Бот & Уведомления</h3>
                 <small class="muted">Живые статусы сборки, автопостинг релизов в каналы и управление через команды бота</small>
               </div>
               <div class="actions">
-                <button class="btn ghost sm" id="btnTgPollNow">🔄 Проверить команды</button>
-                <button class="btn ghost sm" id="btnTgSendTest">📢 Тестовое сообщение</button>
-                <button class="btn primary sm" id="btnTgSaveConfig">💾 Сохранить настройки</button>
+                <button class="btn ghost sm" id="btnTgPollNow"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg> Проверить команды</button>
+                <button class="btn ghost sm" id="btnTgSendTest"><svg class="svgi" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Тестовое сообщение</button>
+                <button class="btn primary sm" id="btnTgSaveConfig"><svg class="svgi" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Сохранить настройки</button>
               </div>
             </div>
 
@@ -1462,7 +1455,7 @@
               <!-- Блок подключения бота -->
               <div class="panel-box" style="background:rgba(10,20,55,.4)">
                 <div class="panel-head">
-                  <span class="ic">🤖</span>
+                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></span>
                   <div>
                     <h3>Настройки бота (Bot Father)</h3>
                     <small class="muted">Токен доступа, полученный у @BotFather</small>
@@ -1472,11 +1465,11 @@
                 <div class="field" style="margin-top:10px">
                   <input id="tgBotToken" type="password" placeholder=" " style="padding-right:75px" />
                   <span>HTTP Bot Token *</span>
-                  <button class="icon-btn" id="btnToggleTgTokenEye" style="position:absolute;right:8px;top:12px;font-size:14px" title="Показать токен">👁️</button>
+                  <button class="icon-btn" id="btnToggleTgTokenEye" style="position:absolute;right:8px;top:12px;font-size:14px" title="Показать токен"><svg class="svgi" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
 
                 <div style="display:flex;gap:10px;align-items:center;margin:12px 0 16px">
-                  <button class="btn sm ghost" id="btnTgCheckToken">🔍 Проверить подключение</button>
+                  <button class="btn sm ghost" id="btnTgCheckToken"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Проверить подключение</button>
                   <div id="tgBotStatusBadge" class="pill bad"><i></i>Не настроен</div>
                 </div>
 
@@ -1498,7 +1491,7 @@
               <!-- Инструкция по привязке через Telegram -->
               <div class="panel-box" style="background:rgba(10,20,55,.4)">
                 <div class="panel-head">
-                  <span class="ic">💡</span>
+                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg></span>
                   <div>
                     <h3>Привязка каналов и групп</h3>
                     <small class="muted">Как подключить бота к каналу или чату</small>
@@ -1525,7 +1518,7 @@
             <!-- Привязанные каналы -->
             <div class="panel-box" style="margin-top:18px;background:rgba(10,20,55,.4)">
               <div class="panel-head">
-                <span class="ic">📢</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
                 <div>
                   <h3>Привязанные каналы и чаты (<span id="tgChannelsCount">0</span>)</h3>
                   <small class="muted">Список чатов, куда бот отправляет уведомления по триггерам</small>
@@ -1553,7 +1546,7 @@
             <!-- Настройка триггеров и событий -->
             <div class="panel-box" style="margin-top:18px;background:rgba(10,20,55,.4)">
               <div class="panel-head">
-                <span class="ic">⚡</span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
                 <div>
                   <h3>События и триггеры (что отправлять в Telegram)</h3>
                   <small class="muted">Настройте, о каких операциях бот будет сообщать в привязанные чаты</small>
@@ -1631,12 +1624,12 @@
           <span class="dots"><i></i><i></i><i></i></span>
           <span>Терминал</span>
           <span class="term-state" id="termState">готов</span>
-          <button class="icon-btn" id="termClear" title="Очистить">⌫</button>
-          <button class="icon-btn" id="termToggle" title="Свернуть">▾</button>
+          <button class="icon-btn" id="termClear" title="Очистить"><svg class="svgi" viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
+          <button class="icon-btn" id="termToggle" title="Свернуть"><svg class="svgi" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
         <div class="term-body" id="termBody"></div>
         <form class="term-input" id="termForm">
-          <span class="prompt">meya@forge&nbsp;❯</span>
+          <span class="prompt">meya@forge&nbsp;»</span>
           <input id="termIn" autocomplete="off" spellcheck="false" placeholder="введите команду…" />
         </form>
       </div>
@@ -1679,7 +1672,7 @@
   <!-- Универсальное модальное окно подтверждения удаления / действий -->
   <div id="universalConfirmModal" class="modal hidden">
     <div class="modal-card">
-      <div id="confirmModalIcon" style="text-align:center;font-size:36px;margin-bottom:6px">🗑️</div>
+      <div id="confirmModalIcon" style="text-align:center;font-size:36px;margin-bottom:6px"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></div>
       <h2 id="confirmModalTitle">Подтверждение удаления</h2>
       <p class="muted" id="confirmModalDesc" style="line-height:1.6">
         Вы действительно хотите выполнить это действие?
@@ -1694,7 +1687,7 @@
   <!-- Модалка: Подтверждение опасного действия (сканирование / логирование) -->
   <div id="deviceWarningModal" class="modal hidden">
     <div class="modal-card">
-      <div style="text-align:center;font-size:36px;margin-bottom:6px">⚠️</div>
+      <div style="text-align:center;font-size:36px;margin-bottom:6px"><svg class="svgi" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
       <h2 id="warnModalTitle">Внимание! Подтверждение операции</h2>
       <p class="muted" id="warnModalDesc" style="line-height:1.6">
         Во время сбора комплексной информации и снятия системных логов устройство может кратковременно зависнуть, войти в режим опроса шин или <b style="color:var(--pink)">автоматически перезагрузиться</b>.<br><br>
@@ -1710,7 +1703,7 @@
   <!-- Модалка: Выбор логов -->
   <div id="deviceLogsModal" class="modal hidden">
     <div class="modal-card">
-      <div style="text-align:center;font-size:32px;margin-bottom:6px">📋</div>
+      <div style="text-align:center;font-size:32px;margin-bottom:6px"><svg class="svgi" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg></div>
       <h2>Снятие логов с устройства</h2>
       <p class="muted">Выберите тип системного журнала для извлечения через ADB:</p>
       <div style="display:flex;flex-direction:column;gap:10px;margin:10px 0">
@@ -1733,7 +1726,7 @@
   <!-- Модалка: Параметры импорта и разборки прошивки -->
   <div id="importOptionsModal" class="modal hidden">
     <div class="modal-card">
-      <div style="text-align:center;font-size:36px;margin-bottom:6px">📦</div>
+      <div style="text-align:center;font-size:36px;margin-bottom:6px"><svg class="svgi" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg></div>
       <h2>Параметры импорта и разборки</h2>
       <p class="muted" style="margin-bottom:14px">
         Файл: <b id="importOptFileName" style="color:var(--pink)">—</b><br>
@@ -1786,13 +1779,13 @@
     <div class="modal-card" style="width:min(680px,94vw);max-height:85vh;overflow:hidden;display:flex;flex-direction:column">
       <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:12px">
         <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:24px">🗄️</span>
+          <span style="font-size:24px"><svg class="svgi" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg></span>
           <div>
             <h3 style="margin:0">Хранилище устройств</h3>
             <small class="muted">Сохранённые полные и частичные профили Android-устройств</small>
           </div>
         </div>
-        <button class="icon-btn" id="btnCloseDevLib">✕</button>
+        <button class="icon-btn" id="btnCloseDevLib"><svg class="svgi" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
 
       <div id="devLibList" style="flex:1;overflow-y:auto;margin:14px 0;display:flex;flex-direction:column;gap:10px">
@@ -1838,6 +1831,7 @@
   </div>
 
   <div id="toasts" class="toasts"></div>
+  <script src="icons.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

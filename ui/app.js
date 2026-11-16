@@ -239,6 +239,10 @@
     return d.toLocaleDateString() + " " + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
   document.addEventListener("click", (e) => {
     const b = e.target.closest(".btn"); if (!b) return;
     const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height), sp = document.createElement("span");
@@ -271,6 +275,7 @@
     if (page === "settings") loadTelegramConfig();
     if (page === "unpack") initRepackPage();
     if (page === "debloat") initDebloatPage();
+    if (page === "apk") initApkKitchen();
     if (page === "port") initPortingPage();
 
     // Применяем перевод ко всем динамическим блокам открытой страницы
@@ -321,6 +326,7 @@
       if ($(".page.active").dataset.page === "projects") refreshProjects();
       if ($(".page.active").dataset.page === "partitions") loadCurrentProjectDetails();
       if ($(".page.active").dataset.page === "tools") refreshTools();
+      if ($(".page.active").dataset.page === "apk") apkRefreshAll();
     });
   }
 
@@ -328,7 +334,7 @@
     e.preventDefault();
     const cmd = tin.value.trim(); if (!cmd) return;
     hist.push(cmd); hi = hist.length; tin.value = "";
-    line("❯ " + cmd, "cmd");
+    line("» " + cmd, "cmd");
     if (cmd === "clear" || cmd === "cls") { body.innerHTML = ""; return; }
     if (busy) { line("Дождитесь завершения текущей команды", "err"); return; }
     setBusy(true);
@@ -348,7 +354,7 @@
       const items = await invoke("list_projects");
       if (!items || items.length === 0) {
         list.innerHTML = `<div class="empty-placeholder" style="grid-column: 1 / -1">
-          <div class="ic">📁</div>
+          <div class="ic">${icon('folder')}</div>
           <h3>Нет созданных проектов</h3>
           <p class="muted">Создайте ваш первый проект прошивки для распаковки разделов.</p>
           <button class="btn primary" onclick="document.getElementById('btnNewProject').click()">+ Создать проект</button>
@@ -370,7 +376,7 @@
           </div>
           <div class="proj-footer">
             <button class="btn sm danger btn-del-proj" title="Удалить проект">Удалить</button>
-            <button class="btn sm primary btn-open-proj">Открыть разделы ➔</button>
+            <button class="btn sm primary btn-open-proj">Открыть разделы →</button>
           </div>
         `;
         card.querySelector(".btn-open-proj").onclick = (e) => {
@@ -382,7 +388,7 @@
           showConfirmDialog({
             title: `Удаление проекта ${item.meta.name}`,
             desc: `Вы действительно хотите безвозвратно удалить проект <b>${item.meta.name}</b> со всеми распакованными файлами и образами?`,
-            icon: "🗑️",
+            iconName: "trash",
             okText: "Удалить проект",
             okDanger: true,
             onConfirm: async () => {
@@ -550,7 +556,7 @@
             showConfirmDialog({
               title: `Удаление раздела ${p.name}`,
               desc: `Удалить файлы раздела <b>${p.name}</b> (образ images/${p.name}.img и папку extracted/${p.name}) из проекта <b>${currentProject}</b>?<br><br><span style="color:#ff8fab">Данные раздела будут удалены с диска только после нажатия «Удалить раздел».</span>`,
-              icon: "🗑️",
+              iconName: "trash",
               okText: "Удалить раздел",
               okDanger: true,
               onConfirm: async () => {
@@ -670,8 +676,8 @@
   // Универсальное модальное окно подтверждения удаления / опасных действий
   let pendingModalConfirm = null;
 
-  function showConfirmDialog({ title, desc, icon = "🗑️", okText = "Удалить", okDanger = true, onConfirm }) {
-    $("#confirmModalIcon").textContent = icon;
+  function showConfirmDialog({ title, desc, iconName = "trash", okText = "Удалить", okDanger = true, onConfirm }) {
+    $("#confirmModalIcon").innerHTML = icon(iconName, 38);
     $("#confirmModalTitle").textContent = title;
     $("#confirmModalDesc").innerHTML = desc;
     const okBtn = $("#btnOkConfirmModal");
@@ -734,7 +740,7 @@
       <b>1.</b> Считывание свойств Android, точек монтирования и ядра через ADB.<br>
       <b>2.</b> Перезагрузка в режим <b>Fastboot / Bootloader</b> для снятия аппаратных таблиц, разметки и статуса блокировки загрузчика.<br>
       <b>3.</b> Автоматический возврат (перезагрузка) в обычный режим Android OS.<br><br>
-      <span style="color:#ff8fab">⚠️ Не отключайте кабель USB и не трогайте телефон до завершения всего цикла!</span>`,
+      <span style="color:#ff8fab">${icon('alert', 15)} Не отключайте кабель USB и не трогайте телефон до завершения всего цикла!</span>`,
       executeScanDevice
     );
   };
@@ -945,7 +951,7 @@
       if (!list || list.length === 0) {
         listEl.innerHTML = `
           <div class="empty-placeholder" style="padding:30px">
-            <div class="ic">🗄️</div>
+            <div class="ic">${icon('archive')}</div>
             <h3>Хранилище устройств пусто</h3>
             <p class="muted">После каждого сканирования устройства его профиль сохраняется сюда со всеми свойствами, разделами и fstab.</p>
           </div>
@@ -978,7 +984,7 @@
           </div>
           <div style="display:flex;gap:6px">
             <button class="btn sm primary btn-load-dev">Открыть</button>
-            <button class="btn sm ghost btn-del-dev" title="Удалить из хранилища">🗑️</button>
+            <button class="btn sm ghost btn-del-dev" title="Удалить из хранилища">${icon('trash', 14)}</button>
           </div>
         `;
 
@@ -1177,8 +1183,6 @@
     $("#pTabLk").classList.toggle("hidden", tab !== "lk");
     $("#pTabElf").classList.toggle("hidden", tab !== "elf");
     $("#pTabProps").classList.toggle("hidden", tab !== "props");
-    $("#pTabFlasher").classList.toggle("hidden", tab !== "flasher");
-    $("#pTabApk").classList.toggle("hidden", tab !== "apk");
   }
 
   $$("#patchToolsTabs .f-pill").forEach(btn => {
@@ -1247,7 +1251,7 @@
       const logs = await invoke("boot_apply_patches", { project: currentProject, targetName, options });
       const logBox = $("#bootPatchLog");
       logBox.classList.remove("hidden");
-      logBox.textContent = "✔ Результаты патчинга:\n" + logs.map(l => "• " + l).join("\n");
+      logBox.textContent = "✓ Результаты патчинга:\n" + logs.map(l => "• " + l).join("\n");
       toast("Патчи успешно применены к extracted/" + targetName, "sky");
       inspectBootFolder(targetName);
     } catch (e) {
@@ -1278,13 +1282,13 @@
   $("#btnPresetSkipInitramfs").onclick = () => {
     $("#inputKernelHexFind").value = "73 6B 69 70 5F 69 6E 69 74 72 61 6D 66 73";
     $("#inputKernelHexReplace").value = "77 61 6E 74 5F 69 6E 69 74 72 61 6D 66 73";
-    toast("Загружен пресет: skip_initramfs ➔ want_initramfs", "pink");
+    toast("Загружен пресет: skip_initramfs → want_initramfs", "pink");
   };
 
   $("#btnPresetEnforcing").onclick = () => {
     $("#inputKernelHexFind").value = "65 6E 66 6F 72 63 69 6E 67 3D 31";
     $("#inputKernelHexReplace").value = "65 6E 66 6F 72 63 69 6E 67 3D 30";
-    toast("Загружен пресет: enforcing=1 ➔ enforcing=0", "pink");
+    toast("Загружен пресет: enforcing=1 → enforcing=0", "pink");
   };
 
   $("#btnSelectBootFile").onclick = async () => {
@@ -1794,7 +1798,7 @@
       const offHex = hasOffset ? `0x${fn.file_offset.toString(16).toUpperCase()}` : "IMPORT";
 
       tr.innerHTML = `
-        <td><b style="color:${hasOffset ? 'var(--pink)' : 'var(--muted)'}">🛡️ ${escapeHtml(fn.name)}</b></td>
+        <td><b style="color:${hasOffset ? 'var(--pink)' : 'var(--muted)'}">${icon('shield', 13)} ${escapeHtml(fn.name)}</b></td>
         <td><code class="code-sm">0x${fn.address.toString(16).toUpperCase()}</code></td>
         <td><code class="code-sm" style="color:${hasOffset ? 'var(--sky)' : '#ff8fab'}">${offHex}</code></td>
         <td><span class="badge ${fn.binding === 'GLOBAL' ? 'ext4' : 'raw'}">${fn.binding}</span></td>
@@ -1856,7 +1860,7 @@
       const res = await invoke("elf_apply_patch", { req });
       const statusLbl = $("#patchStatusLabel");
       statusLbl.classList.remove("hidden");
-      statusLbl.innerHTML = `✔ Патч применен! Смещение <b>0x${res.offset.toString(16).toUpperCase()}</b>: <code>${res.old_bytes_hex}</code> ➔ <code style="color:var(--sky)">${res.new_bytes_hex}</code>`;
+      statusLbl.innerHTML = `✓ Патч применен! Смещение <b>0x${res.offset.toString(16).toUpperCase()}</b>: <code>${res.old_bytes_hex}</code> → <code style="color:var(--sky)">${res.new_bytes_hex}</code>`;
       toast("Функция успешно пропатчена заглушкой!", "sky");
       analyzeElf(currentElfPath);
     } catch (e) {
@@ -1894,7 +1898,7 @@
       const msg = await invoke("elf_patch_string", { filePath: currentElfPath, oldStr, newStr });
       const statusBox = $("#strPatchStatus");
       statusBox.classList.remove("hidden");
-      statusBox.textContent = `✔ ${msg}`;
+      statusBox.textContent = `✓ ${msg}`;
       toast(msg, "sky");
       analyzeElf(currentElfPath);
     } catch (e) {
@@ -1916,7 +1920,7 @@
         card.className = "card";
         card.style.cursor = "pointer";
         card.innerHTML = `
-          <div class="ic">⚡</div>
+          <div class="ic">${icon('zap')}</div>
           <h3>${escapeHtml(p.name)}</h3>
           <p>${escapeHtml(p.description)}</p>
           <div style="margin-top:10px">
@@ -2024,125 +2028,6 @@
     }
   };
 
-  // --- Вкладка: Fastboot Flasher ---
-  async function refreshFastbootDevices() {
-    try {
-      const devs = await invoke("fb_list_devices");
-      const statusEl = $("#fbDeviceStatus");
-      if (devs.length === 0) {
-        statusEl.textContent = "Устройства Fastboot не обнаружены";
-        statusEl.style.color = "var(--muted)";
-      } else {
-        statusEl.innerHTML = devs.map(d => `Подключено: <b style="color:var(--sky)">${d.serial}</b> (${d.mode})`).join(", ");
-        statusEl.style.color = "var(--sky)";
-      }
-    } catch (e) {
-      $("#fbDeviceStatus").textContent = "Ошибка проверки Fastboot: " + e;
-    }
-  }
-
-  $("#btnRefreshFbDevices").onclick = () => {
-    refreshFastbootDevices();
-  };
-
-  $("#btnPickFlashImg").onclick = async () => {
-    if (T && T.dialog) {
-      const file = await T.dialog.open({
-        multiple: false,
-        filters: [{ name: 'Образы разделов', extensions: ['img', 'bin'] }]
-      });
-      if (file) {
-        $("#inputFlashImgPath").value = file;
-        const base = file.split(/[\\/]/).pop().replace(/\.img$/i, "").replace(/_a$|_b$/i, "");
-        if (base) {
-          $("#inputFlashPartition").value = base;
-        }
-      }
-    }
-  };
-
-  $("#btnExecuteFlash").onclick = async () => {
-    const partition = $("#inputFlashPartition").value.trim();
-    const imagePath = $("#inputFlashImgPath").value.trim();
-    const slot = $("#selFlashSlot").value;
-
-    if (!partition || !imagePath) {
-      toast("Укажите имя раздела и путь к файлу образа!", "pink");
-      return;
-    }
-
-    if (!confirm(`Вы действительно хотите прошить ${imagePath} в раздел ${partition} (слот: ${slot})?`)) {
-      return;
-    }
-
-    const logBox = $("#flashLogBox");
-    logBox.classList.remove("hidden");
-    logBox.textContent = `⏳ Запущена прошивка раздела ${partition}...\n`;
-
-    try {
-      const res = await invoke("fb_flash_partition", {
-        req: {
-          partition,
-          image_path: imagePath,
-          slot
-        }
-      });
-      logBox.textContent = res;
-      toast(`Раздел ${partition} успешно прошит!`, "sky");
-    } catch (e) {
-      logBox.textContent = "✖ " + e;
-      toast("Ошибка прошивки: " + e);
-    }
-  };
-
-  $$("[data-fb-reboot]").forEach(btn => {
-    btn.onclick = async () => {
-      const mode = btn.dataset.fbReboot;
-      try {
-        const msg = await invoke("fb_reboot_mode", { mode });
-        toast(msg, "sky");
-        setTimeout(refreshFastbootDevices, 2000);
-      } catch (e) {
-        toast("Ошибка перезагрузки: " + e);
-      }
-    };
-  });
-
-  // --- 4. APK Modding ---
-  $("#btnSelectApkFile").onclick = async () => {
-    if (!currentProject) {
-      toast("Сначала выберите или создайте проект!", "pink");
-      go("projects");
-      return;
-    }
-    if (T && T.dialog) {
-      const file = await T.dialog.open({
-        multiple: false,
-        filters: [{ name: 'Android пакеты', extensions: ['apk', 'jar'] }]
-      });
-      if (file) {
-        try {
-          await invoke("decompile_apk", { project: currentProject, apkPath: file });
-          toast("Запущена декомпиляция APK через Apktool...", "pink");
-        } catch (e) { toast("Ошибка: " + e); }
-      }
-    }
-  };
-
-  $("#btnBuildApk").onclick = async () => {
-    if (!currentProject) {
-      toast("Сначала выберите проект!", "pink");
-      return;
-    }
-    const folder = prompt("Введите имя папки APK из extracted/ (например apk_Settings):", "apk_");
-    if (folder) {
-      try {
-        await invoke("build_apk", { project: currentProject, targetFolder: folder, sign: true });
-        toast(`Запущена сборка и подпись APK ${folder}...`, "pink");
-      } catch (e) { toast("Ошибка: " + e); }
-    }
-  };
-
   /* ---------- инструменты ---------- */
   async function refreshTools() {
     const list = $("#toolsList");
@@ -2236,7 +2121,7 @@
       const items = await invoke("tools_list");
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        btn.textContent = `⏳ Проверка (${i + 1}/${items.length}): ${item.name}`;
+        btn.innerHTML = `${icon('hourglass', 14)} Проверка (${i + 1}/${items.length}): ${item.name}`;
 
         try {
           const ver = await invoke("tool_check_latest", { id: item.id });
@@ -2257,7 +2142,7 @@
     } finally {
       isCheckingUpdates = false;
       btn.disabled = false;
-      btn.textContent = "🔄 Проверить обновления инструментов";
+      btn.innerHTML = `${icon('refresh', 14)} Проверить обновления инструментов`;
       refreshTools();
     }
   };
@@ -2372,8 +2257,8 @@
         <td><span class="badge raw">${c.chat_type || 'channel'}</span></td>
         <td>${triggersHtml}</td>
         <td style="text-align:right">
-          <button class="btn sm ghost btn-tg-test" title="Отправить тест">📢 Тест</button>
-          <button class="btn sm ghost btn-tg-del" title="Отвязать канал">🗑️</button>
+          <button class="btn sm ghost btn-tg-test" title="Отправить тест">${icon('megaphone', 13)} Тест</button>
+          <button class="btn sm ghost btn-tg-del" title="Отвязать канал">${icon('trash', 13)}</button>
         </td>
       `;
 
@@ -2430,10 +2315,10 @@
     const input = $("#tgBotToken");
     if (input.type === "password") {
       input.type = "text";
-      $("#btnToggleTgTokenEye").textContent = "🔒";
+      $("#btnToggleTgTokenEye").innerHTML = icon('lock', 13);
     } else {
       input.type = "password";
-      $("#btnToggleTgTokenEye").textContent = "👁️";
+      $("#btnToggleTgTokenEye").innerHTML = icon('eye', 13);
     }
   };
 
@@ -2573,7 +2458,7 @@
       // 1. Разобранные папки
       if (!targets.extracted || targets.extracted.length === 0) {
         extList.innerHTML = `<div class="empty-placeholder" style="padding:24px">
-          <div class="ic">🧩</div>
+          <div class="ic">${icon('puzzle')}</div>
           <h3>Нет извлечённых разделов</h3>
           <p class="muted" style="font-size:12px">Перейдите в «Разделы и образы» и нажмите «Разобрать в папку».</p>
         </div>`;
@@ -2599,7 +2484,7 @@
 
           row.innerHTML = `
             <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">
-              <span style="font-size:20px">${part.detected_fs === 'boot' ? '⚡' : '📁'}</span>
+              <span style="font-size:20px">${icon(part.detected_fs === 'boot' ? 'zap' : 'folder', 20)}</span>
               <div style="min-width:0">
                 <b style="color:var(--text);font-size:14px">${part.name}</b>
                 <div style="font-size:11.5px;color:var(--muted)">
@@ -2610,7 +2495,7 @@
             </div>
             <div style="display:flex;align-items:center;gap:8px">
               ${fsOptions}
-              <button class="btn sm primary btn-repack-single" data-part="${part.name}">🔨 Собрать</button>
+              <button class="btn sm primary btn-repack-single" data-part="${part.name}">${icon('hammer', 13)} Собрать</button>
             </div>
           `;
           extList.append(row);
@@ -2685,7 +2570,7 @@
           item.style.justifyContent = "space-between";
           item.innerHTML = `
             <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:18px">📦</span>
+              <span style="font-size:18px">${icon('package', 18)}</span>
               <b>${f}</b>
             </div>
             <span class="badge" style="background:rgba(142,197,255,.15);color:var(--sky)">ГОТОВ</span>
@@ -2824,7 +2709,7 @@
     if (!base || !port) return toast("Выберите оба проекта: Базу и Порт");
     if (base === port) return toast("База и Порт должны быть разными проектами");
 
-    toast(`Глубокое сравнение: ${base} ➔ ${port}...`, "pink");
+    toast(`Глубокое сравнение: ${base} → ${port}...`, "pink");
     try {
       const res = await invoke("compare_projects", { baseName: base, portName: port });
       currentComparison = res;
@@ -2846,7 +2731,7 @@
     const scoreVal = $("#portScoreVal");
     scoreVal.textContent = data.compatibility_score + "%";
     scoreVal.style.color = data.compatibility_score >= 80 ? "#6ee7b7" : data.compatibility_score >= 50 ? "#fbbf24" : "#ff6b8a";
-    $("#portScoreIcon").textContent = data.compatibility_score >= 80 ? "✨" : data.compatibility_score >= 50 ? "⚠️" : "⛔";
+    $("#portScoreIcon").innerHTML = icon(data.compatibility_score >= 80 ? 'sparkles' : data.compatibility_score >= 50 ? 'alert' : 'ban', 36);
 
     const notesWrap = $("#portScoreNotes");
     notesWrap.innerHTML = "";
@@ -2925,7 +2810,7 @@
       remove_avb_dm_verity: $("#chkPortAvb").checked,
     };
 
-    toast(`Применение операций портирования: ${base} ➔ ${port}...`, "pink");
+    toast(`Применение операций портирования: ${base} → ${port}...`, "pink");
     try {
       await invoke("apply_porting_transfer", {
         baseName: base,
@@ -3231,20 +3116,20 @@
   }
 
   function getFileIcon(name, ext, isDir) {
-    if (isDir) return "📁";
+    if (isDir) return icon("folder", 14);
     const lName = name.toLowerCase();
     const lExt = ext.toLowerCase();
 
-    if (lName === "build.prop" || lExt === "prop" || lExt === "cfg") return "⚙️";
-    if (lExt === "rc" || lExt === "sh" || lExt === "bat") return "📜";
-    if (lExt === "xml" || lExt === "json") return "📝";
-    if (lExt === "img" || lExt === "bin") return "💿";
-    if (lExt === "so") return "🧩";
-    if (lExt === "apk" || lExt === "jar") return "📱";
-    if (["png", "jpg", "jpeg", "webp", "bmp", "svg"].includes(lExt)) return "🖼️";
-    if (lName.includes("fstab") || lExt === "fstab") return "🗄️";
-    if (lExt === "txt" || lExt === "list" || lExt === "cpio") return "📄";
-    return "📄";
+    if (lName === "build.prop" || lExt === "prop" || lExt === "cfg") return icon("settings", 14);
+    if (lExt === "rc" || lExt === "sh" || lExt === "bat") return icon("scroll", 14);
+    if (lExt === "xml" || lExt === "json") return icon("fileText", 14);
+    if (lExt === "img" || lExt === "bin") return icon("disc", 14);
+    if (lExt === "so") return icon("puzzle", 14);
+    if (lExt === "apk" || lExt === "jar") return icon("smartphone", 14);
+    if (["png", "jpg", "jpeg", "webp", "bmp", "svg"].includes(lExt)) return icon("image", 14);
+    if (lName.includes("fstab") || lExt === "fstab") return icon("archive", 14);
+    if (lExt === "txt" || lExt === "list" || lExt === "cpio") return icon("file", 14);
+    return icon("file", 14);
   }
 
   function renderFmNodes(container, entries, level) {
@@ -3258,19 +3143,19 @@
       row.dataset.path = entry.rel_path;
 
       const chevron = entry.is_dir
-        ? `<span class="fm-chevron ${fmExpandedFolders.has(entry.rel_path) ? 'expanded' : ''}">▶</span>`
+        ? `<span class="fm-chevron ${fmExpandedFolders.has(entry.rel_path) ? 'expanded' : ''}">${icon('chevronRight')}</span>`
         : `<span style="width:14px"></span>`;
 
-      const icon = getFileIcon(entry.name, entry.ext, entry.is_dir);
+      const fileIcon = getFileIcon(entry.name, entry.ext, entry.is_dir);
 
       row.innerHTML = `
         ${chevron}
-        <span style="font-size:14px">${icon}</span>
+        <span style="font-size:14px">${fileIcon}</span>
         <span class="fm-name" title="${entry.name}">${entry.name}</span>
         ${entry.is_dir ? '' : `<span class="fm-size">${formatBytes(entry.size)}</span>`}
         <div class="fm-actions">
-          <span class="icon-btn btn-fm-ren" title="Переименовать" style="font-size:11px">✏️</span>
-          <span class="icon-btn btn-fm-del" title="Удалить" style="font-size:11px">🗑️</span>
+          <span class="icon-btn btn-fm-ren" title="Переименовать" style="font-size:11px">${icon('pencil')}</span>
+          <span class="icon-btn btn-fm-del" title="Удалить" style="font-size:11px">${icon('trash')}</span>
         </div>
       `;
 
@@ -3519,7 +3404,7 @@
     showConfirmDialog({
       title: `Удаление ${isDir ? 'папки' : 'файла'}`,
       desc: `Удалить ${isDir ? 'папку' : 'файл'} <b>«${name}»</b> (${relPath})? Это действие необратимо.`,
-      icon: "🗑️",
+      iconName: "trash",
       okText: "Удалить",
       okDanger: true,
       onConfirm: async () => {
@@ -3612,6 +3497,203 @@
     }
   };
 
+  /* ---------- APK KITCHEN ---------- */
+  let apkKitchenProject = null;
+
+  async function initApkKitchen() {
+    const sel = $("#apkProjectSelect");
+    sel.innerHTML = '<option value="">Выберите проект...</option>';
+    try {
+      const items = await invoke("list_projects");
+      (items || []).forEach(it => {
+        const opt = document.createElement("option");
+        opt.value = it.meta.name;
+        opt.textContent = `${it.meta.name} (${it.parts} образов)`;
+        if (currentProject === it.meta.name || apkKitchenProject === it.meta.name) opt.selected = true;
+        sel.append(opt);
+      });
+      if (!sel.value && items && items.length > 0) sel.value = items[0].meta.name;
+      apkKitchenProject = sel.value;
+      await apkRefreshAll();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  $("#apkProjectSelect").onchange = () => {
+    apkKitchenProject = $("#apkProjectSelect").value;
+    apkRefreshAll();
+  };
+  $("#btnApkRefresh").onclick = () => apkRefreshAll();
+
+  async function apkRefreshAll() {
+    const scanBody = $("#apkScanTbody");
+    const decBody = $("#apkDecTbody");
+    if (!apkKitchenProject) {
+      scanBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">Выберите проект для сканирования приложений.</td></tr>`;
+      decBody.innerHTML = "";
+      $("#apkFoundCount").textContent = "0";
+      $("#apkOdexCount").textContent = "0";
+      $("#apkDecCount").textContent = "0";
+      return;
+    }
+
+    // APK в прошивке
+    try {
+      const apks = (await invoke("apk_scan_project", { project: apkKitchenProject })) || [];
+      $("#apkFoundCount").textContent = apks.length;
+      $("#apkOdexCount").textContent = apks.filter(a => a.has_odex).length;
+      scanBody.innerHTML = "";
+      if (apks.length === 0) {
+        scanBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">APK не найдены. Сначала разберите разделы прошивки (system, product, vendor...).</td></tr>`;
+      }
+      apks.forEach(a => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><b>${escapeHtml(a.name)}</b></td>
+          <td style="color:var(--muted);font-family:Consolas,monospace;font-size:11px;word-break:break-all">${escapeHtml(a.rel_path)}</td>
+          <td>${formatBytes(a.size)}</td>
+          <td>${a.has_odex ? `<span class="badge raw">${a.odex_count} odex</span>` : '<span class="badge erofs">deodexed</span>'}</td>
+          <td style="text-align:right;white-space:nowrap">
+            <button class="btn sm primary btn-apk-dec">${icon('package', 13)} Декомпилировать</button>
+            ${a.has_odex ? `<button class="btn sm ghost btn-apk-deodex">${icon('zap', 13)} Деодекс</button>` : ''}
+          </td>
+        `;
+        tr.querySelector(".btn-apk-dec").onclick = async () => {
+          try {
+            await invoke("apk_decompile_project", { project: apkKitchenProject, relPath: a.rel_path });
+            toast(`Запущена декомпиляция ${a.name}...`, "pink");
+          } catch (e) { toast("Ошибка: " + e); }
+        };
+        const bDeodex = tr.querySelector(".btn-apk-deodex");
+        if (bDeodex) {
+          bDeodex.onclick = () => {
+            askDeviceConfirmation(
+              `Деодекс ${a.name}`,
+              `Будет выполнена конвертация <b>odex → classes.dex</b> через baksmali/smali с bootclasspath из framework проекта.<br><br>
+              Результат: <code>out/${a.name.replace(/\.apk$/i, "")}-deodexed.apk</code>. После деодекса приложение можно декомпилировать Apktool с полным кодом.`,
+              async () => {
+                try {
+                  await invoke("apk_deodex", { project: apkKitchenProject, relPath: a.rel_path });
+                  toast(`Запущен деодекс ${a.name}...`, "pink");
+                } catch (e) { toast("Ошибка: " + e); }
+              }
+            );
+          };
+        }
+        scanBody.appendChild(tr);
+      });
+    } catch (e) {
+      scanBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:16px;color:#ff8fab">Ошибка сканирования: ${e}</td></tr>`;
+    }
+
+    // Декомпилированные
+    try {
+      const list = (await invoke("apk_list_decompiled", { project: apkKitchenProject })) || [];
+      $("#apkDecCount").textContent = list.length;
+      decBody.innerHTML = "";
+      if (list.length === 0) {
+        decBody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">Нет декомпилированных приложений. Декомпилируйте APK из таблицы выше или с диска.</td></tr>`;
+      }
+      list.forEach(d => {
+        const tr = document.createElement("tr");
+        const contents = [
+          d.has_smali ? '<span class="badge ext4">smali</span>' : '',
+          d.has_resources ? '<span class="badge erofs">res</span>' : ''
+        ].filter(Boolean).join(" ") || '<span class="muted">—</span>';
+        tr.innerHTML = `
+          <td><b>${escapeHtml(d.name)}</b><br><small style="color:var(--muted);font-family:Consolas,monospace;font-size:11px">${escapeHtml(d.folder)}</small></td>
+          <td>${contents}</td>
+          <td>${d.file_count}</td>
+          <td style="text-align:right;white-space:nowrap">
+            <button class="btn sm ghost btn-apk-edit" title="Открыть в файловом менеджере">${icon('pencil', 13)} Редактор</button>
+            <button class="btn sm ghost btn-apk-build">${icon('hammer', 13)} Собрать</button>
+            <button class="btn sm primary btn-apk-sign">${icon('zap', 13)} Собрать & Подписать</button>
+            <button class="btn sm danger btn-apk-del" title="Удалить папку">${icon('trash', 13)}</button>
+          </td>
+        `;
+        tr.querySelector(".btn-apk-edit").onclick = () => fmRevealPath(apkKitchenProject, d.folder);
+        tr.querySelector(".btn-apk-build").onclick = async () => {
+          try {
+            await invoke("build_apk", { project: apkKitchenProject, targetFolder: d.name, sign: false });
+            toast(`Запущена сборка ${d.name} (без подписи)...`, "pink");
+          } catch (e) { toast("Ошибка: " + e); }
+        };
+        tr.querySelector(".btn-apk-sign").onclick = async () => {
+          try {
+            await invoke("build_apk", { project: apkKitchenProject, targetFolder: d.name, sign: true });
+            toast(`Запущена сборка и подпись ${d.name}...`, "pink");
+          } catch (e) { toast("Ошибка: " + e); }
+        };
+        tr.querySelector(".btn-apk-del").onclick = () => {
+          showConfirmDialog({
+            title: `Удаление ${d.name}`,
+            desc: `Удалить папку <b>${d.folder}</b> со всем декомпилированным содержимым?`,
+            iconName: "trash",
+            okText: "Удалить папку",
+            onConfirm: async () => {
+              try {
+                await invoke("fs_delete_entry", { project: apkKitchenProject, relPath: d.folder });
+                toast(`Папка ${d.name} удалена`);
+                apkRefreshAll();
+              } catch (e) { toast("Ошибка удаления: " + e); }
+            }
+          });
+        };
+        decBody.appendChild(tr);
+      });
+    } catch (e) {
+      decBody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:16px;color:#ff8fab">Ошибка: ${e}</td></tr>`;
+    }
+  }
+
+  $("#btnApkPickExternal").onclick = async () => {
+    if (!apkKitchenProject) return toast("Сначала выберите проект!", "pink");
+    if (T && T.dialog) {
+      const file = await T.dialog.open({
+        multiple: false,
+        filters: [{ name: 'Android приложения', extensions: ['apk'] }]
+      });
+      if (file) {
+        try {
+          await invoke("decompile_apk", { project: apkKitchenProject, apkPath: file });
+          toast("Запущена декомпиляция APK...", "pink");
+        } catch (e) { toast("Ошибка: " + e); }
+      }
+    }
+  };
+
+  // Переход в файловый менеджер с раскрытием пути (например extracted/apk_Settings)
+  async function fmRevealPath(project, relPath) {
+    go("files");
+    if (fmCurrentProject !== project) {
+      fmCurrentProject = project;
+      $("#fmProjectSelect").value = project;
+      fmCurrentFile = null;
+      fmExpandedFolders.clear();
+      resetFmEditor();
+    }
+    await loadFmTree();
+    const segs = relPath.split("/").filter(Boolean);
+    let prefix = "";
+    for (let i = 0; i < segs.length - 1; i++) {
+      prefix = prefix ? prefix + "/" + segs[i] : segs[i];
+      if (fmExpandedFolders.has(prefix)) continue;
+      const row = document.querySelector(`.fm-row[data-path="${prefix}"]`);
+      if (!row) break;
+      const nameEl = row.querySelector(".fm-name");
+      if (nameEl) nameEl.click();
+      await sleep(250);
+    }
+    await sleep(150);
+    const target = document.querySelector(`.fm-row[data-path="${relPath}"]`);
+    if (target) {
+      target.scrollIntoView({ block: "center" });
+      target.style.background = "rgba(245,163,199,0.12)";
+      setTimeout(() => { target.style.background = ""; }, 1600);
+    }
+  }
+
   /* ---------- WSL ---------- */
   async function checkWsl() {
     const ok = await invoke("wsl_status");
@@ -3663,7 +3745,7 @@
         };
       });
     } else {
-      $("#splashText").textContent = u && u.error ? "GitHub недоступен — офлайн режим" : "Последняя версия ✦";
+      $("#splashText").textContent = u && u.error ? "GitHub недоступен — офлайн режим" : "Последняя версия";
       await sleep(350);
     }
 
@@ -3676,7 +3758,7 @@
 
     requestAnimationFrame(() => go("home"));
 
-    line("MEYAFORGE v0.1.0 запущен. Стек Rust + Clean WebUI готов.", "sys");
+    line("MEYAFORGE v0.1.1 запущен. Стек Rust + Clean WebUI готов.", "sys");
     const p = await invoke("get_profile").catch(() => null);
     applyProfile(p);
     if (!p) setTimeout(openProfile, 450);
