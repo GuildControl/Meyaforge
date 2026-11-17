@@ -276,7 +276,7 @@
     if (page === "unpack") initRepackPage();
     if (page === "debloat") initDebloatPage();
     if (page === "apk") initApkKitchen();
-    if (page === "port") initPortingPage();
+    if (page === "debug") initDebugPage();
 
     // Применяем перевод ко всем динамическим блокам открытой страницы
     if (currentLang === "en") {
@@ -2619,6 +2619,8 @@
         });
       }
 
+      runFirmwarePreflight();
+
     } catch (e) {
       console.error(e);
       toast("Ошибка загрузки целей: " + e);
@@ -2685,29 +2687,110 @@
     }
   };
 
-  // Кнопка: Сформировать Fastboot ROM
-  $("#btnBuildFastbootPkg").onclick = async () => {
+  /* ---------- ФОРМИРОВАНИЕ ПРОШИВКИ (codename / anti-rollback / firmware.meyaforge) ---------- */
+  let fwPreflightData = null;
+
+  async function runFirmwarePreflight() {
+    const proj = $("#repackProjectSelect").value;
+    const box = $("#fwPreflight");
+    if (!proj || !box) { fwPreflightData = null; return; }
+    try {
+      const pf = await invoke("firmware_preflight", { project: proj });
+      fwPreflightData = pf;
+
+      // Автоподстановка codename из build.prop (если поле не редактировали вручную)
+      const codeInput = $("#fwCodename");
+      if (pf.codename_detected && !codeInput.dataset.touched) {
+        codeInput.value = pf.codename_detected;
+      }
+
+      const det = pf.codename_detected;
+      const entered = (codeInput.value || "").trim().toLowerCase();
+      let codePill;
+      if (!det) {
+        codePill = '<span class="pill warn"><i></i>Codename не определён — укажите вручную</span>';
+      } else if (entered && entered !== det.toLowerCase()) {
+        codePill = `<span class="pill bad"><i></i>Несовпадение: build.prop → ${det}</span>`;
+      } else {
+        codePill = `<span class="pill ok"><i></i>Codename: ${det}</span>`;
+      }
+
+      const freshCnt = pf.images.filter(i => i.fresh).length;
+      const totalSize = pf.images.reduce((s, i) => s + i.size, 0);
+      const metaLine = [
+        pf.brand && pf.model ? `${pf.brand} ${pf.model}` : null,
+        pf.android ? `Android ${pf.android}` : null,
+        pf.sdk ? `SDK ${pf.sdk}` : null,
+        pf.security_patch ? `Патч: ${pf.security_patch}` : null,
+      ].filter(Boolean).join(" • ") || "Метаданные build.prop не найдены";
+
+      box.style.display = "flex";
+      box.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <b style="font-size:13px">Префлайт-проверка</b>
+          ${codePill}
+          <span class="pill ${pf.platform_tools ? "ok" : "warn"}"><i></i>${pf.platform_tools ? "adb/fastboot вложены" : "platform-tools не установлены"}</span>
+          <span class="pill ${pf.images.length ? "ok" : "bad"}"><i></i>${pf.images.length} образов (${freshCnt} свежих) • ${formatBytes(totalSize)}</span>
+        </div>
+        <div class="muted" style="font-size:12px">${metaLine}</div>
+        ${pf.warnings.length ? `<div style="font-size:12px;color:#fbbf24">${pf.warnings.map(w => "⚠ " + w).join("<br>")}</div>` : ""}
+      `;
+    } catch (e) {
+      fwPreflightData = null;
+      box.style.display = "flex";
+      box.innerHTML = `<span style="color:#ff8fab;font-size:12px">Ошибка префлайт-проверки: ${e}</span>`;
+    }
+  }
+
+  // Ручное редактирование codename — не перезаписывать автоподстановку
+  $("#fwCodename").addEventListener("input", () => {
+    $("#fwCodename").dataset.touched = "1";
+    if (fwPreflightData && fwPreflightData.codename_detected) {
+      const det = fwPreflightData.codename_detected.toLowerCase();
+      const ok = $("#fwCodename").value.trim().toLowerCase() === det;
+      const pill = $("#fwPreflight .pill");
+      if (pill) {
+        pill.className = "pill " + (ok ? "ok" : "bad");
+        pill.innerHTML = `<i></i>${ok ? "Codename: " + fwPreflightData.codename_detected : "Несовпадение: build.prop → " + fwPreflightData.codename_detected}`;
+      }
+    }
+  });
+
+  // Кнопка: Сформировать прошивку
+  $("#btnBuildFullFirmware").onclick = async () => {
     const proj = $("#repackProjectSelect").value;
     if (!proj) return toast("Сначала выберите проект");
 
     const title = $("#fastbootRomTitle").value.trim() || proj;
     const author = $("#fastbootRomAuthor").value.trim() || "MeyaForge";
+    const codename = $("#fwCodename").value.trim();
+    const arb = Math.max(0, parseInt($("#fwAntiRollback").value || "0", 10) || 0);
 
-    toast(`Формирование Fastboot пакета: ${title}...`, "pink");
+    if (!codename) return toast("Укажите кодовое имя устройства (codename)");
+
+    toast(`Формирование прошивки: ${title} (${codename}, ARB ${arb})...`, "pink");
     try {
-      await invoke("build_fastboot_package", {
+      await invoke("build_full_firmware", {
         project: proj,
         romTitle: title,
-        author: author
+        author: author,
+        codename: codename,
+        antirollback: arb
       });
       loadRepackTargets();
     } catch (e) {
-      toast("Ошибка формирования пакета: " + e);
+      toast("Ошибка: " + e);
     }
   };
 
-  /* ---------- ПОРТИРОВАНИЕ (data-page="port") ---------- */
+  /* ---------- ПОРТИРОВАНИЕ (модал «Сравнение устройств» на data-page="device") ---------- */
   let currentComparison = null;
+
+  $("#btnOpenPortCompare").onclick = () => {
+    initPortingPage();
+    $("#portCompareModal").classList.remove("hidden");
+  };
+  $("#btnClosePortCompare").onclick = () => $("#portCompareModal").classList.add("hidden");
 
   async function initPortingPage() {
     const bSel = $("#portBaseSelect");
@@ -2937,6 +3020,466 @@
     }
   };
 
+  /* ---------- ОТЛАДКА (data-page="debug") ---------- */
+  // База правил: паттерны строк логов → диагноз и готовое решение
+  const DBG_CATS = {
+    bootloop: "Бутлуп и запуск",
+    security: "SELinux и Verity",
+    hardware: "Железо (HAL)",
+    network: "Связь (модем, Wi-Fi, BT)",
+    apps: "Приложения",
+    system: "Система и ФС",
+    perf: "Память и производительность",
+  };
+
+  const DBG_SEV = {
+    crit: { label: "КРИТИЧНО", color: "#ff6b8a" },
+    warn: { label: "ВНИМАНИЕ", color: "#fbbf24" },
+    info: { label: "ЗАМЕТКА", color: "#8ec5ff" },
+  };
+
+  const DBG_RULES = [
+    {
+      sev: "crit", cat: "bootloop", title: "Падение system_server / Watchdog — бутлуп",
+      patterns: [/Watchdog: \*\*\*/i, /System server has died/i, /system_server.*(died|crashed)/i],
+      desc: "Системный сервер Android падает на старте, устройство уходит в циклическую перезагрузку после логотипа.",
+      solution: "Причина почти всегда в несовместимых правках framework или конфликте подписей системных APK. Откатите последние изменения в system/framework, убедитесь что все системные APK подписаны одним ключом (APK Kitchen → «Собрать и подписать»), а при портировании — что boot.img и fstab взяты из базы (Устройство → Портирование).",
+      fix: "# Крайняя мера из recovery:\nwipe data / factory reset\n# Затем пересборка разделов: Распаковка/Сборка → Собрать все"
+    },
+    {
+      sev: "crit", cat: "bootloop", title: "Смерть Zygote — ранняя стадия бутлупа",
+      patterns: [/zygote.*(died|crash)/i, /Unable to start runtime/i, /RuntimeInit: .*Fatal/i],
+      desc: "Zygote не может стартовать — повреждён или несовместим framework (boot.oat / framework.jar не соответствуют ядру или boot.img).",
+      solution: "Проверьте, что boot.img строго из базы, а не из донора. Если переносили framework — верните оригинальный boot-classpath. Деодексированные APK должны собираться тем же bootclasspath, что и framework прошивки.",
+      fix: null
+    },
+    {
+      sev: "warn", cat: "security", title: "Блокировки SELinux (avc: denied)",
+      patterns: [/avc: denied/i],
+      desc: "SELinux запрещает процессам доступ к ресурсам. Массовые denial после портирования ломают HAL: камеру, звук, сенсоры, fingerprint.",
+      solution: "Соберите все denial и сгенерируйте правила sepolicy через audit2allow, добавив их в sepolicy устройства. Для быстрой проверки, что причина именно в SELinux — временно переведите его в permissive: Патчи → Boot & Kernel → «SELinux Permissive», пересоберите boot и прошейте.",
+      fix: "# Пример сгенерированного правила (добавить в .te файл устройства):\nallow cameraserver sysfs:file read;\nallow hal_audio_default vendor_file:file execute;\n\n# Проверка из adb:\nadb shell getenforce   # Enforcing / Permissive"
+    },
+    {
+      sev: "crit", cat: "security", title: "DM-Verity / AVB — повреждение верификации",
+      patterns: [/dm-verity/i, /verity.*(corrupt|fail)/i, /device is corrupt/i, /verification failure/i, /avb.*(error|fail)/i],
+      desc: "Проверка целостности раздела не проходит после модификации system/vendor — загрузка блокируется или устройство уходит в бутлуп.",
+      solution: "Отключите флаги verify/avb в fstab: Патчи → Boot & Kernel → «Отключить DM-Verity & AVB». Затем прошейте vbmeta с отключённой верификацией: Патчи → VBMeta & AVB → «Отключить Verity & Verification».",
+      fix: "fastboot --disable-verity --disable-verification flash vbmeta vbmeta.img\n# или готовый пустой образ: Патчи → VBMeta → Сгенерировать пустую vbmeta.img"
+    },
+    {
+      sev: "crit", cat: "hardware", title: "Линкер: не найдены нативные библиотеки",
+      patterns: [/CANNOT LINK/i, /library "[^"]+" not found/i, /dlopen failed/i],
+      desc: "Бинарник или HAL не может загрузиться — в vendor/lib(64) не хватает .so, или версия VNDK не совпадает с требуемой.",
+      solution: "Перенесите недостающие библиотеки из базы: Устройство → Портирование → «Синхронизировать HAL драйверы (vendor/lib/hw)». Сверьте VNDK-версии базы и порта в таблице сравнения — при расхождении дополните vendor комплектом либ-base.",
+      fix: null
+    },
+    {
+      sev: "warn", cat: "hardware", title: "Камера: падение CameraService / HAL",
+      patterns: [/CameraService.*(died|error|fail)/i, /cameraserver.*(died|crash)/i, /Could not open camera/i, /camera\.(hal|provider).*error/i],
+      desc: "Сервис камеры падает или не находит HAL — приложения камеры показывают чёрный экран или вылетают.",
+      solution: "Перенесите из базы camera HAL: vendor/lib/hw/camera.*, vendor/lib64/hw/camera.* и сопутствующие camera-blobs (vendor/lib/camera/). Проверьте SELinux denial для cameraserver.",
+      fix: null
+    },
+    {
+      sev: "warn", cat: "hardware", title: "Звук: ошибки AudioFlinger / audio HAL",
+      patterns: [/AudioFlinger.*(error|died|fail)/i, /audio_hw.*(error|cannot)/i, /could not open.*audio/i],
+      desc: "Аудиосервер не может открыть аппаратный модуль — пропадает звук, зависают звонки и плееры.",
+      solution: "Перенесите из базы audio.primary.*.so, audio_policy конфигурацию (vendor/etc/audio_policy_configuration.xml) и mixer_paths*.xml.",
+      fix: null
+    },
+    {
+      sev: "info", cat: "hardware", title: "Сенсоры: ошибки sensorservice / sensor HAL",
+      patterns: [/sensorservice.*(error|not found|fail)/i, /sensor.*hal.*(error|failed)/i],
+      desc: "Не работают акселерометр, гироскоп, датчик приближения — не крутится экран, не гаснет при звонке.",
+      solution: "Перенесите sensors.*.so и конфиги sensor из базы (vendor/lib/hw/, vendor/etc/sensors/).",
+      fix: null
+    },
+    {
+      sev: "warn", cat: "network", title: "Wi-Fi / Bluetooth: не грузится firmware",
+      patterns: [/wlan.*(firmware|failed)/i, /failed to load.*(b[0-9]{2}|firmware|nvram)/i, /cnss|wcnss/i, /bt.*firmware.*fail/i],
+      desc: "Чип Wi-Fi/BT не получает прошивку — переключатели Wi-Fi/Bluetooth не включаются.",
+      solution: "Перенесите радиомодули из базы: Устройство → Портирование → «Синхронизировать радиомодули (vendor/firmware)». Проверьте также WCNSS_qcom_cfg.ini и права на /vendor/firmware.",
+      fix: null
+    },
+    {
+      sev: "warn", cat: "network", title: "Модем / RIL: нет сети, падение qcrild",
+      patterns: [/qcrild.*(crash|died|fail)/i, /RILJ.*(error|exception)/i, /radio.*(not available|error)/i, /no sim/i],
+      desc: "Радиоинтерфейс не поднимается — нет SIM, не работает мобильный интернет и звонки.",
+      solution: "Перенесите modem-прошивку (раздел modem / vendor/firmware) и ril-библиотеки (libril*, libqmi*) из базы. Убедитесь, что не стёрлись persist и nvram разделы.",
+      fix: null
+    },
+    {
+      sev: "crit", cat: "system", title: "Ошибки ФС: EXT4/EROFS, I/O error",
+      patterns: [/EXT4-fs error/i, /EROFS.*error/i, /Buffer I\/O error/i, /journal.*abort/i],
+      desc: "Файловая система раздела повреждена — раздел монтируется read-only или не монтируется вовсе.",
+      solution: "Пересоберите образ раздела: Распаковка/Сборка → «Собрать все». Проверьте, что размер собранного .img не превышает размер раздела в разметке, и что сборка идёт тем же типом ФС (erofs/ext4), что ожидает fstab.",
+      fix: null
+    },
+    {
+      sev: "crit", cat: "system", title: "Не монтируются разделы (vold / fs_mgr / fstab)",
+      patterns: [/Failed to mount/i, /fs_mgr.*(failed|cannot|error)/i, /vold.*(failed|error).*mount/i],
+      desc: "fs_mgr не может смонтировать разделы по fstab — загрузка останавливается на логотипе.",
+      solution: "Синхронизируйте fstab из базы: Устройство → Портирование → «Синхронизировать fstab и точки монтирования». Проверьте by-name пути и флаги first_stage_mount.",
+      fix: null
+    },
+    {
+      sev: "warn", cat: "system", title: "init: отсутствуют .rc скрипты или сервисы",
+      patterns: [/init: .*cannot find/i, /service .* does not exist/i, /could not import.*\.rc/i, /cannot execv/i],
+      desc: "init не находит скрипты или исполняемые файлы сервисов — после переноса не стартуют HAL и демоны.",
+      solution: "Проверьте vendor/etc/init/*.rc и vendor/bin: при переносе HAL копируйте rc-файлы сервисов вместе с бинарниками. Пути в .rc должны совпадать с реальным расположением файлов.",
+      fix: null
+    },
+    {
+      sev: "warn", cat: "apps", title: "PackageManager: ошибки парсинга и подписей APK",
+      patterns: [/INSTALL_PARSE_FAILED/i, /Failed to parse.*apk/i, /no certificates/i, /signatures do not match/i, /INSTALL_FAILED_UPDATE_INCOMPATIBLE/i],
+      desc: "Пакетный менеджер отвергает APK: битый манифест после правок или конфликт подписей с уже установленной версией.",
+      solution: "Переподпишите изменённый APK тем же ключом, что и остальную систему: APK Kitchen → «Собрать и подписать». При конфликте подписей удалите старую версию из /data или используйте тестовый ключ для всей прошивки.",
+      fix: null
+    },
+    {
+      sev: "warn", cat: "apps", title: "Краш приложения (FATAL EXCEPTION)",
+      patterns: [/FATAL EXCEPTION/i, /AndroidRuntime.*(Exception|Error)/i, /Force finishing activity/i],
+      desc: "Приложение падает с необработанным исключением. Частые причины после моддинга: удалённый ресурс в res, правки smali с неверными регистрами, отсутствующая зависимость.",
+      solution: "Найдите имя пакета и первую строку стека (Caused by). Если правили smali — проверьте количество .locals и типы регистров. Если удаляли ресурсы — верните их или поправьте ссылки в public.xml. Пересоберите и подпишите APK в APK Kitchen.",
+      fix: null
+    },
+    {
+      sev: "info", cat: "apps", title: "Краши Google Play Services (GmsCore)",
+      patterns: [/GmsCore.*(crash|died|FATAL)/i, /GooglePlayServices.*(crash|died)/i],
+      desc: "GMS падает циклически — всплывают ошибки «Приложение Google остановлено», жрётся батарея.",
+      solution: "Обновите или переустановите GApps под нужную версию Android. Для microG включите signature spoofing в framework (патч в smali services.jar).",
+      fix: null
+    },
+    {
+      sev: "warn", cat: "perf", title: "Нехватка памяти: OOM / LowMemoryKiller",
+      patterns: [/lowmemorykiller/i, /Out of memory/i, /kill .*oom_adj/i, /oom_score_adj/i],
+      desc: "Ядро убивает приложения из-за нехватки RAM — фризы, перезапуск лаунчера, вылеты фоновых задач.",
+      solution: "Настройте zram и лимиты фоновых процессов твиками build.prop: Патчи → build.prop Твики → пресеты оптимизации памяти. Уберите тяжёлый софт Деблоатером.",
+      fix: "# Пример твиков для слабых устройств:\nro.config.low_ram=true\nro.lmk.low=1001\nro.lmk.medium=800\nro.lmk.critical=0\nvm.swappiness=60"
+    },
+    {
+      sev: "info", cat: "perf", title: "Троттлинг: thermal-engine ограничивает частоты",
+      patterns: [/thermal.*(throttl|mitigation|critical)/i, /cpu.*throttl/i],
+      desc: "Срабатывает тепловая защита — частоты CPU/GPU сбрасываются, устройство тормозит под нагрузкой.",
+      solution: "Это штатная защита, но агрессивные профили можно смягчить правкой thermal-*.conf в vendor/etc. Проверьте, что после портирования thermal-движок от базы, а не от донора.",
+      fix: null
+    },
+    {
+      sev: "warn", cat: "security", title: "Keystore / Gatekeeper / Keymaster ошибки",
+      patterns: [/keystore.*(error|failed)/i, /gatekeeper.*(error|failed)/i, /keymaster.*(error|failed)/i],
+      desc: "Криптографические сервисы не работают — не ставится блокировка экрана, не работают отпечатки и шифрование.",
+      solution: "Перенесите keymaster/gatekeeper HAL из базы. Если данные keystore повреждены после смены прошивки — поможет wipe data.",
+      fix: null
+    },
+  ];
+
+  let dbgKbCategory = "all";
+
+  /* ---------- Карта запуска ОС: этапы определяются по сигнатурам в логах ---------- */
+  const DBG_BOOT_STAGES = [
+    {
+      id: "first", title: "First Stage — ядро и ранний init",
+      items: [
+        { label: "Ядро Linux загружено", patterns: [/Linux version \d/i, /Booting Linux on physical CPU/i] },
+        { label: "Инициализация SoC и драйверов", patterns: [/clk_|regulator|iommu|of_platform_populate|probed successfully/i] },
+        { label: "init: первая стадия запущена", patterns: [/init: .*first stage/i, /FirstStageMount/i, /first stage started/i] },
+        { label: "SELinux: политика загружена", patterns: [/SELinux:.*(loaded|policy)/i, /selinux.*load_policy/i] },
+        { label: "First stage mount (system/vendor)", patterns: [/first_stage_mount/i, /fs_mgr: .*mount/i, /Mounted .*\/(system|vendor)/i] },
+      ]
+    },
+    {
+      id: "second", title: "Second Stage — init, HAL и демоны",
+      items: [
+        { label: "init: вторая стадия (ueventd, сервисы)", patterns: [/init: .*second stage/i, /ueventd: /i] },
+        { label: "vold: монтирование userdata", patterns: [/vold: /i, /fs_mgr: __mount/i] },
+        { label: "hwServiceManager и HAL запущены", patterns: [/hwservicemanager/i, /HIDL_FETCH|\.hal\.|android\.hardware\./i] },
+        { label: "Демоны железа (audio/camera/sensors)", patterns: [/audioserver|AudioFlinger/i, /cameraserver|CameraService/i, /sensorservice/i] },
+        { label: "SurfaceFlinger запущен", patterns: [/SurfaceFlinger/i] },
+        { label: "Zygote запущен", patterns: [/zygote|Zygote/i] },
+      ]
+    },
+    {
+      id: "third", title: "System Server — фреймворк Android",
+      items: [
+        { label: "SystemServer стартовал", patterns: [/Starting com\.android\.server/i, /Entered the Android system server/i, /SystemServer: /i] },
+        { label: "PackageManager: сканирование пакетов", patterns: [/PackageManagerService|PackageManager: /i] },
+        { label: "ActivityManagerService готов", patterns: [/ActivityManagerService|ActivityManager: /i] },
+        { label: "SystemUI загружен", patterns: [/SystemUI|StatusBar/i] },
+        { label: "Boot completed — ОС загружена", patterns: [/boot_completed|BOOT_COMPLETED|Device is ready/i] },
+      ]
+    },
+  ];
+
+  // Состояние галочек накапливается между анализами (logcat + dmesg вместе дают полную карту)
+  let dbgBootState = {};
+
+  function dbgUpdateBootStages(lines) {
+    DBG_BOOT_STAGES.forEach((cat, ci) => {
+      cat.items.forEach((item, ii) => {
+        const key = ci + ":" + ii;
+        if (dbgBootState[key]) return;
+        for (const ln of lines) {
+          if (item.patterns.some(p => p.test(ln))) { dbgBootState[key] = true; break; }
+        }
+      });
+    });
+    dbgRenderBootStages();
+  }
+
+  function dbgRenderBootStages() {
+    const box = $("#dbgBootStages");
+    if (!box) return;
+    box.innerHTML = "";
+    DBG_BOOT_STAGES.forEach((cat, ci) => {
+      const done = cat.items.filter((_, ii) => dbgBootState[ci + ":" + ii]).length;
+      const total = cat.items.length;
+      const complete = done === total;
+      const catEl = document.createElement("div");
+      catEl.className = "dbg-boot-cat" + (complete ? " complete" : done > 0 ? " partial" : "");
+      catEl.innerHTML = `
+        <div class="dbg-boot-cat-head">
+          <b>${cat.title}</b>
+          <span class="dbg-boot-progress">${done}/${total}</span>
+        </div>
+        ${cat.items.map((item, ii) => {
+          const ok = !!dbgBootState[ci + ":" + ii];
+          return `<div class="dbg-boot-item${ok ? " done" : ""}">
+            <span class="dbg-boot-ic">${ok
+              ? '<svg class="svgi" viewBox="0 0 24 24" style="color:#6ee7b7"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+              : '<svg class="svgi" viewBox="0 0 24 24" style="color:var(--muted)"><circle cx="12" cy="12" r="10"/></svg>'}
+            </span>
+            <span>${item.label}</span>
+          </div>`;
+        }).join("")}
+      `;
+      box.appendChild(catEl);
+    });
+  }
+
+  function initDebugPage() {
+    renderDbgKbFilters();
+    renderDbgKbGrid();
+    dbgRenderBootStages();
+  }
+
+  // Гайды по сбору логов — категория «Логирование» в базе знаний
+  const DBG_LOG_GUIDES = [
+    {
+      title: "Как снять logcat с устройства",
+      desc: "Базовый способ получить журнал Android OS: краши приложений, ошибки сервисов и SystemUI.",
+      fix: "# Включите «Отладку по USB» в настройках разработчика, затем:\nadb logcat -b all -d > logcat.txt\n\n# Кнопка «Анализ Logcat» на этой странице делает то же самое в один клик."
+    },
+    {
+      title: "Dmesg — журнал ядра Linux",
+      desc: "Лог ядра: старт драйверов, SELinux на ранней стадии, ошибки ФС и железа. Нужен для этапов First Stage на карте запуска.",
+      fix: "adb shell dmesg > dmesg.txt\n# Полный вывод обычно требует root:\nadb shell su -c dmesg > dmesg.txt"
+    },
+    {
+      title: "Постоянный logcat (logpersistd) — ловим бутлуп",
+      desc: "При бутлупе устройство перезагружается раньше, чем вы успеваете снять лог. Включённый logpersistd пишет лог на диск и переживает перезагрузку.",
+      fix: "adb shell setprop persist.logd.logpersistd logcatd\nadb reboot\n# после воспроизведения проблемы логи здесь:\n/data/misc/logd/logcatd.*"
+    },
+    {
+      title: "Раннее логирование ядра: pstore / ramoops",
+      desc: "Если устройство умирает до старта ADB, последние строки ядра сохраняются в pstore. После перезагрузки в recovery их можно вытащить и увидеть причину бутлупа.",
+      fix: "# В recovery (TWRP) или с root:\ncat /sys/fs/pstore/console-ramoops* > /sdcard/ramoops.txt\ncat /proc/last_kmsg > /sdcard/last_kmsg.txt  # на старых ядрах\n\n# Включение в kernel: CONFIG_PSTORE_CONSOLE + ramoops в DTS\n# либо cmdline: ramoops.mem_address=0x... ramoops.mem_size=0x100000"
+    },
+    {
+      title: "Ранняя консоль ядра: earlycon / UART",
+      desc: "Hardcore-вариант для отладки First Stage: вывод ядра в последовательный порт до инициализации дисплея. Нужен UART-адаптер и распайка тестпоинтов платы.",
+      fix: "# Дописать в kernel cmdline (Патчи → Boot & Kernel → cmdline):\nearlycon=msm_serial_dm,0x<addr> androidboot.console=ttyMSM0\nconsole=tty0\n\n# Снимать вывод: minicom / putty на ПК, 115200 8N1"
+    },
+    {
+      title: "Bootchart — визуальная карта запуска",
+      desc: "Строит таймлайн старта процессов: видно, какой этап тормозит или зависает при запуске ОС.",
+      fix: "adb shell 'touch /data/bootchart/enabled'\nadb reboot\n# после загрузки:\nadb pull /data/bootchart/ .\n# отчёт собирается утилитой bootchart (pybootchartgui) в PNG"
+    },
+    {
+      title: "Полный bugreport одной командой",
+      desc: "Снимок всего сразу: logcat, dmesg, dumpsys сервисов, fstab, свойства. Удобно отправлять разработчику прошивки.",
+      fix: "adb bugreport bugreport.zip\n# В архиве: bugreport-*.txt — главный файл, FS/data/misc — дампы состояния"
+    },
+    {
+      title: "Логи Recovery (TWRP)",
+      desc: "Журнал установки прошивок и ошибок монтирования разделов из кастомного recovery.",
+      fix: "# Прямо на устройстве: Advanced → Copy Log\n# или через ADB из recovery:\nadb pull /tmp/recovery.log\nadb shell cat /tmp/last_log\n\n# Кнопка «Recovery» на этой странице читает журнал автоматически."
+    },
+  ];
+
+  function renderDbgKbFilters() {
+    const box = $("#dbgKbFilters");
+    if (!box) return;
+    const cats = [["all", "Все проблемы"], ...Object.entries(DBG_CATS), ["logging", "Логирование"]];
+    box.innerHTML = "";
+    cats.forEach(([val, label]) => {
+      const b = document.createElement("button");
+      b.className = "f-pill" + (dbgKbCategory === val ? " active" : "");
+      b.textContent = label;
+      b.onclick = () => { dbgKbCategory = val; renderDbgKbFilters(); renderDbgKbGrid(); };
+      box.appendChild(b);
+    });
+  }
+
+  function dbgBuildKbRuleCard(r) {
+    const sev = DBG_SEV[r.sev];
+    const card = document.createElement("div");
+    card.className = "spec-card dbg-kb-card";
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="dbg-sev" style="background:${sev.color}22;color:${sev.color}">${sev.label}</span>
+        <span class="badge raw">${DBG_CATS[r.cat]}</span>
+      </div>
+      <b style="font-size:13.5px">${r.title}</b>
+      <small class="muted" style="line-height:1.5">${r.desc}</small>
+      <details class="dbg-kb-details">
+        <summary>Решение</summary>
+        <div class="dbg-solution" style="margin-top:6px">${r.solution}</div>
+        ${r.fix ? `<pre class="dbg-fix">${escapeHtml(r.fix)}</pre>` : ""}
+      </details>
+    `;
+    return card;
+  }
+
+  function dbgBuildKbGuideCard(g) {
+    const card = document.createElement("div");
+    card.className = "spec-card dbg-kb-card";
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="dbg-sev" style="background:#b39dff22;color:#b39dff">ГАЙД</span>
+        <span class="badge raw">Логирование</span>
+      </div>
+      <b style="font-size:13.5px">${g.title}</b>
+      <small class="muted" style="line-height:1.5">${g.desc}</small>
+      <details class="dbg-kb-details">
+        <summary>Инструкция</summary>
+        <pre class="dbg-fix">${escapeHtml(g.fix)}</pre>
+      </details>
+    `;
+    return card;
+  }
+
+  function renderDbgKbGrid() {
+    const grid = $("#dbgKbGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+    if (dbgKbCategory === "logging") {
+      DBG_LOG_GUIDES.forEach(g => grid.appendChild(dbgBuildKbGuideCard(g)));
+      return;
+    }
+    DBG_RULES.filter(r => dbgKbCategory === "all" || r.cat === dbgKbCategory)
+      .forEach(r => grid.appendChild(dbgBuildKbRuleCard(r)));
+    if (dbgKbCategory === "all") {
+      DBG_LOG_GUIDES.forEach(g => grid.appendChild(dbgBuildKbGuideCard(g)));
+    }
+  }
+
+  function dbgAnalyzeText(text) {
+    const lines = text.split(/\r?\n/);
+    dbgUpdateBootStages(lines);
+    const issues = [];
+    for (const rule of DBG_RULES) {
+      let count = 0;
+      const samples = [];
+      for (const ln of lines) {
+        if (rule.patterns.some(p => p.test(ln))) {
+          count++;
+          if (samples.length < 4 && !samples.includes(ln)) samples.push(ln);
+        }
+      }
+      if (count > 0) issues.push({ rule, count, samples });
+    }
+    const sevOrder = { crit: 0, warn: 1, info: 2 };
+    issues.sort((a, b) => sevOrder[a.rule.sev] - sevOrder[b.rule.sev] || b.count - a.count);
+
+    $("#dbgSummary").classList.remove("hidden");
+    $("#dbgLinesCount").textContent = lines.length;
+    $("#dbgCritCount").textContent = issues.filter(i => i.rule.sev === "crit").length;
+    $("#dbgWarnCount").textContent = issues.filter(i => i.rule.sev === "warn").length;
+    $("#dbgInfoCount").textContent = issues.filter(i => i.rule.sev === "info").length;
+
+    const box = $("#dbgIssues");
+    box.innerHTML = "";
+    if (issues.length === 0) {
+      box.innerHTML = `<div class="empty-placeholder" style="padding:24px">
+        <div class="ic">${icon('shield')}</div>
+        <h3>Известных проблем не найдено</h3>
+        <p class="muted">В логе не обнаружено сигнатур из базы (${DBG_RULES.length} правил). Если проблема всё же есть — расширьте захват лога (logcat без фильтров, dmesg после перезагрузки).</p>
+      </div>`;
+      return;
+    }
+
+    issues.forEach(({ rule, count, samples }) => {
+      const sev = DBG_SEV[rule.sev];
+      const card = document.createElement("div");
+      card.className = `dbg-issue ${rule.sev}`;
+      card.innerHTML = `
+        <div class="dbg-issue-head">
+          <span class="dbg-sev" style="background:${sev.color}22;color:${sev.color}">${sev.label}</span>
+          <b>${rule.title}</b>
+          <span class="muted" style="margin-left:auto;font-size:12px">${count} совпад. · ${DBG_CATS[rule.cat]}</span>
+        </div>
+        <div class="dbg-solution">${rule.desc}</div>
+        <pre class="dbg-samples">${escapeHtml(samples.join("\n"))}</pre>
+        <div class="dbg-solution"><b style="color:var(--sky)">Решение:</b> ${rule.solution}</div>
+        ${rule.fix ? `<pre class="dbg-fix">${escapeHtml(rule.fix)}</pre>` : ""}
+      `;
+      box.appendChild(card);
+    });
+  }
+
+  $("#btnDbgAnalyzeText").onclick = () => {
+    const text = $("#dbgLogInput").value.trim();
+    if (!text) return toast("Вставьте лог или снимите его с устройства!", "pink");
+    $("#dbgLogStats").textContent = "";
+    dbgAnalyzeText(text);
+    toast("Анализ лога завершён", "pink");
+  };
+
+  $("#btnDbgClear").onclick = () => {
+    $("#dbgLogInput").value = "";
+    $("#dbgIssues").innerHTML = "";
+    $("#dbgLogStats").textContent = "";
+    $("#dbgSummary").classList.add("hidden");
+    dbgBootState = {};
+    dbgRenderBootStages();
+  };
+
+  async function dbgFetchAndAnalyze(logType, name) {
+    try {
+      toast(`Чтение ${name} с устройства...`, "pink");
+      const logText = await invoke("read_device_logs", { logType });
+      if (!logText || !logText.trim()) return toast(`${name} пуст — устройство подключено и в режиме ADB?`, "pink");
+      $("#dbgLogInput").value = logText;
+      dbgAnalyzeText(logText);
+      $("#dbgLogStats").textContent = `Источник: ${name} (устройство, ADB)`;
+      toast(`Анализ ${name} завершён`, "pink");
+    } catch (e) {
+      toast("Ошибка чтения лога: " + e, "pink");
+    }
+  }
+
+  $("#btnDbgLogcat").onclick = () => dbgFetchAndAnalyze("logcat", "Logcat");
+  $("#btnDbgDmesg").onclick = () => dbgFetchAndAnalyze("dmesg", "Dmesg");
+  $("#btnDbgRecovery").onclick = () => dbgFetchAndAnalyze("recovery", "Recovery Log");
+
+  $("#btnDbgFile").onclick = () => $("#dbgFileInput").click();
+  $("#dbgFileInput").onchange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || "");
+      $("#dbgLogInput").value = text;
+      dbgAnalyzeText(text);
+      $("#dbgLogStats").textContent = `Источник: файл ${file.name} (${formatBytes(file.size)})`;
+      toast("Файл проанализирован", "pink");
+    };
+    reader.onerror = () => toast("Не удалось прочитать файл", "pink");
+    reader.readAsText(file);
+  };
+
   /* ---------- ДЕБЛОАТЕР ПРОШИВОК (data-page="debloat") ---------- */
   let currentDebloatData = null;
   let selectedDebloatPaths = new Set();
@@ -3151,6 +3694,100 @@
       toast("Ошибка восстановления: " + e);
     }
   };
+
+  /* ---------- Подсветка синтаксиса редактора (*.prop, *.smali, *.xml, *.rc и др.) ---------- */
+  let fmCurrentLang = "TXT";
+
+  // Комбинированный регэксп-токенизатор: правила применяются слева направо,
+  // сгенерированная разметка повторно не сканируется.
+  function hlCombined(esc, rules) {
+    const combined = new RegExp(rules.map(r => `(${r[0]})`).join("|"), "g");
+    return esc.replace(combined, function () {
+      const args = arguments;
+      for (let i = 1; i <= rules.length; i++) {
+        if (args[i] !== undefined) {
+          const cls = rules[i - 1][1];
+          return cls ? `<span class="${cls}">${args[0]}</span>` : args[0];
+        }
+      }
+      return args[0];
+    });
+  }
+
+  const HL_STR = "&quot;.*?&quot;";
+  const HL_NUM = "\\b0x[\\da-fA-F]+\\b|\\b\\d+(?:\\.\\d+)?\\b";
+
+  const HL_RULES = {
+    SMALI: [
+      [HL_STR, "tok-s"],
+      ["\\.[a-z][\\w]*", "tok-k"],
+      ["L[\\w/$-]+;", "tok-t"],
+      ["\\b[vp]\\d+\\b", "tok-n"],
+      [":[\\w$]+", "tok-a"],
+      [HL_NUM, "tok-n"],
+      ["\\b(true|false|null|this)\\b", "tok-k"],
+    ],
+    RC: [
+      [HL_STR, "tok-s"],
+      ["\\b(on|service|class|import|export|trigger|action|property|option|setprop|setrlimit|write|mkdir|mount|umount|symlink|chmod|chown|chcon|start|stop|restart|disable|disabled|oneshot|user|group|seclabel|socket|exec|exec_start|exec_background|insmod|copy|rm|rmdir|wait|wait_for_prop|load_system_props|load_persist_props|restorecon|swapon|domainname|hostname)\\b", "tok-k"],
+      ["\\b0o?[0-7]{3,4}\\b|" + HL_NUM, "tok-n"],
+    ],
+    SHELL: [
+      [HL_STR, "tok-s"],
+      ["&#39;.*?&#39;", "tok-s"],
+      ["\\b(if|then|else|elif|fi|for|while|do|done|case|esac|function|return|exit|echo|cp|mv|rm|chmod|chown|chcon|mkdir|mount|umount|ln|sleep|grep|sed|awk|cat|ls|find|xargs|source|export|local|setprop|getprop|start|stop|setenforce|restorecon)\\b", "tok-k"],
+      ["\\$[\\w@#?$!]+|\\$\\{[^}]*\\}", "tok-a"],
+      [HL_NUM, "tok-n"],
+    ],
+    JSON: [
+      ["&quot;.*?&quot;(?=\\s*:)", "tok-a"],
+      [HL_STR, "tok-s"],
+      ["\\b(true|false|null)\\b", "tok-k"],
+      ["-?\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b", "tok-n"],
+    ],
+    FSTAB: [
+      ["\\b(ext4|erofs|f2fs|vfat|auto|emmc|swap|tmpfs|none|overlay)\\b", "tok-k"],
+      ["\\b(ro|rw|defaults|noatime|nosuid|nodev|noexec|nodiscard|discard|encryptable|forceencrypt|forcefdeorfbe|fileencryption|verity|verify|avb|first_stage_mount|latemount|recoveryonly|slotselect|logical|zram|check|formattable|nonremovable|voldmanaged|wait|nofail)\\b", "tok-a"],
+      [HL_NUM, "tok-n"],
+    ],
+  };
+
+  function highlightFmLine(line, lang) {
+    const esc = escapeHtml(line);
+    if (["PROP", "RC", "SHELL", "FSTAB", "SMALI"].includes(lang) && line.trimStart().startsWith("#")) {
+      return `<span class="tok-c">${esc}</span>`;
+    }
+    if (lang === "PROP") {
+      const eq = esc.indexOf("=");
+      if (eq > 0) return `<span class="tok-a">${esc.slice(0, eq)}</span><span class="tok-p">=</span>${esc.slice(eq + 1)}`;
+      return esc;
+    }
+    const rules = HL_RULES[lang];
+    if (!rules) return esc;
+    return hlCombined(esc, rules);
+  }
+
+  function hlXmlFull(text) {
+    const stash = [];
+    const keep = (html) => { stash.push(html); return `Zq${stash.length - 1}qZ`; };
+    let esc = escapeHtml(text);
+    esc = esc.replace(/&lt;!--[\s\S]*?--&gt;/g, (m) => keep(`<span class="tok-c">${m}</span>`));
+    esc = esc.replace(/&quot;.*?&quot;/g, (m) => keep(`<span class="tok-s">${m}</span>`));
+    esc = esc.replace(/(&lt;\/?)([\w:.-]+)/g, (m, lt, tag) => `${lt}<span class="tok-k">${tag}</span>`);
+    esc = esc.replace(/([\w:.-]+)(=)(?=Zq\d+qZ)/g, `<span class="tok-a">$1</span>$2`);
+    esc = esc.replace(/(\/?&gt;)/g, `<span class="tok-p">$1</span>`);
+    return esc.replace(/Zq(\d+)qZ/g, (_, i) => stash[+i]);
+  }
+
+  function updateFmHighlight() {
+    const code = $("#fmHighlightCode");
+    if (!code) return;
+    const txt = fmTa.value;
+    const html = fmCurrentLang === "XML"
+      ? hlXmlFull(txt)
+      : txt.split("\n").map(l => highlightFmLine(l, fmCurrentLang)).join("\n");
+    code.innerHTML = html + (txt.endsWith("\n") ? "\n" : "");
+  }
 
   /* ---------- ФАЙЛОВЫЙ МЕНЕДЖЕР & ВСТРОЕННЫЙ РЕДАКТОР (data-page="files") ---------- */
   let fmCurrentProject = null;
@@ -3400,12 +4037,15 @@
       else if (lExt === "xml") lang = "XML";
       else if (lExt === "json") lang = "JSON";
       else if (lExt === "sh" || lExt === "bat") lang = "SHELL";
+      else if (lExt === "smali") lang = "SMALI";
       else if (lName.includes("fstab") || lExt === "fstab") lang = "FSTAB";
 
+      fmCurrentLang = lang;
       $("#fmLangBadge").textContent = lang;
 
       updateLineNumbers(txt);
       updateFmStats(txt, entry.size);
+      updateFmHighlight();
 
     } catch (e) {
       toast("Ошибка чтения: " + e);
@@ -3427,15 +4067,19 @@
     $("#fmStatsBadge").textContent = `${lines} строк • ${formatBytes(sizeBytes || text.length)}`;
   }
 
-  // Синхронизация скролла редактора и номеров строк
+  // Синхронизация скролла редактора, номеров строк и слоя подсветки
   const fmTa = $("#fmCodeTextarea");
   fmTa.onscroll = () => {
     $("#fmLineNumbers").scrollTop = fmTa.scrollTop;
+    const layer = $("#fmHighlightLayer");
+    layer.scrollTop = fmTa.scrollTop;
+    layer.scrollLeft = fmTa.scrollLeft;
   };
 
   fmTa.oninput = () => {
     updateLineNumbers(fmTa.value);
     updateFmStats(fmTa.value, fmTa.value.length);
+    updateFmHighlight();
   };
 
   // Клавиатурные шорткаты в редакторе (Ctrl+S, Tab)
@@ -3613,6 +4257,8 @@
 
   /* ---------- APK KITCHEN ---------- */
   let apkKitchenProject = null;
+  let apkScanCache = [];
+  let apkDecCache = [];
 
   async function initApkKitchen() {
     const sel = $("#apkProjectSelect");
@@ -3639,125 +4285,195 @@
     apkRefreshAll();
   };
   $("#btnApkRefresh").onclick = () => apkRefreshAll();
+  $("#btnCloseApkAction").onclick = () => $("#apkActionModal").classList.add("hidden");
 
   async function apkRefreshAll() {
-    const scanBody = $("#apkScanTbody");
-    const decBody = $("#apkDecTbody");
+    const listEl = $("#apkAppsList");
     if (!apkKitchenProject) {
-      scanBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">Выберите проект для сканирования приложений.</td></tr>`;
-      decBody.innerHTML = "";
+      listEl.innerHTML = `<div class="empty-state" style="padding:30px;grid-column:1/-1">Выберите проект для отображения приложений.</div>`;
+      apkScanCache = []; apkDecCache = [];
       $("#apkFoundCount").textContent = "0";
       $("#apkOdexCount").textContent = "0";
       $("#apkDecCount").textContent = "0";
       return;
     }
 
-    // APK в прошивке
+    listEl.innerHTML = `<div class="empty-state" style="padding:30px;grid-column:1/-1">Сканирование приложений проекта...</div>`;
+
+    let apks = [];
     try {
-      const apks = (await invoke("apk_scan_project", { project: apkKitchenProject })) || [];
-      $("#apkFoundCount").textContent = apks.length;
-      $("#apkOdexCount").textContent = apks.filter(a => a.has_odex).length;
-      scanBody.innerHTML = "";
-      if (apks.length === 0) {
-        scanBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">APK не найдены. Сначала разберите разделы прошивки (system, product, vendor...).</td></tr>`;
-      }
-      apks.forEach(a => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><b>${escapeHtml(a.name)}</b></td>
-          <td style="color:var(--muted);font-family:Consolas,monospace;font-size:11px;word-break:break-all">${escapeHtml(a.rel_path)}</td>
-          <td>${formatBytes(a.size)}</td>
-          <td>${a.has_odex ? `<span class="badge raw">${a.odex_count} odex</span>` : '<span class="badge erofs">deodexed</span>'}</td>
-          <td style="text-align:right;white-space:nowrap">
-            <button class="btn sm primary btn-apk-dec">${icon('package', 13)} Декомпилировать</button>
-            ${a.has_odex ? `<button class="btn sm ghost btn-apk-deodex">${icon('zap', 13)} Деодекс</button>` : ''}
-          </td>
-        `;
-        tr.querySelector(".btn-apk-dec").onclick = async () => {
-          try {
-            await invoke("apk_decompile_project", { project: apkKitchenProject, relPath: a.rel_path });
-            toast(`Запущена декомпиляция ${a.name}...`, "pink");
-          } catch (e) { toast("Ошибка: " + e); }
-        };
-        const bDeodex = tr.querySelector(".btn-apk-deodex");
-        if (bDeodex) {
-          bDeodex.onclick = () => {
-            askDeviceConfirmation(
-              `Деодекс ${a.name}`,
-              `Будет выполнена конвертация <b>odex → classes.dex</b> через baksmali/smali с bootclasspath из framework проекта.<br><br>
-              Результат: <code>out/${a.name.replace(/\.apk$/i, "")}-deodexed.apk</code>. После деодекса приложение можно декомпилировать Apktool с полным кодом.`,
-              async () => {
-                try {
-                  await invoke("apk_deodex", { project: apkKitchenProject, relPath: a.rel_path });
-                  toast(`Запущен деодекс ${a.name}...`, "pink");
-                } catch (e) { toast("Ошибка: " + e); }
-              }
-            );
-          };
-        }
-        scanBody.appendChild(tr);
-      });
+      apks = (await invoke("apk_scan_project", { project: apkKitchenProject })) || [];
     } catch (e) {
-      scanBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:16px;color:#ff8fab">Ошибка сканирования: ${e}</td></tr>`;
+      listEl.innerHTML = `<div class="form-err" style="padding:16px;grid-column:1/-1">Ошибка сканирования: ${e}</div>`;
+      return;
+    }
+    let decs = [];
+    try {
+      decs = (await invoke("apk_list_decompiled", { project: apkKitchenProject })) || [];
+    } catch (_) {}
+
+    apkScanCache = apks;
+    apkDecCache = decs;
+    $("#apkFoundCount").textContent = apks.length;
+    $("#apkOdexCount").textContent = apks.filter(a => a.has_odex).length;
+    $("#apkDecCount").textContent = decs.length;
+
+    listEl.innerHTML = "";
+    if (apks.length === 0 && decs.length === 0) {
+      listEl.innerHTML = `<div class="empty-state" style="padding:30px;grid-column:1/-1">APK не найдены. Сначала разберите разделы прошивки (system, product, vendor...) или нажмите «Загрузить приложение».</div>`;
+      return;
     }
 
-    // Декомпилированные
-    try {
-      const list = (await invoke("apk_list_decompiled", { project: apkKitchenProject })) || [];
-      $("#apkDecCount").textContent = list.length;
-      decBody.innerHTML = "";
-      if (list.length === 0) {
-        decBody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">Нет декомпилированных приложений. Декомпилируйте APK из таблицы выше или с диска.</td></tr>`;
-      }
-      list.forEach(d => {
-        const tr = document.createElement("tr");
-        const contents = [
-          d.has_smali ? '<span class="badge ext4">smali</span>' : '',
-          d.has_resources ? '<span class="badge erofs">res</span>' : ''
-        ].filter(Boolean).join(" ") || '<span class="muted">—</span>';
-        tr.innerHTML = `
-          <td><b>${escapeHtml(d.name)}</b><br><small style="color:var(--muted);font-family:Consolas,monospace;font-size:11px">${escapeHtml(d.folder)}</small></td>
-          <td>${contents}</td>
-          <td>${d.file_count}</td>
-          <td style="text-align:right;white-space:nowrap">
-            <button class="btn sm ghost btn-apk-edit" title="Открыть в файловом менеджере">${icon('pencil', 13)} Редактор</button>
-            <button class="btn sm ghost btn-apk-build">${icon('hammer', 13)} Собрать</button>
-            <button class="btn sm primary btn-apk-sign">${icon('zap', 13)} Собрать & Подписать</button>
-            <button class="btn sm danger btn-apk-del" title="Удалить папку">${icon('trash', 13)}</button>
-          </td>
-        `;
-        tr.querySelector(".btn-apk-edit").onclick = () => fmRevealPath(apkKitchenProject, d.folder);
-        tr.querySelector(".btn-apk-build").onclick = async () => {
-          try {
-            await invoke("build_apk", { project: apkKitchenProject, targetFolder: d.name, sign: false });
-            toast(`Запущена сборка ${d.name} (без подписи)...`, "pink");
-          } catch (e) { toast("Ошибка: " + e); }
-        };
-        tr.querySelector(".btn-apk-sign").onclick = async () => {
-          try {
-            await invoke("build_apk", { project: apkKitchenProject, targetFolder: d.name, sign: true });
-            toast(`Запущена сборка и подпись ${d.name}...`, "pink");
-          } catch (e) { toast("Ошибка: " + e); }
-        };
-        tr.querySelector(".btn-apk-del").onclick = () => {
-          showConfirmDialog({
-            title: `Удаление ${d.name}`,
-            desc: `Удалить папку <b>${d.folder}</b> со всем декомпилированным содержимым?`,
-            iconName: "trash",
-            okText: "Удалить папку",
-            onConfirm: async () => {
-              try {
-                await invoke("fs_delete_entry", { project: apkKitchenProject, relPath: d.folder });
-                toast(`Папка ${d.name} удалена`);
-                apkRefreshAll();
-              } catch (e) { toast("Ошибка удаления: " + e); }
-            }
-          });
-        };
-        decBody.appendChild(tr);
+    // Связываем декомпилированные папки с найденными APK по базовому имени
+    const usedDec = new Set();
+    apks.forEach(a => {
+      const base = a.name.replace(/\.apk$/i, "").toLowerCase();
+      const dec = decs.find(d => !usedDec.has(d.folder) && d.name.toLowerCase() === base) || null;
+      if (dec) usedDec.add(dec.folder);
+      listEl.appendChild(buildApkCard(a, dec));
+    });
+    // Декомпилированные без исходного APK (например, загруженные с диска)
+    decs.filter(d => !usedDec.has(d.folder)).forEach(d => {
+      listEl.appendChild(buildApkCard(null, d));
+    });
+  }
+
+  function buildApkCard(a, dec) {
+    const card = document.createElement("div");
+    card.className = "apk-card";
+    const name = a ? a.name : dec.name;
+    const path = a ? a.rel_path : dec.folder;
+    const badges = [];
+    if (a) badges.push(`<span class="badge raw">${formatBytes(a.size)}</span>`);
+    if (a && a.has_odex) badges.push(`<span class="badge raw">${a.odex_count} odex</span>`);
+    if (dec) badges.push(`<span class="badge ext4">декомпилирован</span>`);
+    if (dec && dec.has_smali) badges.push(`<span class="badge erofs">smali</span>`);
+    if (dec && dec.has_resources) badges.push(`<span class="badge erofs">res</span>`);
+    card.innerHTML = `
+      <div class="apk-card-ic">${icon('smartphone', 22)}</div>
+      <div class="apk-card-info">
+        <b title="${escapeHtml(name)}">${escapeHtml(name)}</b>
+        <small title="${escapeHtml(path)}">${escapeHtml(path)}</small>
+        <div class="apk-card-badges">${badges.join("")}</div>
+      </div>
+    `;
+    card.onclick = () => openApkActionModal(a, dec);
+    return card;
+  }
+
+  function openApkActionModal(a, dec) {
+    $("#apkActionTitle").textContent = a ? a.name : dec.name;
+    $("#apkActionDesc").textContent = a ? a.rel_path : dec.folder;
+
+    const pills = [];
+    if (a) pills.push(`<span class="pill">Размер: <b>${formatBytes(a.size)}</b></span>`);
+    if (a && a.has_odex) pills.push(`<span class="pill" style="border-color:rgba(255,107,138,.4);color:#ff8fab">ODEX: <b>${a.odex_count}</b></span>`);
+    if (dec) pills.push(`<span class="pill">Файлов: <b>${dec.file_count}</b></span>`);
+    $("#apkActionInfo").innerHTML = pills.join("");
+
+    const box = $("#apkActionButtons");
+    box.innerHTML = "";
+    const addBtn = (cls, ic, label, fn) => {
+      const b = document.createElement("button");
+      b.className = `btn ${cls}`;
+      b.innerHTML = `${icon(ic, 15)} ${label}`;
+      b.onclick = fn;
+      box.appendChild(b);
+    };
+
+    if (!dec) {
+      addBtn("primary", "package", "Декомпилировать (Apktool)", async () => {
+        try {
+          await invoke("apk_decompile_project", { project: apkKitchenProject, relPath: a.rel_path });
+          toast(`Запущена декомпиляция ${a.name}...`, "pink");
+          apkWaitAndReveal(a.name.replace(/\.apk$/i, ""));
+        } catch (e) { toast("Ошибка: " + e); }
       });
-    } catch (e) {
-      decBody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:16px;color:#ff8fab">Ошибка: ${e}</td></tr>`;
+      if (a.has_odex) {
+        addBtn("ghost", "zap", "Деодекс (odex → classes.dex)", () => {
+          $("#apkActionModal").classList.add("hidden");
+          askDeviceConfirmation(
+            `Деодекс ${a.name}`,
+            `Будет выполнена конвертация <b>odex → classes.dex</b> через baksmali/smali с bootclasspath из framework проекта.<br><br>
+            Результат: <code>out/${a.name.replace(/\.apk$/i, "")}-deodexed.apk</code>. После деодекса приложение можно декомпилировать Apktool с полным кодом.`,
+            async () => {
+              try {
+                await invoke("apk_deodex", { project: apkKitchenProject, relPath: a.rel_path });
+                toast(`Запущен деодекс ${a.name}...`, "pink");
+              } catch (e) { toast("Ошибка: " + e); }
+            }
+          );
+        });
+      }
+    }
+
+    if (dec) {
+      addBtn("primary", "pencil", "Открыть в редакторе", () => {
+        $("#apkActionModal").classList.add("hidden");
+        fmRevealPath(apkKitchenProject, dec.folder);
+      });
+      addBtn("ghost", "hammer", "Собрать APK (без подписи)", async () => {
+        try {
+          await invoke("build_apk", { project: apkKitchenProject, targetFolder: dec.name, sign: false });
+          toast(`Запущена сборка ${dec.name} (без подписи)...`, "pink");
+          $("#apkActionModal").classList.add("hidden");
+        } catch (e) { toast("Ошибка: " + e); }
+      });
+      addBtn("ghost", "zap", "Собрать и подписать APK", async () => {
+        try {
+          await invoke("build_apk", { project: apkKitchenProject, targetFolder: dec.name, sign: true });
+          toast(`Запущена сборка и подпись ${dec.name}...`, "pink");
+          $("#apkActionModal").classList.add("hidden");
+        } catch (e) { toast("Ошибка: " + e); }
+      });
+      addBtn("danger", "trash", "Удалить декомпилированную папку", () => {
+        showConfirmDialog({
+          title: `Удаление ${dec.name}`,
+          desc: `Удалить папку <b>${dec.folder}</b> со всем декомпилированным содержимым?`,
+          iconName: "trash",
+          okText: "Удалить папку",
+          onConfirm: async () => {
+            try {
+              await invoke("fs_delete_entry", { project: apkKitchenProject, relPath: dec.folder });
+              toast(`Папка ${dec.name} удалена`);
+              $("#apkActionModal").classList.add("hidden");
+              apkRefreshAll();
+            } catch (e) { toast("Ошибка удаления: " + e); }
+          }
+        });
+      });
+    }
+
+    if (a && dec) {
+      addBtn("ghost", "package", "Декомпилировать заново (Apktool)", async () => {
+        try {
+          await invoke("apk_decompile_project", { project: apkKitchenProject, relPath: a.rel_path });
+          toast(`Запущена повторная декомпиляция ${a.name}...`, "pink");
+          apkWaitAndReveal(a.name.replace(/\.apk$/i, ""));
+        } catch (e) { toast("Ошибка: " + e); }
+      });
+    }
+
+    $("#apkActionModal").classList.remove("hidden");
+  }
+
+  // Ожидание фоновой декомпиляции, затем открытие папки в файловом менеджере с редактором
+  async function apkWaitAndReveal(baseName) {
+    $("#apkActionModal").classList.add("hidden");
+    const prevFolders = apkDecCache.map(d => d.folder);
+    for (let i = 0; i < 400; i++) {
+      await sleep(1500);
+      const busy = await invoke("task_busy").catch(() => false);
+      if (!busy) break;
+    }
+    await apkRefreshAll();
+    const dec = apkDecCache.find(d => !prevFolders.includes(d.folder))
+      || (baseName && apkDecCache.find(d => d.name.toLowerCase() === baseName.toLowerCase()));
+    if (dec) {
+      toast(`Декомпиляция завершена: ${dec.name}. Открываю редактор...`, "pink");
+      fmRevealPath(apkKitchenProject, dec.folder);
+    } else {
+      toast("Декомпиляция завершена. Обновите список, чтобы увидеть папку.", "pink");
     }
   }
 
@@ -3772,6 +4488,7 @@
         try {
           await invoke("decompile_apk", { project: apkKitchenProject, apkPath: file });
           toast("Запущена декомпиляция APK...", "pink");
+          apkWaitAndReveal(null);
         } catch (e) { toast("Ошибка: " + e); }
       }
     }
@@ -3872,7 +4589,7 @@
 
     requestAnimationFrame(() => go("home"));
 
-    line("MEYAFORGE v0.1.4 запущен. Стек Rust + Clean WebUI готов.", "sys");
+    line("MEYAFORGE v0.1.5 запущен. Стек Rust + Clean WebUI готов.", "sys");
     const p = await invoke("get_profile").catch(() => null);
     applyProfile(p);
     if (!p) setTimeout(openProfile, 450);

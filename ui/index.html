@@ -14,7 +14,7 @@
     <div class="brand" data-tauri-drag-region>
       <img src="assets/icon.png" alt="" />
       <span class="logo-text">MEYA<b>FORGE</b></span>
-      <span class="ver" id="appVer">v0.1.4</span>
+      <span class="ver" id="appVer">v0.1.5</span>
     </div>
     <div class="task-bar-indicator hidden" id="topTaskBar">
       <span class="spinner-mini"></span>
@@ -68,7 +68,7 @@
       <button class="nav" data-page="debloat"><svg viewBox="0 0 24 24"><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3-3h8m-10 3h12"/></svg><span data-i18n="nav_debloat">Деблоатер</span></button>
       <button class="nav" data-page="tools"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg><span data-i18n="nav_tools">Инструменты</span></button>
       <button class="nav" data-page="unpack"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg><span data-i18n="nav_unpack">Распаковка / Сборка</span></button>
-      <button class="nav" data-page="port"><svg viewBox="0 0 24 24"><path d="M4 12h12M12 6l6 6-6 6M20 4v16"/></svg><span data-i18n="nav_port">Портирование</span></button>
+      <button class="nav" data-page="debug"><svg viewBox="0 0 24 24"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6z"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg><span data-i18n="nav_debug">Отладка</span></button>
       <div class="spacer"></div>
       <button class="nav" data-page="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15.1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6V4.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span data-i18n="nav_settings">Настройки</span></button>
       <div class="user-chip" id="userChip">
@@ -100,7 +100,7 @@
             <article class="card" data-go="debloat" style="--c:var(--sky)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m14.62 17.9-10.68-2.92"/><path d="M18.38 2.62a1 1 0 1 1 3 3L17.36 9.64a.5.5 0 0 0 0 .71l.94.94a2.41 2.41 0 0 1 0 3.41l-.94.94a.5.5 0 0 1-.71 0L8.35 7.35a.5.5 0 0 1 0-.71l.94-.94a2.41 2.41 0 0 1 3.41 0l.94.94a.5.5 0 0 0 .71 0z"/><path d="M9 8c-1.8 2.71-3.97 3.46-6.58 3.95a.51.51 0 0 0-.3.82l7.32 8.88a1 1 0 0 0 1.18.2C12.74 20.41 16 16.79 16 15"/></svg></div><h3>Деблоатер</h3><p>Глубокая очистка от рекламы, телеметрии Xiaomi, Samsung, Google и партнерского мусора.</p></article>
             <article class="card" data-go="tools" style="--c:var(--violet)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><h3>Менеджер утилит</h3><p>MagiskBoot, Apktool, Uber-Signer, JADX, erofs-utils и др.</p></article>
             <article class="card" data-go="unpack" style="--c:var(--pink)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg></div><h3>Распаковка / Сборка</h3><p>Упаковка и формирование flashable zip образов.</p></article>
-            <article class="card" data-go="port" style="--c:var(--violet)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m10 16 1.5 1.5"/><path d="m14 8-1.5-1.5"/><path d="M15 2c-1.8 2-2.52 4-2.81 6"/><path d="m16.5 10.5 1 1"/><path d="m17 6-2.9-2.9"/><path d="M2 15c6.67-6 13.33 0 20-6"/><path d="m20 9 .9.9"/><path d="M3.1 14.1 4 15"/><path d="m6.5 12.5 1 1"/><path d="m7 18 2.9 2.9"/><path d="M9 22c1.8-2 2.52-4 2.81-6"/></svg></div><h3>Портирование</h3><p>Сравнение прошивок, перенос ядра, fstab и HAL модулей.</p></article>
+            <article class="card" data-go="debug" style="--c:var(--violet)"><div class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6z"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg></div><h3>Отладка</h3><p>Анализ логов, поиск известных багов и готовые решения. Портирование — в разделе «Чтение устройства».</p></article>
           </div>
         </div>
 
@@ -171,6 +171,7 @@
               <p class="muted">Глубокий анализ устройства в режимах Android OS, Recovery, Sideload, Fastboot и FastbootD</p>
             </div>
             <div class="actions">
+              <button class="btn ghost" id="btnOpenPortCompare"><svg class="svgi" viewBox="0 0 24 24"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg> Сравнение</button>
               <button class="btn ghost" id="btnOpenDevLib"><svg class="svgi" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg> Хранилище (<span id="savedDevicesCount">0</span>)</button>
               <button class="btn ghost" id="btnOpenLogsModal"><svg class="svgi" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></svg> Снять логи</button>
               <label><input type="checkbox" id="scanBootImages" /> Сохранить lk и boot</label>
@@ -858,14 +859,14 @@
           <div class="page-header">
             <div>
               <h2 class="page-title">APK Kitchen</h2>
-              <p class="muted">Полный цикл работы с приложениями: поиск APK в прошивке, декомпиляция, деодекс, редактирование ресурсов и Smali, сборка и подпись</p>
+              <p class="muted">Выберите приложение из проекта или загрузите своё — декомпиляция, деодекс, редактирование ресурсов и Smali, сборка и подпись</p>
             </div>
             <div class="actions">
               <select id="apkProjectSelect" class="search-input" style="width:220px;padding:8px 12px">
                 <option value="">Выберите проект...</option>
               </select>
               <button class="btn ghost" id="btnApkRefresh"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg> Обновить</button>
-              <button class="btn primary" id="btnApkPickExternal"><svg class="svgi" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Декомпилировать APK с диска</button>
+              <button class="btn primary" id="btnApkPickExternal"><svg class="svgi" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Загрузить приложение</button>
             </div>
           </div>
 
@@ -879,46 +880,12 @@
             <div class="panel-head">
               <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/></svg></span>
               <div>
-                <h3>Приложения в прошивке</h3>
-                <small class="muted">Все APK из разобранных разделов проекта (system/app, priv-app, product, vendor и др.)</small>
+                <h3>Приложения</h3>
+                <small class="muted">Нажмите на приложение, чтобы открыть меню действий: декомпиляция, деодекс, редактор, сборка и подпись</small>
               </div>
             </div>
-            <div class="table-card">
-              <table class="parts-table">
-                <thead>
-                  <tr>
-                    <th>Приложение</th>
-                    <th>Путь</th>
-                    <th>Размер</th>
-                    <th>ODEX</th>
-                    <th style="text-align:right">Действия</th>
-                  </tr>
-                </thead>
-                <tbody id="apkScanTbody"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="panel-box" style="margin-top:16px">
-            <div class="panel-head">
-              <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg></span>
-              <div>
-                <h3>Декомпилированные приложения</h3>
-                <small class="muted">extracted/apk_* — правьте ресурсы и Smali во встроенном редакторе, затем соберите и подпишите</small>
-              </div>
-            </div>
-            <div class="table-card">
-              <table class="parts-table">
-                <thead>
-                  <tr>
-                    <th>Папка</th>
-                    <th>Содержимое</th>
-                    <th>Файлов</th>
-                    <th style="text-align:right">Действия</th>
-                  </tr>
-                </thead>
-                <tbody id="apkDecTbody"></tbody>
-              </table>
+            <div id="apkAppsList" class="apk-apps-grid">
+              <div class="empty-state" style="padding:30px;grid-column:1/-1">Выберите проект для отображения приложений.</div>
             </div>
           </div>
 
@@ -1075,10 +1042,13 @@
                   </p>
                 </div>
 
-                <!-- Редактор текста с номерами строк -->
+                <!-- Редактор текста с номерами строк и подсветкой синтаксиса -->
                 <div id="fmTextEditorWrap" class="fm-editor-wrap hidden">
                   <div class="fm-line-numbers" id="fmLineNumbers">1</div>
-                  <textarea id="fmCodeTextarea" class="fm-textarea" spellcheck="false" autocomplete="off" placeholder="Содержимое файла..."></textarea>
+                  <div class="fm-editor-stack">
+                    <pre class="fm-highlight" id="fmHighlightLayer" aria-hidden="true"><code id="fmHighlightCode"></code></pre>
+                    <textarea id="fmCodeTextarea" class="fm-textarea" spellcheck="false" autocomplete="off" placeholder="Содержимое файла..."></textarea>
+                  </div>
                 </div>
 
                 <!-- Просмотр изображений -->
@@ -1174,13 +1144,13 @@
 
           <!-- Нижняя сетка: Шаг 3 (Формирование Fastboot ROM Flasher пакета) и Список готовых файлов в out/ -->
           <div class="grid-2col">
-            <!-- Блок генерации релиза -->
+            <!-- Блок формирования полноценной прошивки -->
             <div class="panel-box">
               <div class="panel-head">
-                <span class="ic"></span>
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></svg></span>
                 <div>
-                  <h3>3. Формирование готовой прошивки (Fastboot ROM)</h3>
-                  <small class="muted">Создание пакета для быстрой прошивки с автоматическими скриптами</small>
+                  <h3>3. Формирование прошивки (Full Fastboot ROM)</h3>
+                  <small class="muted">Проверки codename / anti-rollback, вложенные platform-tools, flash.bat / flash.sh и зашифрованный firmware.meyaforge</small>
                 </div>
               </div>
 
@@ -1195,12 +1165,26 @@
                   <span>Автор / Билдер сборки</span>
                 </label>
 
-                <div class="tool-hint">
-                  Пакет будет включать <code>super.img</code>, <code>boot.img</code>, <code>vbmeta.img</code>, а также кроссплатформенные скрипты <b>flash_all.bat</b> (Windows) и <b>flash_all.sh</b> (Linux/macOS) с автоотключением AVB/dm-verity.
+                <div style="display:flex;gap:10px">
+                  <label class="field" style="margin:0;flex:1">
+                    <input id="fwCodename" placeholder=" " />
+                    <span>Кодовое имя устройства (codename)</span>
+                  </label>
+                  <label class="field" style="margin:0;width:180px">
+                    <input id="fwAntiRollback" placeholder=" " type="number" min="0" max="99" value="0" />
+                    <span>Anti-Rollback индекс</span>
+                  </label>
                 </div>
 
-                <button class="btn primary" id="btnBuildFastbootPkg">
-                   Сформировать Fastboot ROM пакет
+                <!-- Префлайт-проверки -->
+                <div id="fwPreflight" style="display:none;flex-direction:column;gap:8px;background:rgba(10,20,55,.4);padding:12px 14px;border-radius:8px;border:1px solid var(--line)"></div>
+
+                <div class="tool-hint">
+                  Пакет будет включать все образы разделов (<code>images/</code>), вложенные <b>adb/fastboot</b> (<code>tools/win/</code>), кроссплатформенные скрипты <b>flash.bat</b> и <b>flash.sh</b> с проверками codename и anti-rollback, а также зашифрованный файл <b>firmware.meyaforge</b> — конфигурацию для официальной тулзы прошивки MEYAFORGE (список разделов, данные устройства, пошаговые инструкции).
+                </div>
+
+                <button class="btn primary" id="btnBuildFullFirmware">
+                  <svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> Сформировать прошивку
                 </button>
               </div>
             </div>
@@ -1222,25 +1206,312 @@
           </div>
         </div>
 
-        <!-- Портирование -->
-        <div class="page" data-page="port">
+        <!-- Отладка -->
+        <div class="page" data-page="debug">
           <div class="page-header">
             <div>
-              <h2 class="page-title">Мастер портирования прошивок</h2>
-              <p class="muted">Сравнение стоковой базы и донора, анализ совместимости Android / VNDK, автоматический перенос ядра, fstab и HAL драйверов</p>
+              <h2 class="page-title">Отладка и анализ проблем</h2>
+              <p class="muted">Автоматический разбор логов устройства: поиск известных ошибок, диагностика бутлупов, SELinux, HAL и готовые решения</p>
             </div>
             <div class="actions">
-              <div style="display:flex;gap:10px;align-items:center">
-                <select id="portBaseSelect" class="search-input" style="width:190px;padding:8px 12px">
-                  <option value="">База (Сток)...</option>
-                </select>
-                <span style="color:var(--pink);font-weight:bold;font-size:16px">→</span>
-                <select id="portPortSelect" class="search-input" style="width:190px;padding:8px 12px">
-                  <option value="">Порт (Донор)...</option>
-                </select>
-                <button class="btn primary" id="btnCompareProjects"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Сравнить</button>
+              <button class="btn primary" id="btnDbgLogcat"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Анализ Logcat</button>
+              <button class="btn ghost" id="btnDbgDmesg">Dmesg</button>
+              <button class="btn ghost" id="btnDbgRecovery">Recovery</button>
+              <button class="btn ghost" id="btnDbgFile">Из файла...</button>
+            </div>
+          </div>
+
+          <input type="file" id="dbgFileInput" accept=".txt,.log,.logcat,.dmesg" style="display:none" />
+
+          <div class="panel-box" style="margin-bottom:16px">
+            <div class="panel-head">
+              <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6z"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg></span>
+              <div>
+                <h3>Анализ устройства</h3>
+                <small class="muted">Снимите лог с устройства кнопками выше, загрузите файл или вставьте текст вручную — движок сопоставит строки с базой известных проблем и отметит пройденные этапы запуска ОС</small>
               </div>
             </div>
+            <textarea id="dbgLogInput" class="dbg-log-input" spellcheck="false" placeholder="--------- beginning of main&#10;Вставьте сюда logcat / dmesg / recovery log или снимите лог с устройства кнопками выше..."></textarea>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap">
+              <button class="btn primary sm" id="btnDbgAnalyzeText"><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> Запустить анализ</button>
+              <button class="btn ghost sm" id="btnDbgClear">Очистить</button>
+              <span class="muted" id="dbgLogStats" style="font-size:12px"></span>
+            </div>
+          </div>
+
+          <div class="panel-box" style="margin-bottom:16px">
+            <div class="panel-head">
+              <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span>
+              <div>
+                <h3>Карта запуска ОС</h3>
+                <small class="muted">Галочки этапов выставляются автоматически скриптом анализа логов: First Stage (ядро и ранний init), Second Stage (init, HAL, zygote), System Server (фреймворк Android)</small>
+              </div>
+            </div>
+            <div id="dbgBootStages" class="dbg-boot-grid">
+              <div class="empty-state" style="padding:18px;grid-column:1/-1;font-size:12px">Запустите анализ — статус этапов запуска определится автоматически по сигнатурам в логах.</div>
+            </div>
+            <div class="tool-hint" style="margin-top:10px">
+              <span>First Stage виден в основном в <b>dmesg</b>, Second Stage и System Server — в <b>logcat</b>. Проанализируйте оба лога подряд — отметки объединяются. Как включить раннее логирование для полной карты — см. базу знаний, категория «Логирование».</span>
+            </div>
+          </div>
+
+          <div class="info-banner hidden" id="dbgSummary">
+            <span class="info-tag">Строк проанализировано: <b id="dbgLinesCount">0</b></span>
+            <span class="info-tag" style="border-color:rgba(255,107,138,.5);color:#ff8fab">Критично: <b id="dbgCritCount">0</b></span>
+            <span class="info-tag" style="border-color:rgba(251,191,36,.5);color:#fbbf24">Предупреждений: <b id="dbgWarnCount">0</b></span>
+            <span class="info-tag">Заметок: <b id="dbgInfoCount">0</b></span>
+          </div>
+
+          <div id="dbgIssues" style="display:flex;flex-direction:column;gap:12px"></div>
+
+          <div class="panel-box" style="margin-top:18px">
+            <div class="panel-head">
+              <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+              <div>
+                <h3>База знаний: популярные проблемы и решения</h3>
+                <small class="muted">Типовые неисправности кастомных прошивок и проверенные способы их устранения в MEYAFORGE</small>
+              </div>
+            </div>
+            <div class="filter-pills" id="dbgKbFilters" style="margin:10px 0 14px"></div>
+            <div class="grid" id="dbgKbGrid"></div>
+          </div>
+        </div>
+
+        <!-- Настройки -->
+        <div class="page" data-page="settings">
+          <h2 class="page-title" data-i18n="settings_title">Настройки</h2>
+
+          <!-- Выбор языка -->
+          <div class="panel" style="margin-bottom:18px">
+            <h3 data-i18n="settings_lang">Язык интерфейса</h3>
+            <p class="muted">Выберите язык для интерфейса MEYAFORGE и уведомлений Telegram бота:</p>
+            <div style="display:flex;gap:10px;margin-top:6px">
+              <button class="btn ghost btn-set-lang" data-set-lang="ru">Русский (RU)</button>
+              <button class="btn ghost btn-set-lang" data-set-lang="en">English (EN)</button>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-bottom:18px">
+            <h3 data-i18n="settings_author">Профиль автора</h3>
+            <p class="muted">Эти данные подставляются в релизы прошивок.</p>
+            <button class="btn primary" id="editProfile">Редактировать профиль</button>
+          </div>
+
+          <!-- Telegram Бот & Уведомления в Настройках -->
+          <div class="panel-box" style="margin-bottom:18px">
+            <div class="page-header" style="margin-bottom:14px">
+              <div>
+                <h3 style="margin:0;font-size:18px"><svg class="svgi" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg> Telegram Бот & Уведомления</h3>
+                <small class="muted">Живые статусы сборки, автопостинг релизов в каналы и управление через команды бота</small>
+              </div>
+              <div class="actions">
+                <button class="btn ghost sm" id="btnTgPollNow"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg> Проверить команды</button>
+                <button class="btn ghost sm" id="btnTgSendTest"><svg class="svgi" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Тестовое сообщение</button>
+                <button class="btn primary sm" id="btnTgSaveConfig"><svg class="svgi" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Сохранить настройки</button>
+              </div>
+            </div>
+
+            <!-- Верхняя сетка: Токен и Подключение / Подсказка по командам -->
+            <div class="grid-2col">
+              <!-- Блок подключения бота -->
+              <div class="panel-box" style="background:rgba(10,20,55,.4)">
+                <div class="panel-head">
+                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></span>
+                  <div>
+                    <h3>Настройки бота (Bot Father)</h3>
+                    <small class="muted">Токен доступа, полученный у @BotFather</small>
+                  </div>
+                </div>
+
+                <div class="field" style="margin-top:10px">
+                  <input id="tgBotToken" type="password" placeholder=" " style="padding-right:75px" />
+                  <span>HTTP Bot Token *</span>
+                  <button class="icon-btn" id="btnToggleTgTokenEye" style="position:absolute;right:8px;top:12px;font-size:14px" title="Показать токен"><svg class="svgi" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                </div>
+
+                <div style="display:flex;gap:10px;align-items:center;margin:12px 0 16px">
+                  <button class="btn sm ghost" id="btnTgCheckToken"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Проверить подключение</button>
+                  <div id="tgBotStatusBadge" class="pill bad"><i></i>Не настроен</div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:14px">
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                    <input type="checkbox" id="tgEnabled" style="accent-color:var(--pink);transform:scale(1.2)" />
+                    <span><b>Включить интеграцию Telegram</b></span>
+                  </label>
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                    <input type="checkbox" id="tgPollActive" style="accent-color:var(--sky);transform:scale(1.2)" />
+                    <span>
+                      <b>Фоновый слушатель команд в каналах</b><br>
+                      <small class="muted">Позволяет привязывать каналы командой /meyakitchen прямо в Telegram</small>
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Инструкция по привязке через Telegram -->
+              <div class="panel-box" style="background:rgba(10,20,55,.4)">
+                <div class="panel-head">
+                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg></span>
+                  <div>
+                    <h3>Привязка каналов и групп</h3>
+                    <small class="muted">Как подключить бота к каналу или чату</small>
+                  </div>
+                </div>
+
+                <div class="fstab-viewer" style="margin-top:10px;background:rgba(10,20,55,.6);line-height:1.6">
+<b>1.</b> Добавьте вашего бота в Telegram канал или группу с правом отправки сообщений.<br>
+<b>2.</b> Напишите в чате или канале команду:<br>
+<code style="color:var(--sky);font-weight:bold">/meyakitchen apply &lt;триггер&gt;</code><br><br>
+<b>Доступные триггеры:</b><br>
+• <code style="color:var(--pink)">all</code> — все уведомления программы<br>
+• <code style="color:var(--pink)">build</code> — живой прогресс и завершение сборки<br>
+• <code style="color:var(--pink)">release</code> — релизы и готовые прошивки<br>
+• <code style="color:var(--pink)">import</code> — разборка и распаковка образов<br>
+• <code style="color:var(--pink)">device</code> — слепки диагностированных устройств<br><br>
+<b>Другие команды:</b><br>
+• <code>/meyakitchen status</code> — статус привязки чата<br>
+• <code>/meyakitchen remove</code> — отвязать чат от кухни
+                </div>
+              </div>
+            </div>
+
+            <!-- Привязанные каналы -->
+            <div class="panel-box" style="margin-top:18px;background:rgba(10,20,55,.4)">
+              <div class="panel-head">
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+                <div>
+                  <h3>Привязанные каналы и чаты (<span id="tgChannelsCount">0</span>)</h3>
+                  <small class="muted">Список чатов, куда бот отправляет уведомления по триггерам</small>
+                </div>
+              </div>
+
+              <div class="table-card" style="margin-top:12px">
+                <table class="parts-table">
+                  <thead>
+                    <tr>
+                      <th>Чат / Канал</th>
+                      <th>Chat ID</th>
+                      <th>Тип</th>
+                      <th>Назначенные триггеры</th>
+                      <th style="text-align:right">Действия</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tgChannelsTbody">
+                    <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">Нет привязанных каналов. Напишите <code>/meyakitchen apply all</code> в вашем канале или группе.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Настройка триггеров и событий -->
+            <div class="panel-box" style="margin-top:18px;background:rgba(10,20,55,.4)">
+              <div class="panel-head">
+                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+                <div>
+                  <h3>События и триггеры (что отправлять в Telegram)</h3>
+                  <small class="muted">Настройте, о каких операциях бот будет сообщать в привязанные чаты</small>
+                </div>
+              </div>
+
+              <div class="grid-2col" style="margin-top:14px;gap:16px">
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvBuildStart" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Начало сборки (создание отслеживаемого сообщения)</b><br>
+                    <small class="muted">Создает сообщение со статусом старта и запоминает его для дальнейшего обновления.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvBuildProgress" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Живое обновление прогресса сборки</b><br>
+                    <small class="muted">Редактирует то же самое сообщение в канале по мере прохождения этапов и выводит шкалу прогресса.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvBuildDone" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Успешное завершение сборки</b><br>
+                    <small class="muted">Финальное редактирование сообщения с именем выходного файла, размером, MD5 и автором.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvImport" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Импорт и разборка прошивок</b><br>
+                    <small class="muted">Уведомляет о распакованном архиве (zip, rar, 7z, payload) и числе извлеченных разделов.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvDevice" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Диагностика и слепки устройств</b><br>
+                    <small class="muted">Отправляет краткую карточку подключенного и просканированного Android-телефона.</small>
+                  </span>
+                </label>
+
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="tgEvRelease" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
+                  <span>
+                    <b>Публикация релизов прошивок</b><br>
+                    <small class="muted">Отправка релизных заметок и файлов прошивок при финальной публикации.</small>
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-bottom:18px">
+            <h3>WSL (Подсистема Windows для Linux)</h3>
+            <p class="muted" id="wslText">Проверка…</p>
+            <button class="btn ghost" id="wslInstall">Установить WSL</button>
+          </div>
+          <div class="panel">
+            <h3>Обновления программы</h3>
+            <p class="muted" id="updText">—</p>
+            <button class="btn ghost" id="updRecheck">Проверить снова</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Терминал -->
+      <div class="terminal" id="terminal">
+        <div class="term-head" id="termHead">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span>Терминал</span>
+          <span class="term-state" id="termState">готов</span>
+          <button class="icon-btn" id="termClear" title="Очистить"><svg class="svgi" viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
+          <button class="icon-btn" id="termToggle" title="Свернуть"><svg class="svgi" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+        </div>
+        <div class="term-body" id="termBody"></div>
+        <form class="term-input" id="termForm">
+          <span class="prompt">meya@forge&nbsp;»</span>
+          <input id="termIn" autocomplete="off" spellcheck="false" placeholder="введите команду…" />
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Модалка: Сравнение устройств и портирование -->
+  <div id="portCompareModal" class="modal hidden">
+    <div class="modal-card" style="width:min(1000px,96vw);max-height:88vh;overflow-y:auto;text-align:left">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px">
+        <div>
+          <h2 style="margin:0;text-align:left">Сравнение устройств</h2>
+          <p class="muted" style="text-align:left;margin:4px 0 0;font-size:12.5px">Сравнение всех характеристик прошивок и профилей устройств, оценка совместимости и автоматический перенос ядра, fstab и HAL драйверов</p>
+        </div>
+        <button class="icon-btn" id="btnClosePortCompare" title="Закрыть" style="flex-shrink:0"><svg class="svgi" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+          <div class="form-row" style="align-items:center;margin-bottom:16px">
+            <select id="portBaseSelect" class="search-input" style="flex:1;max-width:none"><option value="">База (Сток)...</option></select>
+            <span style="color:var(--pink);font-weight:bold;font-size:16px">→</span>
+            <select id="portPortSelect" class="search-input" style="flex:1;max-width:none"><option value="">Порт (Донор)...</option></select>
+            <button class="btn primary" id="btnCompareProjects" style="white-space:nowrap"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Сравнить</button>
           </div>
 
           <!-- Сравнение профилей из хранилища (устройства и прошивки) -->
@@ -1479,227 +1750,8 @@
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Настройки -->
-        <div class="page" data-page="settings">
-          <h2 class="page-title" data-i18n="settings_title">Настройки</h2>
-
-          <!-- Выбор языка -->
-          <div class="panel" style="margin-bottom:18px">
-            <h3 data-i18n="settings_lang">Язык интерфейса</h3>
-            <p class="muted">Выберите язык для интерфейса MEYAFORGE и уведомлений Telegram бота:</p>
-            <div style="display:flex;gap:10px;margin-top:6px">
-              <button class="btn ghost btn-set-lang" data-set-lang="ru">Русский (RU)</button>
-              <button class="btn ghost btn-set-lang" data-set-lang="en">English (EN)</button>
-            </div>
-          </div>
-
-          <div class="panel" style="margin-bottom:18px">
-            <h3 data-i18n="settings_author">Профиль автора</h3>
-            <p class="muted">Эти данные подставляются в релизы прошивок.</p>
-            <button class="btn primary" id="editProfile">Редактировать профиль</button>
-          </div>
-
-          <!-- Telegram Бот & Уведомления в Настройках -->
-          <div class="panel-box" style="margin-bottom:18px">
-            <div class="page-header" style="margin-bottom:14px">
-              <div>
-                <h3 style="margin:0;font-size:18px"><svg class="svgi" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg> Telegram Бот & Уведомления</h3>
-                <small class="muted">Живые статусы сборки, автопостинг релизов в каналы и управление через команды бота</small>
-              </div>
-              <div class="actions">
-                <button class="btn ghost sm" id="btnTgPollNow"><svg class="svgi" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg> Проверить команды</button>
-                <button class="btn ghost sm" id="btnTgSendTest"><svg class="svgi" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Тестовое сообщение</button>
-                <button class="btn primary sm" id="btnTgSaveConfig"><svg class="svgi" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Сохранить настройки</button>
-              </div>
-            </div>
-
-            <!-- Верхняя сетка: Токен и Подключение / Подсказка по командам -->
-            <div class="grid-2col">
-              <!-- Блок подключения бота -->
-              <div class="panel-box" style="background:rgba(10,20,55,.4)">
-                <div class="panel-head">
-                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></span>
-                  <div>
-                    <h3>Настройки бота (Bot Father)</h3>
-                    <small class="muted">Токен доступа, полученный у @BotFather</small>
-                  </div>
-                </div>
-
-                <div class="field" style="margin-top:10px">
-                  <input id="tgBotToken" type="password" placeholder=" " style="padding-right:75px" />
-                  <span>HTTP Bot Token *</span>
-                  <button class="icon-btn" id="btnToggleTgTokenEye" style="position:absolute;right:8px;top:12px;font-size:14px" title="Показать токен"><svg class="svgi" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                </div>
-
-                <div style="display:flex;gap:10px;align-items:center;margin:12px 0 16px">
-                  <button class="btn sm ghost" id="btnTgCheckToken"><svg class="svgi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Проверить подключение</button>
-                  <div id="tgBotStatusBadge" class="pill bad"><i></i>Не настроен</div>
-                </div>
-
-                <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:14px">
-                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
-                    <input type="checkbox" id="tgEnabled" style="accent-color:var(--pink);transform:scale(1.2)" />
-                    <span><b>Включить интеграцию Telegram</b></span>
-                  </label>
-                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
-                    <input type="checkbox" id="tgPollActive" style="accent-color:var(--sky);transform:scale(1.2)" />
-                    <span>
-                      <b>Фоновый слушатель команд в каналах</b><br>
-                      <small class="muted">Позволяет привязывать каналы командой /meyakitchen прямо в Telegram</small>
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Инструкция по привязке через Telegram -->
-              <div class="panel-box" style="background:rgba(10,20,55,.4)">
-                <div class="panel-head">
-                  <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg></span>
-                  <div>
-                    <h3>Привязка каналов и групп</h3>
-                    <small class="muted">Как подключить бота к каналу или чату</small>
-                  </div>
-                </div>
-
-                <div class="fstab-viewer" style="margin-top:10px;background:rgba(10,20,55,.6);line-height:1.6">
-<b>1.</b> Добавьте вашего бота в Telegram канал или группу с правом отправки сообщений.<br>
-<b>2.</b> Напишите в чате или канале команду:<br>
-<code style="color:var(--sky);font-weight:bold">/meyakitchen apply &lt;триггер&gt;</code><br><br>
-<b>Доступные триггеры:</b><br>
-• <code style="color:var(--pink)">all</code> — все уведомления программы<br>
-• <code style="color:var(--pink)">build</code> — живой прогресс и завершение сборки<br>
-• <code style="color:var(--pink)">release</code> — релизы и готовые прошивки<br>
-• <code style="color:var(--pink)">import</code> — разборка и распаковка образов<br>
-• <code style="color:var(--pink)">device</code> — слепки диагностированных устройств<br><br>
-<b>Другие команды:</b><br>
-• <code>/meyakitchen status</code> — статус привязки чата<br>
-• <code>/meyakitchen remove</code> — отвязать чат от кухни
-                </div>
-              </div>
-            </div>
-
-            <!-- Привязанные каналы -->
-            <div class="panel-box" style="margin-top:18px;background:rgba(10,20,55,.4)">
-              <div class="panel-head">
-                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
-                <div>
-                  <h3>Привязанные каналы и чаты (<span id="tgChannelsCount">0</span>)</h3>
-                  <small class="muted">Список чатов, куда бот отправляет уведомления по триггерам</small>
-                </div>
-              </div>
-
-              <div class="table-card" style="margin-top:12px">
-                <table class="parts-table">
-                  <thead>
-                    <tr>
-                      <th>Чат / Канал</th>
-                      <th>Chat ID</th>
-                      <th>Тип</th>
-                      <th>Назначенные триггеры</th>
-                      <th style="text-align:right">Действия</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tgChannelsTbody">
-                    <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">Нет привязанных каналов. Напишите <code>/meyakitchen apply all</code> в вашем канале или группе.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Настройка триггеров и событий -->
-            <div class="panel-box" style="margin-top:18px;background:rgba(10,20,55,.4)">
-              <div class="panel-head">
-                <span class="ic"><svg class="svgi" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
-                <div>
-                  <h3>События и триггеры (что отправлять в Telegram)</h3>
-                  <small class="muted">Настройте, о каких операциях бот будет сообщать в привязанные чаты</small>
-                </div>
-              </div>
-
-              <div class="grid-2col" style="margin-top:14px;gap:16px">
-                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-                  <input type="checkbox" id="tgEvBuildStart" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
-                  <span>
-                    <b>Начало сборки (создание отслеживаемого сообщения)</b><br>
-                    <small class="muted">Создает сообщение со статусом старта и запоминает его для дальнейшего обновления.</small>
-                  </span>
-                </label>
-
-                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-                  <input type="checkbox" id="tgEvBuildProgress" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
-                  <span>
-                    <b>Живое обновление прогресса сборки</b><br>
-                    <small class="muted">Редактирует то же самое сообщение в канале по мере прохождения этапов и выводит шкалу прогресса.</small>
-                  </span>
-                </label>
-
-                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-                  <input type="checkbox" id="tgEvBuildDone" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
-                  <span>
-                    <b>Успешное завершение сборки</b><br>
-                    <small class="muted">Финальное редактирование сообщения с именем выходного файла, размером, MD5 и автором.</small>
-                  </span>
-                </label>
-
-                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-                  <input type="checkbox" id="tgEvImport" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
-                  <span>
-                    <b>Импорт и разборка прошивок</b><br>
-                    <small class="muted">Уведомляет о распакованном архиве (zip, rar, 7z, payload) и числе извлеченных разделов.</small>
-                  </span>
-                </label>
-
-                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-                  <input type="checkbox" id="tgEvDevice" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
-                  <span>
-                    <b>Диагностика и слепки устройств</b><br>
-                    <small class="muted">Отправляет краткую карточку подключенного и просканированного Android-телефона.</small>
-                  </span>
-                </label>
-
-                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-                  <input type="checkbox" id="tgEvRelease" checked style="margin-top:3px;accent-color:var(--pink);transform:scale(1.2)" />
-                  <span>
-                    <b>Публикация релизов прошивок</b><br>
-                    <small class="muted">Отправка релизных заметок и файлов прошивок при финальной публикации.</small>
-                  </span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel" style="margin-bottom:18px">
-            <h3>WSL (Подсистема Windows для Linux)</h3>
-            <p class="muted" id="wslText">Проверка…</p>
-            <button class="btn ghost" id="wslInstall">Установить WSL</button>
-          </div>
-          <div class="panel">
-            <h3>Обновления программы</h3>
-            <p class="muted" id="updText">—</p>
-            <button class="btn ghost" id="updRecheck">Проверить снова</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Терминал -->
-      <div class="terminal" id="terminal">
-        <div class="term-head" id="termHead">
-          <span class="dots"><i></i><i></i><i></i></span>
-          <span>Терминал</span>
-          <span class="term-state" id="termState">готов</span>
-          <button class="icon-btn" id="termClear" title="Очистить"><svg class="svgi" viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
-          <button class="icon-btn" id="termToggle" title="Свернуть"><svg class="svgi" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
-        </div>
-        <div class="term-body" id="termBody"></div>
-        <form class="term-input" id="termForm">
-          <span class="prompt">meya@forge&nbsp;»</span>
-          <input id="termIn" autocomplete="off" spellcheck="false" placeholder="введите команду…" />
-        </form>
-      </div>
-    </section>
-  </main>
+    </div>
+  </div>
 
   <!-- Модалка: Создание проекта -->
   <div id="newProjectModal" class="modal hidden">
@@ -1891,6 +1943,19 @@
       <div class="row">
         <button class="btn ghost" id="btnCancelFmRename">Отмена</button>
         <button class="btn primary" id="btnConfirmFmRename">Переименовать</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка: Действия с приложением APK Kitchen -->
+  <div id="apkActionModal" class="modal hidden">
+    <div class="modal-card" style="width:min(520px,94vw)">
+      <h2 id="apkActionTitle">Приложение</h2>
+      <p class="muted code-sm" id="apkActionDesc" style="word-break:break-all">—</p>
+      <div id="apkActionInfo" class="status-pills" style="justify-content:center;margin:8px 0 4px"></div>
+      <div id="apkActionButtons" class="apk-action-list"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn ghost" id="btnCloseApkAction">Закрыть</button>
       </div>
     </div>
   </div>

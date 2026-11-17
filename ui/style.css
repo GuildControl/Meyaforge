@@ -289,7 +289,20 @@ button:disabled{opacity:.4;cursor:not-allowed}
 
 .fm-editor-wrap{flex:1;display:flex;overflow:hidden;position:relative}
 .fm-line-numbers{width:52px;background:rgba(5,10,30,.85);border-right:1px solid var(--line);color:rgba(140,170,255,.35);font:12.5px/1.55 "Cascadia Mono",Consolas,monospace;padding:12px 6px;text-align:right;user-select:none;overflow:hidden;flex-shrink:0}
-.fm-textarea{flex:1;background:transparent;border:0;outline:0;color:#e2e8f0;font:12.5px/1.55 "Cascadia Mono",Consolas,monospace;padding:12px 14px;resize:none;white-space:pre;overflow:auto;tab-size:2;caret-color:var(--pink)}
+.fm-editor-stack{flex:1;position:relative;overflow:hidden;background:#060c20}
+.fm-highlight{position:absolute;inset:0;margin:0;padding:12px 14px;overflow:hidden;pointer-events:none;color:#e2e8f0;font:12.5px/1.55 "Cascadia Mono",Consolas,monospace;white-space:pre;tab-size:2}
+.fm-highlight code{font:inherit;white-space:pre;display:block}
+.fm-textarea{position:absolute;inset:0;z-index:1;width:100%;height:100%;background:transparent;border:0;outline:0;color:transparent;font:12.5px/1.55 "Cascadia Mono",Consolas,monospace;padding:12px 14px;resize:none;white-space:pre;overflow:auto;tab-size:2;caret-color:var(--pink)}
+.fm-textarea::selection{background:rgba(142,197,255,.28);color:transparent}
+.fm-textarea::placeholder{color:rgba(140,170,255,.35)}
+/* токены подсветки синтаксиса */
+.tok-c{color:#6b7a99;font-style:italic}
+.tok-s{color:#9ece8f}
+.tok-k{color:#f5a3c7}
+.tok-a{color:#8ec5ff}
+.tok-t{color:#b39dff}
+.tok-n{color:#f7b26b}
+.tok-p{color:#8b98c9}
 
 .fm-binary-box{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px;color:var(--muted);text-align:center}
 .fm-binary-box .ic{font-size:48px}
@@ -302,3 +315,44 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .icon-btn .svgi{width:13px;height:13px;vertical-align:0}
 .ic .svgi{vertical-align:0}
 .fm-chevron .svgi{width:10px;height:10px}
+
+/* ---------- APK Kitchen ---------- */
+.apk-apps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;padding:4px}
+.apk-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:rgba(10,20,55,.4);cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+.apk-card:hover{border-color:var(--sky);background:rgba(142,197,255,.08);transform:translateY(-2px)}
+.apk-card-ic{color:var(--pink);display:flex;flex-shrink:0}
+.apk-card-info{min-width:0;flex:1}
+.apk-card-info b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apk-card-info small{display:block;color:var(--muted);font-size:11px;font-family:Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apk-card-badges{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.apk-action-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.apk-action-list .btn{display:flex;align-items:center;gap:8px;justify-content:flex-start;width:100%}
+
+/* ---------- Отладка ---------- */
+.dbg-log-input{width:100%;min-height:150px;resize:vertical;background:rgba(5,10,30,.85);border:1px solid var(--line);border-radius:6px;color:var(--text);font:12px/1.5 "Cascadia Mono",Consolas,monospace;padding:10px 12px;outline:0}
+.dbg-log-input:focus{border-color:var(--sky)}
+.dbg-issue{border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:8px;background:rgba(10,20,55,.4);padding:14px 16px}
+.dbg-issue.crit{border-left-color:#ff6b8a}
+.dbg-issue.warn{border-left-color:#fbbf24}
+.dbg-issue.info{border-left-color:#8ec5ff}
+.dbg-issue-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.dbg-sev{font-size:10px;font-weight:800;letter-spacing:.06em;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.dbg-samples{background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font:11px/1.5 Consolas,monospace;color:var(--muted);white-space:pre-wrap;word-break:break-all;margin:8px 0;max-height:110px;overflow:auto}
+.dbg-solution{font-size:12.5px;line-height:1.6;color:var(--text)}
+.dbg-fix{background:rgba(0,0,0,.4);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font:11.5px/1.5 Consolas,monospace;color:#9ece8f;white-space:pre-wrap;margin-top:8px}
+.dbg-kb-card{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.dbg-kb-details{font-size:12.5px}
+.dbg-kb-details summary{cursor:pointer;color:var(--sky);font-size:12.5px}
+/* карта запуска ОС */
+.dbg-boot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.dbg-boot-cat{background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.dbg-boot-cat.complete{border-color:rgba(110,231,183,.45)}
+.dbg-boot-cat.partial{border-color:rgba(251,191,36,.4)}
+.dbg-boot-cat-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:13px}
+.dbg-boot-progress{font-size:11px;font-weight:700;color:var(--muted);background:rgba(255,255,255,.05);padding:2px 8px;border-radius:10px}
+.dbg-boot-cat.complete .dbg-boot-progress{color:#6ee7b7}
+.dbg-boot-cat.partial .dbg-boot-progress{color:#fbbf24}
+.dbg-boot-item{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;padding:3px 0;color:var(--muted)}
+.dbg-boot-item.done{color:var(--text)}
+.dbg-boot-ic{flex-shrink:0;margin-top:1px;display:inline-flex}
+.dbg-boot-ic .svgi{width:14px;height:14px}

@@ -11,6 +11,7 @@ mod device_reader;
 mod dtb_tools;
 mod ext4x;
 mod file_manager;
+mod firmware;
 mod flasher_tools;
 mod lk_extractor;
 mod lp;
@@ -295,6 +296,9 @@ fn main() {
             builder::repack_partition,
             builder::repack_super,
             builder::build_fastboot_package,
+            // full firmware builder (codename / anti-rollback checks, firmware.meyaforge)
+            firmware::firmware_preflight,
+            firmware::build_full_firmware,
             // porting engine
             porting::compare_projects,
             porting::compare_saved_profiles,
